@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "AuthentiDocs API Documentation",
-    "description": "This is the RESTful api used in our project AuthentiDocs.",
+    "description": "This is the RESTful API used in our CSE408 Software development lab project: AuthentiDocs.",
     "version": "0.1"
   },
   "servers": [
@@ -12,23 +12,51 @@
   ],
   "tags": [
     {
-      "name": "pet",
-      "description": "Everything about your Pets",
-      "externalDocs": {
-        "description": "Find out more",
-        "url": "http://swagger.io"
-      }
+      "name": "User",
+      "description": "User signup, login, profile routes"
+    },
+    {
+      "name": "Files & Keys",
+      "description": "Signed file, key viewing routes"
+    },
+    {
+      "name": "Home Page",
+      "description": "Routes used in home page of user"
+    },
+    {
+      "name": "Notice",
+      "description": "Retrieving notices"
+    },
+    {
+      "name": "Thread",
+      "description": "Thread page routes"
+    },
+    {
+      "name": "Organization",
+      "description": "Organization page routes"
+    },
+    {
+      "name": "Team",
+      "description": "Team page routes"
+    },
+    {
+      "name": "Addition & Creation",
+      "description": "Routes to add/create various objects"
+    },
+    {
+      "name": "test",
+      "description": "testing"
     }
   ],
   "paths": {
     "/test": {
       "get": {
-        "tags": ["pet"],
-        "summary": "hemlo",
+        "tags": ["test"],
+        "summary": "hello",
         "description": "gives hemlo",
         "responses": {
           "200": {
-            "description": "successful hemlo",
+            "description": "successful helo",
             "content": {
               "application/json": {
                 "schema": {
@@ -36,7 +64,7 @@
                   "properties": {
                     "ret_text": {
                       "type": "string",
-                      "example": "hemlo"
+                      "example": "hello"
                     }
                   }
                 }
@@ -46,47 +74,1388 @@
         }
       }
     },
-    "/pet": {
-      "put": {
-        "tags": ["pet"],
-        "summary": "Update an existing pet",
-        "description": "Update an existing pet by Id",
-        "operationId": "updatePet",
+    "/login": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Logging in",
         "requestBody": {
-          "description": "Update an existent pet in the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Pet"
-              }
-            }
-          },
-          "required": true
+          "$ref": "#/components/requestBodies/loginInput"
         },
         "responses": {
           "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Pet"
-                }
-              }
-            }
+            "$ref": "#/components/responses/200AuthSuccess"
           },
           "400": {
-            "description": "Invalid ID supplied"
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        }
+      }
+    },
+    "/signup": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Signing up a new user",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/signupInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200AuthSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
           },
           "404": {
-            "description": "Pet not found"
+            "$ref": "#/components/responses/404NotFound"
           },
-          "405": {
-            "description": "Validation exception"
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        }
+      }
+    },
+    "/viewuserprofile": {
+      "post": {
+        "tags": ["User"],
+        "summary": "User viewing own profile",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200UserProfileView"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
           }
         },
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/publicprofile": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Viewing another user's profile",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/otherUserProfileViewInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200PublicProfileView"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/editprofile": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Editing own profile",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userProfileEditInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200UserProfileView"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/userworkfiles": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Viewing user's work related files from all threads/teams/organizations",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityFilesList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/userpersonalfiles": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Viewing user's personal files",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityFilesList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/getfiledata": {
+      "post": {
+        "tags": ["Files & Keys"],
+        "summary": "Viewing a file with usual data such as owner, uploading time etc",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/fileIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200FileData"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/getfilemetadata": {
+      "post": {
+        "tags": ["Files & Keys"],
+        "summary": "Viewing a file's metadata such as owning entity, signs, notes etc.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/fileIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200FileMetadata"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/getprvkey": {
+      "post": {
+        "tags": ["Files & Keys"],
+        "summary": "Viewing a user's public and private keys. Can also regenerate keys ",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/keyRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200UserKey"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+
+    "/userorgs": {
+      "post": {
+        "tags": ["Home Page"],
+        "summary": "Viewing an user's organizations",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200UserOrgList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/userteams": {
+      "post": {
+        "tags": ["Home Page"],
+        "summary": "Viewing an user's teams",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityTeamsList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/useractthreads": {
+      "post": {
+        "tags": ["Home Page"],
+        "summary": "Viewing an user's active threads i.e. threads not closed",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityThreadList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/userarcthreads": {
+      "post": {
+        "tags": ["Home Page"],
+        "summary": "Viewing an user's closed/archived threads",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityThreadList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+
+    "/userorgnotices": {
+      "post": {
+        "tags": ["Notice"],
+        "summary": "Viewing an user's notices in an organization",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200UserNoticeList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/userteamnotices": {
+      "post": {
+        "tags": ["Notice"],
+        "summary": "Viewing an user's notices in a team",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200UserNoticeList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/userthreadnotices": {
+      "post": {
+        "tags": ["Notice"],
+        "summary": "Viewing an user's notices in a thread",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/userIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200UserNoticeList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/entitynotices": {
+      "post": {
+        "tags": ["Notice"],
+        "summary": "Viewing an entity's(organization/team/thread) all notices",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/entityIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityNoticeList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+
+    "/threadlist": {
+      "post": {
+        "tags": ["Thread"],
+        "summary": "Viewing an entity's(team/organization) threads",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/entityIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityThreadList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+
+    "/threadmetadata": {
+      "post": {
+        "tags": ["Thread"],
+        "summary": "Viewing a thread's metadata such as admin, member count etc",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/threadIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200ThreadMetaData"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+
+    "/threadfilelist": {
+      "post": {
+        "tags": ["Thread"],
+        "summary": "Viewing a thread's file list",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/threadIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityFilesList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/threadmembers": {
+      "post": {
+        "tags": ["Thread"],
+        "summary": "Viewing a thread's members",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/threadIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityMembersList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+
+    "/teamlist": {
+      "post": {
+        "tags": ["Team"],
+        "summary": "Viewing an organization's teams",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/organizationIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityTeamsList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/teammetadata": {
+      "post": {
+        "tags": ["Team"],
+        "summary": "Viewing a team's metadata such as owner, member count, thread count etc",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/teamIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200TeamMetaData"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/teamthreadlist": {
+      "post": {
+        "tags": ["Team"],
+        "summary": "Viewing a team's thread list",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/teamIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityThreadList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/teammemberlist": {
+      "post": {
+        "tags": ["Team"],
+        "summary": "Viewing a team's members",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/teamIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityMembersList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/teamfilelist": {
+      "post": {
+        "tags": ["Team"],
+        "summary": "Viewing a team's file list",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/teamIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityFilesList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/orgdata": {
+      "post": {
+        "tags": ["Organization"],
+        "summary": "Viewing an organization's metadata such as owner, memeber count etc.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/organizationIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200OrgMetadata"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+
+    "/orgthreadlist": {
+      "post": {
+        "tags": ["Organization"],
+        "summary": "Viewing an organization's threads",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/organizationIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityThreadList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/orgfileslist": {
+      "post": {
+        "tags": ["Organization"],
+        "summary": "Viewing an organization's files",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/organizationIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityFilesList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/orgmemberslist": {
+      "post": {
+        "tags": ["Organization"],
+        "summary": "Viewing an organization's members",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/organizationIdInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityMembersList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+
+    "/addfile": {
+      "post": {
+        "tags": ["Files & Keys"],
+        "summary": "Adding a file with a signature by an user under any entity(user/thread/team/organization)",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/fileAdditionInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200FileAdditionSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/addmembers": {
+      "post": {
+        "tags": ["Addition & Creation"],
+        "summary": "Adding a member to a thread/team/organization",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/memeberAdditionInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200MemberAddSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/addthread": {
+      "post": {
+        "tags": ["Addition & Creation"],
+        "summary": "Adding a thread to a team/organization",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/threadAdditionInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200ThreadAddSuccess"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/addteam": {
+      "post": {
+        "tags": ["Addition & Creation"],
+        "summary": "Adding a team to a organization",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/teamAdditionInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200TeamAddSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/addorg": {
+      "post": {
+        "tags": ["Addition & Creation"],
+        "summary": "Adding a new organization",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/orgAdditionInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200OrgAddSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/addnotice": {
+      "post": {
+        "tags": ["Addition & Creation"],
+        "summary": "Adding a notice to a thread/team/organization",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/noticeAdditionInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200NoticeAddSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/addnote": {
+      "post": {
+        "tags": ["Addition & Creation"],
+        "summary": "Adding a signed note to a file",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/noteAdditionInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200NoteAddSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
           }
         ]
       }
@@ -94,88 +1463,1358 @@
   },
   "components": {
     "schemas": {
-      "Pet": {
-        "required": ["name", "photoUrls"],
+      "dateTime": { "type": "string", "format": "date-time" },
+      "userId": { "type": "string", "format": "uuid" },
+      "threadId": { "type": "string", "format": "uuid" },
+      "teamId": { "type": "string", "format": "uuid" },
+      "organizationId": { "type": "string", "format": "uuid" },
+      "fileId": { "type": "string", "format": "uuid" },
+      "noticeId": { "type": "string", "format": "uuid" },
+      "key": {
+        "type": "object",
+        "description": "ECDSA public/private key in hex",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "0420794d08b0be401e377650629c1c9aeeb42b373a8479e18be207c6fb4dd5ae5ba83dc0a8fbd39aa06511e71d53917e5b5bf1df1a8ebc056a7581f56253c1fbfc"
+          },
+          "private": {
+            "type": "boolean"
+          }
+        }
+      },
+      "userProfile": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64",
-            "example": 10
+          "name": {
+            "type": "string",
+            "example": "user1"
+          },
+          "mailid": {
+            "type": "string",
+            "format": "email",
+            "example": "user1@authentidocs.com"
+          },
+          "publicKey": {
+            "$ref": "#/components/schemas/key"
+          },
+          "profilepicUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": ["name", "mailid"]
+      },
+      "userSignupInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "user1"
+          },
+          "mailid": {
+            "type": "string",
+            "format": "email",
+            "example": "user1@authentidocs.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["name", "mailid", "password"]
+      },
+      "userLoginInput": {
+        "type": "object",
+        "properties": {
+          "mailid": {
+            "type": "string",
+            "format": "email",
+            "example": "user1@authentidocs.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["mailid", "password"]
+      },
+      "fileObject": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "$ref": "#/components/schemas/fileId"
           },
           "name": {
             "type": "string",
-            "example": "doggie"
+            "example": "file1.jpg"
           },
-          "category": {
-            "$ref": "#/components/schemas/Category"
+          "createdAt": {
+            "$ref": "#/components/schemas/dateTime"
           },
-          "photoUrls": {
-            "type": "array",
-            "xml": {
-              "wrapped": true
-            },
-            "items": {
-              "type": "string",
-              "xml": {
-                "name": "photoUrl"
-              }
-            }
+          "ownerId": {
+            "$ref": "#/components/schemas/userId"
           },
-          "tags": {
-            "type": "array",
-            "xml": {
-              "wrapped": true
-            },
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            }
+          "ownerData": {
+            "$ref": "#/components/schemas/userProfile"
           },
-          "status": {
+          "fileLink": {
             "type": "string",
-            "description": "pet status in the store",
-            "enum": ["available", "pending", "sold"]
+            "format": "uri"
+          },
+          "signCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "fileMetadata": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "$ref": "#/components/schemas/fileId"
+          },
+          "currentCustodianId": {
+            "$ref": "#/components/schemas/userId"
+          },
+          "signatures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/signature"
+            }
+          },
+          "currentStatus": {
+            "$ref": "#/components/schemas/fileStatus"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/note"
+            }
+          },
+          "owningThreads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/threadObject"
+            }
+          },
+          "owningTeams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/teamObject"
+            }
+          },
+          "owningOrgs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/orgObject"
+            }
+          }
+        }
+      },
+      "signature": {
+        "type": "object",
+        "properties": {
+          "signedFileId": {
+            "$ref": "#/components/schemas/fileId"
+          },
+          "sign": {
+            "type": "string",
+            "example": "3045022100c6036a83a2086c726cf7269fde3f756e56ad017932bf8c632a116c353d6c69bb0220427a98d0bfe78b258a97f7f79ed0b787b4527ce3606734626ae830c455dbc393"
+          },
+          "signingPubKey": {
+            "$ref": "#/components/schemas/key"
+          },
+          "signingUserId": {
+            "$ref": "#/components/schemas/userId"
+          },
+          "signedAt": {
+            "$ref": "#/components/schemas/dateTime"
+          },
+          "addedNote": {
+            "description": "empty in case of personal files and files without note",
+            "$ref": "#/components/schemas/note"
+          },
+          "noteSerial": {
+            "type": "integer"
           }
         },
-        "xml": {
-          "name": "pet"
+        "required": [
+          "signedFileId",
+          "sign",
+          "signingPubKey",
+          "signingUserId",
+          "signedAt"
+        ]
+      },
+      "note": {
+        "type": "object",
+        "properties": {
+          "noteText": {
+            "type": "string"
+          },
+          "relatedFileId": {
+            "$ref": "#/components/schemas/fileId"
+          },
+          "relatedUserId": {
+            "$ref": "#/components/schemas/userId"
+          },
+          "noteSerial": {
+            "type": "integer"
+          }
+        },
+        "required": ["noteText", "relatedFileId", "relatedUserId"]
+      },
+      "fileStatus": {
+        "type": "string",
+        "enum": [
+          "not viewed by custodian",
+          "viewed by custodian",
+          "signed by custodian",
+          "signed by custodian with note",
+          "closed",
+          "personal"
+        ]
+      },
+      "threadObject": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "threadid": {
+            "$ref": "#/components/schemas/threadId"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "memberCount": {
+            "type": "integer"
+          },
+          "activeFileCount": {
+            "type": "integer"
+          },
+          "totalFileCount": {
+            "type": "integer"
+          },
+          "owningTeamId": {
+            "$ref": "#/components/schemas/teamId"
+          },
+          "owningOrgId": {
+            "$ref": "#/components/schemas/organizationId"
+          }
+        }
+      },
+      "teamObject": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "teamid": {
+            "$ref": "#/components/schemas/teamId"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "memberCount": {
+            "type": "integer"
+          },
+          "totalThreadCount": {
+            "type": "integer"
+          },
+          "activeThreadCount": {
+            "type": "integer"
+          },
+          "totalFileCount": {
+            "type": "integer"
+          },
+          "owningOrgId": {
+            "$ref": "#/components/schemas/organizationId"
+          }
+        }
+      },
+      "orgObject": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "organizationid": {
+            "$ref": "#/components/schemas/organizationId"
+          },
+          "admins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          },
+          "memberCount": {
+            "type": "integer"
+          },
+          "totalThreadCount": {
+            "type": "integer"
+          },
+          "activeThreadCount": {
+            "type": "integer"
+          },
+          "totalFileCount": {
+            "type": "integer"
+          },
+          "totalTeamCount": {
+            "type": "integer"
+          },
+          "activeTeamCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "orgMetadata": {
+        "type": "object",
+        "properties": {
+          "organizationid": {
+            "$ref": "#/components/schemas/organizationId"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "admins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/teamObject"
+            }
+          },
+          "threads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/threadObject"
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/fileObject"
+            }
+          }
+        }
+      },
+      "teammetadata": {
+        "type": "object",
+        "properties": {
+          "teamid": {
+            "$ref": "#/components/schemas/teamId"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "threads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/threadObject"
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/fileObject"
+            }
+          },
+          "owningOrgId": {
+            "$ref": "#/components/schemas/organizationId"
+          }
+        }
+      },
+      "threadmetadata": {
+        "type": "object",
+        "properties": {
+          "threadid": {
+            "$ref": "#/components/schemas/threadId"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/fileObject"
+            }
+          }
+        }
+      },
+
+      "noticeObject": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "$ref": "#/components/schemas/dateTime"
+          },
+          "noticeid": {
+            "$ref": "#/components/schemas/noticeId"
+          },
+          "from": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "relatedFileId": {
+            "$ref": "#/components/schemas/fileId"
+          },
+          "relatedSignature": {
+            "$ref": "#/components/schemas/signature"
+          },
+          "owningEntityType": {
+            "type": "string",
+            "enum": ["thread", "team", "organization"]
+          },
+          "owningEntityId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "createdAt",
+          "from",
+          "subject",
+          "content",
+          "relatedSignature",
+          "owningEntityType",
+          "owningEntityId"
+        ]
+      },
+
+      "publicProfile": {
+        "type": "object",
+        "properties": {
+          "viewingUserId": {
+            "$ref": "#/components/schemas/userId"
+          },
+          "userPublicProfile": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "userOrgCount": {
+            "type": "integer"
+          },
+          "commonOrgCount": {
+            "type": "integer"
+          },
+          "userTeamCount": {
+            "type": "integer"
+          },
+          "commonTeamCount": {
+            "type": "integer"
+          },
+          "userThreadCount": {
+            "type": "integer"
+          },
+          "commonThreadCount": {
+            "type": "integer"
+          }
+        }
+      },
+
+      "fileAddition": {
+        "type": "object",
+        "properties": {
+          "uploadedAt": {
+            "$ref": "#/components/schemas/dateTime"
+          },
+          "uploader": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/signature"
+          },
+          "owningEntityType": {
+            "type": "string",
+            "enum": ["personal", "team", "thread", "organization"]
+          },
+          "owningEntityId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["uploadedAt", "uploader", "signature", "owningEntityType"]
+      },
+
+      "noteAddition": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "$ref": "#/components/schemas/dateTime"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/userProfile"
+          },
+          "content": {
+            "type": "string"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/signature"
+          },
+          "relatedFileId": {
+            "$ref": "#/components/schemas/fileId"
+          },
+          "serial": {
+            "description": "this denotes the serial of the note on this file, used to track file lifecycle",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "createdAt",
+          "creator",
+          "content",
+          "relatedFileId",
+          "signature"
+        ]
+      },
+      "memberAddition": {
+        "type": "object",
+        "properties": {
+          "parentEntityType": {
+            "type": "string",
+            "enum": ["team", "thread", "organization"]
+          },
+          "userid": {
+            "$ref": "#/components/schemas/userId"
+          },
+          "addedAt": {
+            "$ref": "#/components/schemas/dateTime"
+          },
+          "parentEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["owner", "admin", "member"]
+          }
+        },
+        "required": ["parentEntityType", "userid", "parentEntityId"]
+      },
+
+      "threadAddition": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/dateTime"
+          },
+          "parentTeamId": {
+            "$ref": "#/components/schemas/teamId"
+          },
+          "creatorId": {
+            "$ref": "#/components/schemas/userId"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          },
+          "signingOrder": {
+            "description": "if set to true, the order of members array is taken as the signing order at this thread(tentatively)",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "creatorId",
+          "parentTeamId",
+          "members",
+          "signingOrder"
+        ]
+      },
+      "teamAddition": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/dateTime"
+          },
+          "parentOrganizationId": {
+            "$ref": "#/components/schemas/organizationId"
+          },
+          "creatorId": {
+            "$ref": "#/components/schemas/userId"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          }
+        },
+        "required": ["creatorId", "members", "name", "parentOrganizationId"]
+      },
+      "orgAddition": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/dateTime"
+          },
+          "creatorId": {
+            "$ref": "#/components/schemas/userId"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          }
+        },
+        "required": ["creatorId", "members", "name"]
+      },
+
+      "failureResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string"
+          }
         }
       }
     },
     "requestBodies": {
-      "Pet": {
-        "description": "Pet object that needs to be added to the store",
+      "loginInput": {
+        "description": "user data for login",
+        "required": true,
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Pet"
+              "$ref": "#/components/schemas/userLoginInput"
             }
-          },
-          "application/xml": {
+          }
+        }
+      },
+      "signupInput": {
+        "description": "user data for signup",
+        "required": true,
+        "content": {
+          "multipart/form-data": {
             "schema": {
-              "$ref": "#/components/schemas/Pet"
+              "$ref": "#/components/schemas/userSignupInput"
+            },
+            "encoding": {
+              "image": {
+                "contentType": "image/jpeg, image/jpg, image/png"
+              }
+            }
+          }
+        }
+      },
+      "userProfileEditInput": {
+        "description": "user profile data for editing",
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/userSignupInput"
+            },
+            "encoding": {
+              "image": {
+                "contentType": "image/jpeg, image/jpg, image/png"
+              }
+            }
+          }
+        }
+      },
+      "userIdInput": {
+        "description": "userId input for various routes",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userid": {
+                  "$ref": "#/components/schemas/userId"
+                }
+              }
+            }
+          }
+        }
+      },
+      "entityIdInput": {
+        "description": "generic input for thread/organization/team-id",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "entityid": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "entityType": {
+                  "type": "string",
+                  "enum": ["thread", "team", "organization"]
+                }
+              }
+            }
+          }
+        }
+      },
+      "otherUserProfileViewInput": {
+        "description": "request for viewing other user profile",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "requesterId": {
+                  "$ref": "#/components/schemas/userId"
+                },
+                "requestedProfileId": {
+                  "$ref": "#/components/schemas/userId"
+                }
+              },
+              "required": ["requestedProfilId", "requesterId"]
+            }
+          }
+        }
+      },
+      "fileIdInput": {
+        "description": "fileId input for file related routes",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fileid": {
+                  "$ref": "#/components/schemas/fileId"
+                }
+              }
+            }
+          }
+        }
+      },
+      "keyRequest": {
+        "description": "user request for viewing/regenerating ecdsa keys",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "regenerate": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["regenerate"]
+            }
+          }
+        }
+      },
+      "fileAdditionInput": {
+        "description": "adding a file with signature",
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/fileAddition"
+            },
+            "encoding": {
+              "addedFile": {
+                "contentType": "image/*, application/*, text/* "
+              }
+            }
+          }
+        }
+      },
+      "userNoticeRequest": {
+        "description": "request for user's organization/team/thread notices",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/userId"
+            }
+          }
+        }
+      },
+      "entityNoticeRequest": {
+        "description": "request for entity's(team/organization/user) notices",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "entityId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "entityType": {
+                  "type": "string",
+                  "enum": ["thread", "team", "organization"]
+                }
+              },
+              "required": ["entityId", "entityType"]
+            }
+          }
+        }
+      },
+      "threadIdInput": {
+        "description": "threadId input for thread related routes",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "threadid": {
+                  "$ref": "#/components/schemas/threadId"
+                }
+              }
+            }
+          }
+        }
+      },
+      "teamIdInput": {
+        "description": "teamId input for team related routes",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "teamid": {
+                  "$ref": "#/components/schemas/teamId"
+                }
+              }
+            }
+          }
+        }
+      },
+      "organizationIdInput": {
+        "description": "organizationId input for organization related routes",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "organizationid": {
+                  "$ref": "#/components/schemas/organizationId"
+                }
+              }
+            }
+          }
+        }
+      },
+      "memeberAdditionInput": {
+        "description": "adding a member to thread/team/organization",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/memberAddition"
+            }
+          }
+        }
+      },
+      "threadAdditionInput": {
+        "description": "adding a thread to team",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/threadAddition"
+            }
+          }
+        }
+      },
+      "teamAdditionInput": {
+        "description": "adding a team to organization",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/teamAddition"
+            }
+          }
+        }
+      },
+      "orgAdditionInput": {
+        "description": "adding a new organization",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/orgAddition"
+            }
+          }
+        }
+      },
+      "noteAdditionInput": {
+        "description": "adding a note to a file",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/noteAddition"
+            }
+          }
+        }
+      },
+      "noticeAdditionInput": {
+        "description": "adding a notice to a thread/team/organization",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/noticeObject"
             }
           }
         }
       }
     },
     "securitySchemes": {
-      "petstore_auth": {
-        "type": "oauth2",
-        "flows": {
-          "implicit": {
-            "authorizationUrl": "https://petstore3.swagger.io/oauth/authorize",
-            "scopes": {
-              "write:pets": "modify pets in your account",
-              "read:pets": "read your pets"
+      "api_key": {
+        "type": "apiKey",
+        "description": "JWT token given at login/signup",
+        "name": "jwt_token",
+        "in": "cookie"
+      }
+    },
+    "responses": {
+      "200AuthSuccess": {
+        "description": "Successful login/signup, returns userid and jwt token",
+        "headers": {
+          "cookie": {
+            "description": "Holds authenticating JWT",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userid": {
+                  "$ref": "#/components/schemas/userId"
+                }
+              }
             }
           }
         }
       },
-      "api_key": {
-        "type": "apiKey",
-        "name": "api_key",
-        "in": "header"
+      "200UserProfileView": {
+        "description": "User Profile data ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/userProfile"
+            }
+          }
+        }
+      },
+      "200PublicProfileView": {
+        "description": "Viewing another User Profile data ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/publicProfile"
+            }
+          }
+        }
+      },
+      "200FileData": {
+        "description": "Viewing file data ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/fileObject"
+            }
+          }
+        }
+      },
+      "200FileMetadata": {
+        "description": "Viewing file metadata: owning entities, signs etc",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/fileMetadata"
+            }
+          }
+        }
+      },
+      "200UserKey": {
+        "description": "Viewing user keys, regenerated if specified",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "publicKey": {
+                  "$ref": "#/components/schemas/key"
+                },
+                "privateKey": {
+                  "$ref": "#/components/schemas/key"
+                },
+                "regenerated": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["publicKey", "privateKey", "regenerated"]
+            }
+          }
+        }
+      },
+      "200FileAdditionSuccess": {
+        "description": "Successful file addition reply",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/fileObject"
+            }
+          }
+        }
+      },
+      "200UserOrgList": {
+        "description": "List of user organization",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/orgObject"
+              }
+            }
+          }
+        }
+      },
+      "200EntityTeamsList": {
+        "description": "List of entity's(organization/user) teams",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/teamObject"
+              }
+            }
+          }
+        }
+      },
+      "200EntityThreadList": {
+        "description": "List of entity's(team/organization/user) archived/active threads",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/threadObject"
+              }
+            }
+          }
+        }
+      },
+      "200UserNoticeList": {
+        "description": "List of an entity's(thread/team/organization/user) notices. In case of user, specified owning entity level in request(thread/team/organization) is used",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "noticeObject": {
+                    "$ref": "#/components/schemas/noticeObject"
+                  },
+                  "viewedByUser": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "200EntityNoticeList": {
+        "description": "List of an entity's(thread/team/organization/user) notices. In case of user, specified owning entity level in request(thread/team/organization) is used",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/noticeObject"
+              }
+            }
+          }
+        }
+      },
+      "200ThreadMetaData": {
+        "description": "Thread metadata such as name, owner, member count etc",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/threadmetadata"
+            }
+          }
+        }
+      },
+      "200TeamMetaData": {
+        "description": "Team metadata such as name, owner, member count etc",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/teammetadata"
+            }
+          }
+        }
+      },
+      "200EntityFilesList": {
+        "description": "List of an entity's(thread/team/organization/user) files.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/fileObject"
+              }
+            }
+          }
+        }
+      },
+      "200EntityMembersList": {
+        "description": "List of an entity's(thread/team/organization) members.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "user1"
+                  },
+                  "mailid": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user1@authentidocs.com"
+                  },
+                  "publicKey": {
+                    "$ref": "#/components/schemas/key"
+                  },
+                  "profilepicUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "roleInEntity": {
+                    "type": "string",
+                    "enum": ["owner", "member", "admin"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "200OrgMetadata": {
+        "description": "Viewing an organization's metadata.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/orgMetadata"
+            }
+          }
+        }
+      },
+      "200MemberAddSuccess": {
+        "description": "succesfully added a member, viewing new memeber list",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "user1"
+                  },
+                  "mailid": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user1@authentidocs.com"
+                  },
+                  "publicKey": {
+                    "$ref": "#/components/schemas/key"
+                  },
+                  "profilepicUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "roleInEntity": {
+                    "type": "string",
+                    "enum": ["owner", "member", "admin"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "200ThreadAddSuccess": {
+        "description": "added thread, viewing new thread data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/threadObject"
+            }
+          }
+        }
+      },
+      "200TeamAddSuccess": {
+        "description": "added team, viewing new team data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/teamObject"
+            }
+          }
+        }
+      },
+      "200OrgAddSuccess": {
+        "description": "added org, viewing new org data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/orgObject"
+            }
+          }
+        }
+      },
+      "200NoticeAddSuccess": {
+        "description": "added a notice, viewing new notice data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/noticeObject"
+            }
+          }
+        }
+      },
+      "200NoteAddSuccess": {
+        "description": "added a new note, viewing new note data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/note"
+            }
+          }
+        }
+      },
+      "400badrequest": {
+        "description": "Failure in forming a proper request body or in providing proper parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/failureResponse"
+            }
+          }
+        }
+      },
+      "404NotFound": {
+        "description": "Requested resource/entity was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/failureResponse"
+            }
+          }
+        }
+      },
+      "500ServerSideError": {
+        "description": "Unknown server side error occurred, please try again later.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/failureResponse"
+            }
+          }
+        }
+      },
+      "422InvalidInput": {
+        "description": "Provided inputs are not valid, please check them.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/failureResponse"
+            }
+          }
+        }
+      },
+      "403Forbidden": {
+        "description": "User trying to access or modify forbidden resource/entity",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/failureResponse"
+            }
+          }
+        }
+      },
+      "401AuthFailure": {
+        "description": "Failure in authenticating this API call",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/failureResponse"
+            }
+          }
+        }
       }
     }
   }
