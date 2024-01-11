@@ -44,6 +44,10 @@
       "description": "Routes to add/create various objects"
     },
     {
+      "name": "Search",
+      "description": "Searching users, files, notes"
+    },
+    {
       "name": "test",
       "description": "testing"
     }
@@ -1459,6 +1463,117 @@
           }
         ]
       }
+    },
+    "/searchuser": {
+      "post": {
+        "tags": ["Search"],
+        "summary": "Searching a user in global/organization/team/thread level",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/searchUserInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityMembersList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/searchfile": {
+      "post": {
+        "tags": ["Search"],
+        "summary": "Searching a file in personal/organization/team/thread level, returns files matching query",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/searchFileInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityFilesList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/searchnote": {
+      "post": {
+        "tags": ["Search"],
+        "summary": "Searching among the notes of files in organization/team/thread level, returns files with notes matching query",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/searchNoteInput"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200EntityFilesList"
+          },
+          "400": {
+            "$ref": "#/components/responses/400badrequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401AuthFailure"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/422InvalidInput"
+          },
+          "500": {
+            "$ref": "#/components/responses/500ServerSideError"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -2104,7 +2219,63 @@
         },
         "required": ["creatorId", "members", "name"]
       },
-
+      "searchUser":{
+        "type": "object",
+        "properties": {
+          "searchingUserId":{
+            "$ref": "#/components/schemas/userId"
+          },
+          "searchedUserQuery":{
+            "type": "string"
+          },
+          "parentEntityType":{
+            "enum": ["global", "organization", "team", "thread"]
+          },
+          "parentEntityId":{
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["searchingUserId", "searchedUserQuery", "parentEntityType"]
+      },
+      "searchFile":{
+        "type": "object",
+        "properties": {
+          "searchingUserId":{
+            "$ref": "#/components/schemas/userId"
+          },
+          "searchedFileQuery":{
+            "type": "string"
+          },
+          "parentEntityType":{
+            "enum": ["personal", "organization", "team", "thread"]
+          },
+          "parentEntityId":{
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["searchingUserId", "searchedFileQuery", "parentEntityType"]
+      },
+      "searchNote":{
+        "type": "object",
+        "properties": {
+          "searchingUserId":{
+            "$ref": "#/components/schemas/userId"
+          },
+          "searchedNoteQuery":{
+            "type": "string"
+          },
+          "parentEntityType":{
+            "enum": ["organization", "team", "thread"]
+          },
+          "parentEntityId":{
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["searchingUserId", "searchedNoteQuery", "parentEntityType"]
+      },
       "failureResponse": {
         "type": "object",
         "properties": {
@@ -2411,6 +2582,39 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/noticeObject"
+            }
+          }
+        }
+      },
+      "searchUserInput":{
+        "description": "searching a user in a thread/team/organization/global level",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/searchUser"
+            }
+          }
+        }
+      },
+      "searchFileInput":{
+        "description": "searching a file in a thread/team/organization/global level",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/searchFile"
+            }
+          }
+        }
+      },
+      "searchNoteInput":{
+        "description": "searching in file notes in a thread/team/organization level",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/searchNote"
             }
           }
         }
