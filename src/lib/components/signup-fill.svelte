@@ -12,7 +12,7 @@
 </script>
 
 <div class="signup-card-content" bind:this={signup_card_content_div}>
-    <p class="text-3xl font-semibold text-gray-900 dark:text-white mb-3">Signup</p>
+    <p class="text-3xl font-semibold text-gray-900 dark:text-white mb-3">Sign Up</p>
     <form bind:this={form}>
         <div class="relative z-0 w-full mb-5 group">
             <input type="email" id="signup-email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />

@@ -11,10 +11,10 @@
       defaultModelsExpandDepth : -1 //hides the schemas of api.json, as these are not needed to be shown publicly
      });
     });
-   </script>
+</script>
    
-   <svelte:head>
-    <title>API Documentation</title>
-   </svelte:head>
-   
-   <div id="swagger-ui-container" />
+<svelte:head>
+<title>API Documentation</title>
+</svelte:head>
+
+<div id="swagger-ui-container" />
