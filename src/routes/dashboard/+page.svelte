@@ -5,6 +5,7 @@
     import TeamCard from "$lib/components/dashboard/team-card.svelte";
     import ThreadCard from "$lib/components/dashboard/thread-card.svelte";
 
+    let profile_edit_mode: boolean = false;
     let username: string = "Mustafa Siam";
     let email: string = "siam11651@outlook.com";
     let pubkey: string = "0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa";
@@ -60,6 +61,16 @@
         },
     ];
 
+    function edit_profile(): void
+    {
+        profile_edit_mode = true;
+    }
+
+    function save_profile(): void
+    {
+        profile_edit_mode = false;
+    }
+
     function switch_pubkey_truncate(): void
     {
         if(pubkey_truncate_status === "truncate")
@@ -97,19 +108,45 @@
 <!-- Dashboard card root div -->
 <div class="dash-root flex block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
     <!-- This segment shows the profile info and keys -->
-    <div class="dash-left my-6 ms-6 me-3">
+    <div class="dash-left my-6 ps-6 pe-3">
         <!-- Pfp -->
-        <img class="w-36 h-36 rounded-full" src="pochita.webp" alt="Rounded avatar">
+        <div class="flex items-center">
+            <img class="w-36 h-36 rounded-full" src="pochita.webp" alt="Rounded avatar">
+
+            {#if profile_edit_mode}
+                <!-- svelte-ignore a11y-invalid-attribute -->
+                <a href="javascript:" class="inline-flex items-center font-medium text-blue-700 dark:text-blue-600 hover:underline ms-2">
+                    <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"/>
+                        <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"/>
+                        <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"/>
+                    </svg>
+                </a>
+            {/if}
+        </div>
         <!-- Username -->
-        <p class="text-2xl font-medium text-gray-900 dark:text-white mt-2 mb-6">{username}</p>
+        {#if profile_edit_mode}
+            <p class="text-base font-medium text-gray-500 dark:text-gray-400 mt-2">Username</p>
+            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mt-2 mb-6" bind:value={username} required>
+        {:else}
+            <p class="text-2xl font-medium text-gray-900 dark:text-white mt-2 mb-6">{username}</p>
+        {/if}
         <!-- Email ID -->
         <p class="text-base font-medium text-gray-500 dark:text-gray-400 mt-2">Email</p>
-        <p class="text-xl font-medium text-gray-900 dark:text-white mb-4">{email}</p>
-        <!-- Edit profile button -->
-        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Edit Profile</button>
+        {#if profile_edit_mode}
+            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mt-2 mb-6" bind:value={email} required>
+        {:else}
+            <p class="text-xl font-medium text-gray-900 dark:text-white mb-4">{email}</p>
+        {/if}
+        <!-- Edit/save profile button -->
+        {#if profile_edit_mode}
+            <button type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" on:click={save_profile}>Save</button>
+        {:else}
+            <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" on:click={edit_profile}>Edit Profile</button>
+        {/if}
         <!-- Public key -->
         <p class="text-base font-medium text-gray-500 dark:text-gray-400 mt-6">Public Key</p>
-        <div class="flex items-center mb-2" style="max-width: 100%;">
+        <div class="flex items-start mb-2" style="max-width: 100%;">
             <p class="text-xl font-medium text-gray-900 {pubkey_truncate_status} dark:text-white mt-auto mb-auto" style="width: 80%; word-wrap: break-word;" bind:this={pubkey_p}>{pubkey}</p>
             <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 ms-2" on:click={switch_pubkey_truncate}>
                 {#if pubkey_truncate_status === "truncate"}
@@ -127,7 +164,7 @@
         </div>
         <!-- private key -->
         <p class="text-base font-medium text-gray-500 dark:text-gray-400">Private Key</p>
-        <div class="flex items-center mb-4" style="max-width: 100%;">
+        <div class="flex items-start mb-4" style="max-width: 100%;">
             <p class="text-xl font-medium text-gray-900 dark:text-white mt-auto mb-auto" style="width: 80%; word-wrap: break-word;" bind:this={privkey_p}>
                 {#if privkey_visible}
                     {privkey}
@@ -153,7 +190,7 @@
         <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Regenerate Keys</button>
     </div>
     <!-- This segment shows various lists like files orgs etc -->
-    <div class="dash-right my-6 ms-3 me-6">
+    <div class="dash-right my-6 ps-3 me-6">
         <!-- svelte-ignore a11y-invalid-attribute -->
         <ul class="tab-list flex justify-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
             {#each tabs as tab, index}
@@ -171,31 +208,31 @@
             {#if tab_index === 0}
                 <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2" style="overflow-y: auto;">
                     <li>
-                        <FileCard file_name={"File 1"} file_type={"png"}/>
+                        <FileCard file_name={"Personal File 1"} file_type={"png"}/>
                     </li>
                     <li>
-                        <FileCard file_name={"File 2"} file_type={"jpg"}/>
+                        <FileCard file_name={"Personal File 2"} file_type={"jpg"}/>
                     </li>
                     <li>
-                        <FileCard file_name={"File 3"} file_type={"jpg"}/>
+                        <FileCard file_name={"Personal File 3"} file_type={"jpg"}/>
                     </li>
                     <li>
-                        <FileCard file_name={"File 4"} file_type={"pdf"}/>
+                        <FileCard file_name={"Personal File 4"} file_type={"pdf"}/>
                     </li>
                 </ul>
             {:else if tab_index === 1}
                 <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2" style="overflow-y: auto;">
                     <li>
-                        <FileCard file_name={"File 1"} file_type={"png"}/>
+                        <FileCard file_name={"Work File 1"} file_type={"png"}/>
                     </li>
                     <li>
-                        <FileCard file_name={"File 2"} file_type={"jpg"}/>
+                        <FileCard file_name={"Work File 2"} file_type={"jpg"}/>
                     </li>
                     <li>
-                        <FileCard file_name={"File 3"} file_type={"jpg"}/>
+                        <FileCard file_name={"Work File 3"} file_type={"jpg"}/>
                     </li>
                     <li>
-                        <FileCard file_name={"File 4"} file_type={"pdf"}/>
+                        <FileCard file_name={"Work File 4"} file_type={"pdf"}/>
                     </li>
                 </ul>
             {:else if tab_index === 2}
