@@ -1,0 +1,267 @@
+<script lang="ts">
+    import Anavbar from "$lib/components/a-navbar.svelte";
+    import FileCard from "$lib/components/dashboard/file-card.svelte";
+
+    let username: string = "Mustafa Siam";
+    let email: string = "siam11651@outlook.com";
+    let pubkey: string = "0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa";
+    let privkey: string = "af1706bffb2d7ea2bbe6c28bc9940af1706bffb2d7ea2bbe6c28bc9940af1706bffb2d7ea2bbe6c28bc9940";
+    let pubkey_truncate_status: string = "truncate";
+    let privkey_visible: boolean = false;
+    let pubkey_p: HTMLParagraphElement;
+    let privkey_p: HTMLParagraphElement;
+    let tab_index: number = 0;
+
+    class Tab
+    {
+        public name!: string;
+        public callback!: () => void;
+    }
+
+    let tabs: Tab[] = 
+    [
+        {
+            name: "Personal Files",
+            callback: (): void =>
+            {
+                tab_index = 0;
+            }
+        },
+        {
+            name: "Work Files",
+            callback: (): void =>
+            {
+                tab_index = 1;
+            }
+        },
+        {
+            name: "Organizations",
+            callback: (): void =>
+            {
+                tab_index = 2;
+            }
+        },
+        {
+            name: "Teams",
+            callback: (): void =>
+            {
+                tab_index = 3;
+            }
+        },
+        {
+            name: "Threads",
+            callback: (): void =>
+            {
+                tab_index = 4;
+            }
+        },
+    ];
+
+    function switch_pubkey_truncate(): void
+    {
+        if(pubkey_truncate_status === "truncate")
+        {
+            pubkey_truncate_status = "";
+            // pubkey_p.style.overflowX = "scroll";
+        }
+        else
+        {
+            pubkey_truncate_status = "truncate";
+            // pubkey_p.style.overflowX = "hidden";
+            // pubkey_p.scrollTo(0, 0);
+        }
+    }
+
+    function switch_privkey_visibility(): void
+    {
+        // if(privkey_visible)
+        // {
+        //     privkey_p.style.overflowX = "hidden";
+        //     privkey_p.scrollTo(0, 0);
+        // }
+        // else
+        // {
+        //     privkey_p.style.overflowX = "scroll";
+        // }
+
+        privkey_visible = !privkey_visible;
+    }
+</script>
+
+<!-- Navbar -->
+<Anavbar />
+
+<!-- Dashboard card root div -->
+<div class="dash-root flex block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <!-- This segment shows the profile info and keys -->
+    <div class="dash-left my-6 ms-6 me-3">
+        <!-- Pfp -->
+        <img class="w-36 h-36 rounded-full" src="pochita.webp" alt="Rounded avatar">
+        <!-- Username -->
+        <p class="text-2xl font-medium text-gray-900 dark:text-white mt-2 mb-6">{username}</p>
+        <!-- Email ID -->
+        <p class="text-base font-medium text-gray-500 dark:text-gray-400 mt-2">Email</p>
+        <p class="text-xl font-medium text-gray-900 dark:text-white mb-4">{email}</p>
+        <!-- Edit profile button -->
+        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Edit Profile</button>
+        <!-- Public key -->
+        <p class="text-base font-medium text-gray-500 dark:text-gray-400 mt-6">Public Key</p>
+        <div class="flex items-center mb-2" style="max-width: 100%;">
+            <p class="text-xl font-medium text-gray-900 {pubkey_truncate_status} dark:text-white mt-auto mb-auto" style="width: 80%; word-wrap: break-word;" bind:this={pubkey_p}>{pubkey}</p>
+            <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 ms-2" on:click={switch_pubkey_truncate}>
+                {#if pubkey_truncate_status === "truncate"}
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14">
+                        <path d="M10 0C4.612 0 0 5.336 0 7c0 1.742 3.546 7 10 7 6.454 0 10-5.258 10-7 0-1.664-4.612-7-10-7Zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
+                    </svg>
+                {:else}
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="m2 13.587 3.055-3.055A4.913 4.913 0 0 1 5 10a5.006 5.006 0 0 1 5-5c.178.008.356.026.532.054l1.744-1.744A8.973 8.973 0 0 0 10 3C4.612 3 0 8.336 0 10a6.49 6.49 0 0 0 2 3.587Z"/>
+                        <path d="m12.7 8.714 6.007-6.007a1 1 0 1 0-1.414-1.414L11.286 7.3a2.98 2.98 0 0 0-.588-.21l-.035-.01a2.981 2.981 0 0 0-3.584 3.583c0 .012.008.022.01.033.05.204.12.401.211.59l-6.007 6.007a1 1 0 1 0 1.414 1.414L8.714 12.7c.189.091.386.162.59.211.011 0 .021.007.033.01a2.981 2.981 0 0 0 3.584-3.584c0-.012-.008-.023-.011-.035a3.05 3.05 0 0 0-.21-.588Z"/>
+                        <path d="M17.821 6.593 14.964 9.45a4.952 4.952 0 0 1-5.514 5.514L7.665 16.75c.767.165 1.55.25 2.335.251 6.453 0 10-5.258 10-7 0-1.166-1.637-2.874-2.179-3.407Z"/>
+                    </svg>
+                {/if}
+            </button>
+        </div>
+        <!-- private key -->
+        <p class="text-base font-medium text-gray-500 dark:text-gray-400">Private Key</p>
+        <div class="flex items-center mb-4" style="max-width: 100%;">
+            <p class="text-xl font-medium text-gray-900 dark:text-white mt-auto mb-auto" style="width: 80%; word-wrap: break-word;" bind:this={privkey_p}>
+                {#if privkey_visible}
+                    {privkey}
+                {:else}
+                    ●●●●●●●●●●
+                {/if}
+            </p>
+            <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 ms-2" on:click={switch_privkey_visibility}>
+                {#if privkey_visible}
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="m2 13.587 3.055-3.055A4.913 4.913 0 0 1 5 10a5.006 5.006 0 0 1 5-5c.178.008.356.026.532.054l1.744-1.744A8.973 8.973 0 0 0 10 3C4.612 3 0 8.336 0 10a6.49 6.49 0 0 0 2 3.587Z"/>
+                        <path d="m12.7 8.714 6.007-6.007a1 1 0 1 0-1.414-1.414L11.286 7.3a2.98 2.98 0 0 0-.588-.21l-.035-.01a2.981 2.981 0 0 0-3.584 3.583c0 .012.008.022.01.033.05.204.12.401.211.59l-6.007 6.007a1 1 0 1 0 1.414 1.414L8.714 12.7c.189.091.386.162.59.211.011 0 .021.007.033.01a2.981 2.981 0 0 0 3.584-3.584c0-.012-.008-.023-.011-.035a3.05 3.05 0 0 0-.21-.588Z"/>
+                        <path d="M17.821 6.593 14.964 9.45a4.952 4.952 0 0 1-5.514 5.514L7.665 16.75c.767.165 1.55.25 2.335.251 6.453 0 10-5.258 10-7 0-1.166-1.637-2.874-2.179-3.407Z"/>
+                    </svg>
+                {:else}
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14">
+                        <path d="M10 0C4.612 0 0 5.336 0 7c0 1.742 3.546 7 10 7 6.454 0 10-5.258 10-7 0-1.664-4.612-7-10-7Zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
+                    </svg>
+                {/if}
+            </button>
+        </div>
+        <!-- Regenerate keys button -->
+        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Regenerate Keys</button>
+    </div>
+    <!-- This segment shows various lists like files orgs etc -->
+    <div class="dash-right my-6 ms-3 me-6">
+        <!-- svelte-ignore a11y-invalid-attribute -->
+        <ul class="tab-list flex justify-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+            {#each tabs as tab, index}
+                <li class="me-2">
+                    {#if tab_index === index}
+                        <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active" aria-current="page">{tab.name}</a>
+                    {:else}
+                        <a href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white" on:click={tab.callback}>{tab.name}</a>
+                    {/if}
+                </li>
+            {/each}
+        </ul>
+        <div class="tab-content">
+            <p class="tab-title text-2xl font-bold text-gray-900 dark:text-white mx-6 mt-6 ps-1">{tabs[tab_index].name}</p>
+            {#if tab_index === 0}
+                <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2" style="overflow-y: auto;">
+                    <li>
+                        <FileCard file_name={"File 1"} file_type={"png"}/>
+                    </li>
+                    <li>
+                        <FileCard file_name={"File 2"} file_type={"jpg"}/>
+                    </li>
+                    <li>
+                        <FileCard file_name={"File 3"} file_type={"jpg"}/>
+                    </li>
+                    <li>
+                        <FileCard file_name={"File 4"} file_type={"pdf"}/>
+                    </li>
+                </ul>
+            {:else if tab_index === 1}
+                <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2" style="overflow-y: auto;">
+                    <li>
+                        <FileCard file_name={"File 1"} file_type={"png"}/>
+                    </li>
+                    <li>
+                        <FileCard file_name={"File 2"} file_type={"jpg"}/>
+                    </li>
+                    <li>
+                        <FileCard file_name={"File 3"} file_type={"jpg"}/>
+                    </li>
+                    <li>
+                        <FileCard file_name={"File 4"} file_type={"pdf"}/>
+                    </li>
+                </ul>
+            {:else if tab_index === 2}
+                
+            {:else if tab_index === 3}
+
+            {:else if tab_index === 4}
+                
+            {/if}
+        </div>
+    </div>
+</div>
+
+<style>
+    .dash-root
+    {
+        position: absolute;
+        top: 12vh;
+        bottom: 4vh;
+        left: 15%;
+        right: 15%;
+    }
+    .dash-left
+    {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 70%;
+        overflow-y: auto;
+    }
+    .dash-right
+    {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 30%;
+        right: 0;
+    }
+    .tab-list
+    {
+        position: absolute;
+        top: 0;
+        bottom: 93%;
+        left: 0;
+        right: 0;
+    }
+    .tab-content
+    {
+        position: absolute;
+        top: 7%;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    .tab-title
+    {
+        position: absolute;
+        top: 0;
+        bottom: 90%;
+        left: 0;
+        right: 0;
+    }
+    .tab-content-list
+    {
+        position: absolute;
+        top: 10%;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+</style>
