@@ -1,6 +1,9 @@
 <script lang="ts">
     import Anavbar from "$lib/components/a-navbar.svelte";
     import FileCard from "$lib/components/dashboard/file-card.svelte";
+    import OrgCard from "$lib/components/dashboard/org-card.svelte";
+    import TeamCard from "$lib/components/dashboard/team-card.svelte";
+    import ThreadCard from "$lib/components/dashboard/thread-card.svelte";
 
     let username: string = "Mustafa Siam";
     let email: string = "siam11651@outlook.com";
@@ -196,11 +199,62 @@
                     </li>
                 </ul>
             {:else if tab_index === 2}
-                
+                <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2" style="overflow-y: auto;">
+                    <li>
+                        <OrgCard org_name={"Organization 1"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 2"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 3"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 4"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 5"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 6"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 7"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 8"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 9"} />
+                    </li>
+                    <li>
+                        <OrgCard org_name={"Organization 10"} />
+                    </li>
+                </ul>
             {:else if tab_index === 3}
-
+                <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2" style="overflow-y: auto;">
+                    <li>
+                        <TeamCard team_name={"Team 1"} />
+                    </li>
+                    <li>
+                        <TeamCard team_name={"Team 2"} />
+                    </li>
+                    <li>
+                        <TeamCard team_name={"Team 3"} />
+                    </li>
+                </ul>
             {:else if tab_index === 4}
-                
+                <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2" style="overflow-y: auto;">
+                    <li>
+                        <ThreadCard thread_name={"Thread 1"} />
+                    </li>
+                    <li>
+                        <ThreadCard thread_name={"Thread 2"} />
+                    </li>
+                    <li>
+                        <ThreadCard thread_name={"Thread 3"} />
+                    </li>
+                </ul>
             {/if}
         </div>
     </div>

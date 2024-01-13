@@ -53,7 +53,7 @@
             {/if}
         </div>
         <div class="flex-grow">
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">
                 {file_name}
             </p>
             <p class="text-base text-gray-500 dark:text-gray-400">
