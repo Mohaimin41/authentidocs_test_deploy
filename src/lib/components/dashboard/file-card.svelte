@@ -3,31 +3,12 @@
 
     export let file_name: string;
     export let file_type: string;
-    export let file_status: number;
     const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
-    let file_status_color: string;
-    let file_status_text: string;
 
     onMount(() : void =>
     {
         color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
-
-        if(file_status === 0)
-        {
-            file_status_color = "red";
-            file_status_text = "Not Viewed and Not Signed";
-        }
-        else if(file_status === 1)
-        {
-            file_status_color = "blue";
-            file_status_text = "Viewed and Not Signed";
-        }
-        else if(file_status === 2)
-        {
-            file_status_color = "green";
-            file_status_text = "Viewed and Signed";
-        }
     });
 </script>
 
@@ -58,11 +39,6 @@
             </p>
             <p class="text-base text-gray-500 dark:text-gray-400">
                 {file_type.toUpperCase()}
-            </p>
-        </div>
-        <div class="flex flex-row-reverse items-end">
-            <p class="text-base text-{file_status_color}-500 dark:text-{file_status_color}-400">
-                {file_status_text}
             </p>
         </div>
     </div>                  
