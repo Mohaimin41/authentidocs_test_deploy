@@ -5,20 +5,48 @@
     import TeamCard from "$lib/components/dashboard/team-card.svelte";
     import ThreadCard from "$lib/components/dashboard/thread-card.svelte";
 
+    /**
+     * Whether profile edit mode active or not, toggled by button named "Edit Profile"
+     */
     let profile_edit_mode: boolean = false;
     let username: string = "Mustafa Siam";
     let email: string = "siam11651@outlook.com";
     let pubkey: string = "0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa";
     let privkey: string = "af1706bffb2d7ea2bbe6c28bc9940af1706bffb2d7ea2bbe6c28bc9940af1706bffb2d7ea2bbe6c28bc9940";
+    /**
+     * Visibility/truncated state of public key
+     */
     let pubkey_truncate_status: string = "truncate";
+    /**
+     * Visibility/truncated state of private key
+     */
     let privkey_visible: boolean = false;
     let pubkey_p: HTMLParagraphElement;
     let privkey_p: HTMLParagraphElement;
+    /**
+     * Decides which tab to show according to these values:
+     * 
+     * 0 -> personal files
+     * 
+     * 1 -> work files
+     * 
+     * 2 -> organizations
+     * 
+     * 3 -> teams
+     * 
+     * 4 -> threads
+     */
     let tab_index: number = 0;
 
+    /**
+     * This class helps to set tab properties and their functionalities easily 👉👈
+     */
     class Tab
     {
         public name!: string;
+        /**
+         * this callback is supposed to set tab_index
+         */
         public callback!: () => void;
     }
 
@@ -61,43 +89,42 @@
         },
     ];
 
+    /**
+     * toggle to profile edit mode
+     */
     function edit_profile(): void
     {
         profile_edit_mode = true;
     }
 
+    /**
+     * save profile to db after edit
+     */
     function save_profile(): void
     {
         profile_edit_mode = false;
     }
 
+    /**
+     * toggle public key visibility
+     */
     function switch_pubkey_truncate(): void
     {
         if(pubkey_truncate_status === "truncate")
         {
             pubkey_truncate_status = "";
-            // pubkey_p.style.overflowX = "scroll";
         }
         else
         {
             pubkey_truncate_status = "truncate";
-            // pubkey_p.style.overflowX = "hidden";
-            // pubkey_p.scrollTo(0, 0);
         }
     }
 
+    /**
+     * toggle private key visibility
+     */
     function switch_privkey_visibility(): void
     {
-        // if(privkey_visible)
-        // {
-        //     privkey_p.style.overflowX = "hidden";
-        //     privkey_p.scrollTo(0, 0);
-        // }
-        // else
-        // {
-        //     privkey_p.style.overflowX = "scroll";
-        // }
-
         privkey_visible = !privkey_visible;
     }
 </script>
@@ -148,6 +175,7 @@
         <p class="text-base font-medium text-gray-500 dark:text-gray-400 mt-6">Public Key</p>
         <div class="flex items-start mb-2" style="max-width: 100%;">
             <p class="text-xl font-medium text-gray-900 {pubkey_truncate_status} dark:text-white mt-auto mb-auto" style="width: 80%; word-wrap: break-word;" bind:this={pubkey_p}>{pubkey}</p>
+            <!-- Show/hide public key button -->
             <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 ms-2" on:click={switch_pubkey_truncate}>
                 {#if pubkey_truncate_status === "truncate"}
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14">
@@ -172,6 +200,7 @@
                     ●●●●●●●●●●
                 {/if}
             </p>
+            <!-- Show/hide private key button -->
             <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 ms-2" on:click={switch_privkey_visibility}>
                 {#if privkey_visible}
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -203,8 +232,10 @@
                 </li>
             {/each}
         </ul>
+        <!-- Main content of each tab -->
         <div class="tab-content">
             <p class="tab-title text-2xl font-bold text-gray-900 dark:text-white mx-6 mt-6 ps-1">{tabs[tab_index].name}</p>
+            <!-- Each option of tab_index show each type of tab -->
             {#if tab_index === 0}
                 <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2" style="overflow-y: auto;">
                     <li>
