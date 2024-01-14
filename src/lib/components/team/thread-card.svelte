@@ -11,11 +11,11 @@
     {
         if(selected)
         {
-            bg_color_class = "bg-gray-200 dark:bg-gray-600"
+            bg_color_class = "bg-gray-200 dark:bg-gray-600";
         }
         else
         {
-            bg_color_class = "bg-white dark:bg-gray-800"
+            bg_color_class = "bg-white dark:bg-gray-800";
         }
 
         color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
