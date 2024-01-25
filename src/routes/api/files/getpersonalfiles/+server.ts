@@ -20,10 +20,10 @@ export async function POST({
     given_userid
     })
     console.log(data)
-    
+
     
   
-    let ret_text;
+    let ret_text = data;
     let response: Response = new Response(JSON.stringify(ret_text), {
       headers: {
         "Content-Type": "application/json",
