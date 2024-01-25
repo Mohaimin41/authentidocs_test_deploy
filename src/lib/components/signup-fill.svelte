@@ -1,6 +1,9 @@
 <script lang="ts">
     import { afterNavigate, goto } from "$app/navigation";
+    import { db, type PriveKey } from "$lib/db";
     import { signIn } from "@auth/sveltekit/client";
+    import { uid } from "../../stores";
+    import { get } from "svelte/store";
 
     export let signup_card_content_div: HTMLDivElement;
     export let form: HTMLFormElement;
@@ -53,11 +56,42 @@
                     true,
                     ["sign", "verify"]);
 
-                    let private_key = await subtle_crypto.exportKey("jwk", keyPair.privateKey);
                     let public_key = await subtle_crypto.exportKey("jwk", keyPair.publicKey);
 
-                    console.log(private_key);
-                    console.log(public_key);
+                    await db.priv_key.add(
+                    {
+                        id: get(uid),
+                        key: keyPair.privateKey
+                    });
+
+                    let don: PriveKey | undefined = await db.priv_key.get(get(uid));
+
+                    if(don)
+                    {
+                        console.log(await subtle_crypto.exportKey("jwk", keyPair.privateKey));
+                        console.log(await subtle_crypto.exportKey("jwk", don.key));
+                    }
+
+                    let request_obj: any =
+                    {
+                        user_id: response_obj,
+                        key: JSON.stringify(public_key)
+                    };
+
+                    fetch("/api/user/addkey",
+                    {
+                        method: "POST",
+                        headers:
+                        {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(request_obj)
+                    }).then(async (response: Response): Promise<void> =>
+                    {
+                        let response_obj: any = await response.json();
+
+                        // console.log(response_obj);
+                    });
 
                     // signIn("credentials", 
                     // {
