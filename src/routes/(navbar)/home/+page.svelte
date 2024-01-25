@@ -145,7 +145,7 @@
         let temp_priv_key = get(priv_key);
 
         if (temp_priv_key) {
-          let signature = await subtle_crypto.sign(
+          let signature: ArrayBuffer = await subtle_crypto.sign(
             {
               name: "ECDSA",
               hash: { name: "SHA-384" },
@@ -156,7 +156,7 @@
 
           let request_obj: any = {
             filename: file.name,
-            userid: get(uid),
+            userid: $page.data.session?.user?.name,
             file: Array.from(new Uint8Array(file_buffer))
           };
 
@@ -164,8 +164,41 @@
           async (response: Response): Promise<void> =>
           {
             let response_obj: any = await response.json();
-            
-            console.log(response_obj);
+            let signature_hex: string = [...new Uint8Array(signature)].map(x => x.toString(16).padStart(2, '0')).join('');
+
+            let pubkey_json: string | null = localStorage.getItem("pub_key");
+
+            if(pubkey_json)
+            {
+              let jwk_key =<JsonWebKey> JSON.parse(pubkey_json);
+                console.log(typeof jwk_key);
+              let pub_key= await subtle_crypto.importKey(
+                "jwk",
+                jwk_key,
+                {
+                  name: "ECDSA",
+                  namedCurve: "P-384",
+                },
+                true,
+                ["verify"]
+              );
+
+              let request_obj: any =
+              {
+                fileid: response_obj,
+                signature: signature_hex,
+                key: pub_key,
+                userid: $page.data.session?.user?.name
+              };
+
+              common_fetch("/api/files/addfilesignature", request_obj,
+              async (response: Response): Promise<void> =>
+              {
+                let response_obj: any = await response.json();
+
+                console.log(response_obj);
+              });
+            }
           });
         }
       };

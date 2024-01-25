@@ -45,6 +45,7 @@
             async (response: Response): Promise<void> => {
             // new_key.set(false);
             localStorage.setItem("new_key", "0");
+            localStorage.setItem("pub_key", JSON.stringify(public_key));
             });
         }
     });
