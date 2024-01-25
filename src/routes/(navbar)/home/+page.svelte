@@ -163,7 +163,7 @@
 
                     let request_obj: any =
                     {
-                        user_id: get(uid)
+                        user_id: $page.data.session?.user?.name
                     };
 
                     fetch("/api/user/getkey",
