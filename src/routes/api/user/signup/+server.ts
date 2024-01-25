@@ -8,6 +8,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const provider = await request.json();
   console.log(provider);
+  let ret_text;
   let given_email=''
    let { data:result, error } = await supabase
    .rpc('can_signup_user', {
@@ -33,16 +34,18 @@ export async function POST({
         })
         if (error) console.error(error)
         else console.log(result)
+    ret_text=result
+    console.log(ret_text);
 
    }
    else
    {
     console.log("user Already Exists")
+    ret_text=-1;
    }
 
-
-  let ret_text;
-  let response: Response = new Response(JSON.stringify(ret_text), {
+   
+   let response: Response = new Response(JSON.stringify(ret_text), {
     headers: {
       "Content-Type": "application/json",
     },
