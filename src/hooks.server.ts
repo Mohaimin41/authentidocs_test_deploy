@@ -1,9 +1,28 @@
 import { SvelteKitAuth } from "@auth/sveltekit"
 import Credentials from '@auth/core/providers/credentials'
+import { supabase } from "$lib/server/supabase_client.server";
 async function getUserFromDb(email:string,password:string)
 {
-    return {uid:'dladlad',name:'johny',email:email,image:null}
-}
+  let given_email=email
+  let given_pwd_hash=password
+
+    let { data:result, error } = await supabase
+    .rpc('can_log_in_user', {
+      given_email, 
+      given_pwd_hash
+    })
+    if (error) console.error(error)
+    else console.log(result)
+  if(result.userid == null)
+  {
+    return null;
+  }
+  else
+  {
+    return {uid:result.userid,name:result.username,email:result.email,image:result.pfp_url}
+  }
+  }
+   
 export const handle = SvelteKitAuth({
   providers: [
     Credentials({
