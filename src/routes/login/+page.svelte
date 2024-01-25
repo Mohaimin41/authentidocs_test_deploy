@@ -1,7 +1,14 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
+    import { page } from "$app/stores";
     import LogginFill from "$lib/components/loggin-fill.svelte";
     import Signing from "$lib/components/signing.svelte";
     import { onMount } from "svelte";
+
+    if($page.data.session !== null)
+    {
+        goto("/home");
+    }
 
     const IMAGE_COUNT: number = 2;
     const CHAPA_COLLECTION: string[] = ["Everything you need to agree", "It starts with a signature"];
@@ -67,7 +74,7 @@
         
         setTimeout((): void =>
         {
-            let chapa_interval: number = setInterval((): void =>
+            let chapa_interval: NodeJS.Timeout = setInterval((): void =>
             {
                 ++current_length;
 

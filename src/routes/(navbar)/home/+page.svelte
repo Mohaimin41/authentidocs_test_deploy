@@ -1,8 +1,19 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { page } from "$app/stores";
     import FileCard from "$lib/components/home/file-card.svelte"
     import TeamCard from "$lib/components/home/team-card.svelte"
     import ThreadCard from "$lib/components/home/thread-card.svelte"
+    import { goto } from "$app/navigation";
+
+    if($page.data.session === null)
+    {
+        goto("/");
+    }
+    else
+    {
+        console.log("dhuke ase");
+    }
 
     /**
      * Decides which tab to show according to these values:
