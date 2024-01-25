@@ -64,14 +64,6 @@
                         key: keyPair.privateKey
                     });
 
-                    let don: PriveKey | undefined = await db.priv_key.get(get(uid));
-
-                    if(don)
-                    {
-                        console.log(await subtle_crypto.exportKey("jwk", keyPair.privateKey));
-                        console.log(await subtle_crypto.exportKey("jwk", don.key));
-                    }
-
                     let request_obj: any =
                     {
                         user_id: response_obj,
@@ -90,15 +82,20 @@
                     {
                         let response_obj: any = await response.json();
 
-                        // console.log(response_obj);
+                        if(response_obj == 1)
+                        {
+                            signIn("credentials", 
+                            {
+                                email: email,
+                                password: password_hash,
+                                callbackUrl: "/home"
+                            });
+                        }
+                        else
+                        {
+                            // add key failed
+                        }
                     });
-
-                    // signIn("credentials", 
-                    // {
-                    //     email: email,
-                    //     password: password_hash,
-                    //     callbackUrl: "/home"
-                    // });
                 }
                 else
                 {
