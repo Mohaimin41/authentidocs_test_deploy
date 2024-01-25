@@ -144,7 +144,7 @@
         top: 0;
         bottom: 0;
         left: 0;
-        right: 75%;
+        right: 70%;
     }
     .thread-list-container
     {
@@ -158,14 +158,14 @@
     {
         position: absolute;
         top: 0;
-        bottom: 93vh;
+        bottom: 92vh;
         left: 0;
         right: 0;
     }
     .thread-list
     {
         position: absolute;
-        top: 7vh;
+        top: 8vh;
         bottom: 0;
         left: 0;
         right: 0;
@@ -182,7 +182,7 @@
         position: absolute;
         top: 0;
         bottom: 0;
-        left: 27.5%;
+        left: 32.5%;
         right: 0;
     }
     .thread-info
@@ -205,14 +205,14 @@
     {
         position: absolute;
         top: 0;
-        bottom: 93vh;
+        bottom: 92vh;
         left: 0;
         right: 0;
     }
     .thread-files-list
     {
         position: absolute;
-        top: 7vh;
+        top: 8vh;
         bottom: 0;
         left: 0;
         right: 0;
