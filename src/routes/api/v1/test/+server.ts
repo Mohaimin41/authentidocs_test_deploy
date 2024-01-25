@@ -1,6 +1,6 @@
 import { supabase } from "$lib/server/supabase_client.server";
 
-export async function GET(): Promise<Response> {
+export async function POST(): Promise<Response> {
     let ret_text;
     ret_text = {ret_text:"Hello from AuthentiDocs team. The server is alive still ."}
     // const { data } = await supabase.from("user_data").select();
