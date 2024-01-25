@@ -28,6 +28,8 @@
   },
   "type": "module",
   "dependencies": {
+    "@auth/core": "^0.22.0",
+    "@auth/sveltekit": "^0.8.0",
     "@supabase/supabase-js": "^2.39.3",
     "dotenv": "^16.3.2",
     "swagger-ui": "^5.11.0"
