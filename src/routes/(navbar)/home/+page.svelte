@@ -387,7 +387,7 @@
         >
           My Personal Files
         </p>
-        <ul class="list-elements space-y-2 mb-2" style="overflow-y: auto;">
+        <ul class="list-elements space-y-2 mb-2 pb-2" style="overflow-y: auto;">
           {#each personal_files as file}
             <li>
               <FileCard file_name={file.name} file_type={file.type} />

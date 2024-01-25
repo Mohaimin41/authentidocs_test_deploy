@@ -56,8 +56,9 @@
             {/if}
         </div>
         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">New user? <a href="/signup" class="font-medium text-blue-600 hover:underline dark:text-blue-500">Sign Up</a></p>
-        <div class="flex flex-row-reverse">
-            <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login</button>
+        <div class="flex flex-row-reverse items-center">
+            <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 ms-2">Login</button>
+            <a href="/" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Home</a>
         </div>
     </form>
 </div>
