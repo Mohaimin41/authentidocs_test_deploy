@@ -2,8 +2,6 @@
     import { page } from "$app/stores";
     import { signIn } from "@auth/sveltekit/client";
     import { onMount } from "svelte";
-    import { new_key } from "../../stores";
-    import { goto } from "$app/navigation";
 
     export let login_card_content_div: HTMLDivElement;
     export let form: HTMLFormElement;

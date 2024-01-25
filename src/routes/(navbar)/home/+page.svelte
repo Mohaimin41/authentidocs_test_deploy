@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { json } from "@sveltejs/kit";
   import { Modal } from "flowbite";
-  import { onMount } from "svelte";
   import { page } from "$app/stores";
   import FileCard from "$lib/components/home/file-card.svelte";
   import TeamCard from "$lib/components/home/team-card.svelte";
@@ -157,10 +155,18 @@
           );
 
           let request_obj: any = {
-            user_id: $page.data.session?.user?.name,
+            filename: file.name,
+            userid: get(uid),
+            file: Array.from(new Uint8Array(file_buffer))
           };
 
-
+          common_fetch("/api/files/addpersonalfile", request_obj,
+          async (response: Response): Promise<void> =>
+          {
+            let response_obj: any = await response.json();
+            
+            console.log(response_obj);
+          });
         }
       };
 
@@ -406,7 +412,6 @@
     {/if}
   </div>
 </div>
-
 <div
   bind:this={modal_elem}
   data-modal-backdrop="static"
