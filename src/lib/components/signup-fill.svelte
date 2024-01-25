@@ -43,12 +43,28 @@
 
                 if(response_obj !== -1)
                 {
-                    signIn("credentials", 
+                    let subtle_crypto: SubtleCrypto = window.crypto.subtle;
+
+                    let keyPair = await subtle_crypto.generateKey(
                     {
-                        email: email,
-                        password: password_hash,
-                        callbackUrl: "/home"
-                    });
+                        name: "ECDSA",
+                        namedCurve: "P-384",
+                    },
+                    true,
+                    ["sign", "verify"]);
+
+                    let private_key = await subtle_crypto.exportKey("jwk", keyPair.privateKey);
+                    let public_key = await subtle_crypto.exportKey("jwk", keyPair.publicKey);
+
+                    console.log(private_key);
+                    console.log(public_key);
+
+                    // signIn("credentials", 
+                    // {
+                    //     email: email,
+                    //     password: password_hash,
+                    //     callbackUrl: "/home"
+                    // });
                 }
                 else
                 {

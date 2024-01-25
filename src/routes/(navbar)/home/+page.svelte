@@ -73,7 +73,7 @@
         public type!: string;
     }
 
-    let personal_files: File[] = new Array(10);
+    let personal_files: File[] = new Array(0);
 
     for(let i: number = 0; i < personal_files.length; ++i)
     {
@@ -133,6 +133,32 @@
             arch_threads[i] = new Thread();
             arch_threads[i].name = "Thread " + (i + 1).toString();
         }
+
+        let request_obj: any = 
+        {
+            given_userid: "1df5d210-ea18-489b-8c9d-38bc803c5d4a"
+        };
+
+        fetch("/api/files/getpersonalfiles",
+        {
+            method: "POST",
+            headers:
+            {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(request_obj)
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            personal_files = [];
+
+            for(let i: number = 0; i < response_obj.length; ++i)
+            {
+                personal_files[i] = new File();
+                personal_files[i].name = response_obj[i].f_filename;
+                personal_files[i].type = response_obj[i].f_file_extension;
+            }
+        });
     });    
 </script>
 
