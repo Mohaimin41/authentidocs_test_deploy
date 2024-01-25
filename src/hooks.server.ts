@@ -15,7 +15,7 @@ async function getUserFromDb(email:string,password:string)
     else console.log(result)
   if(result.userid == null)
   {
-    return null;
+    return {errors:'fked up'};
   }
   else
   {
@@ -40,13 +40,17 @@ export const handle = SvelteKitAuth({
         // logic to verify if user exists
         user = await <User>getUserFromDb(<string>credentials.email,<string>credentials.password)
         
-        if (!user) {
-          throw new Error('User not found.')
+        if(!user.errors)
+        {
+          return user;
+        }
+        else
+        {
+          throw new Error(JSON.stringify({errors:user.error,status:false}))
         }
 
         // return json object with the user data
-        console.log(user)
-        return user
+
       }
     })
   ],
