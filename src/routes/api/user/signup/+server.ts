@@ -6,8 +6,8 @@ export async function POST({
   request,
   cookies,
 }: RequestEvent): Promise<Response> {
-  const provider = await request.json();
-  console.log(provider);
+  const user = await request.json();
+  console.log(user);
   let ret_text;
   let given_email=''
    let { data:result, error } = await supabase
@@ -18,11 +18,11 @@ export async function POST({
    else console.log(result)
    if(result == true)
    {
-    let given_email='' 
+    let given_email=user.given_email 
     let given_pfp_url='' 
     let given_publickey='' 
-    let given_pwd_hash=''  
-    let given_username=''
+    let given_pwd_hash=user.given_pwd_hash  
+    let given_username=user.given_username
 
         let { data:result, error } = await supabase
         .rpc('add_user', {
