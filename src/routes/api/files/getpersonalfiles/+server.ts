@@ -8,13 +8,19 @@ export async function POST({
     locals,
   }: RequestEvent): Promise<Response> {
     const session = await locals.getSession()
-  if (!session?.user) {
-    throw error(401, "You must sign in to view movies.")
-  }
-  console.log(session)
+    if (!session?.user) {
+      throw error(401, "You must sign in to add files.")
+    }
+    console.log(session)
   
-    const provider = await request.json();
-    console.log(provider);
+    const user_info = await request.json()
+    let given_userid=user_info.given_userid
+    let { data } = await supabase
+    .rpc('get_user_personal_files_userid', {
+    given_userid
+    })
+    console.log(data)
+    
     
   
     let ret_text;
