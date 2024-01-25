@@ -19,7 +19,7 @@ async function getUserFromDb(email:string,password:string)
   }
   else
   {
-    return {uid:result.userid,name:result.userid,email:result.email,image:result.pfp_url}
+    return {id:<string>result.userid,name:result.username,email:result.email,image:result.pfp_url}
   }
   }
    
