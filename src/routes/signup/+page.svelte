@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
+    import { afterNavigate, goto } from "$app/navigation";
     import { page } from "$app/stores";
     import Signing from "$lib/components/signing.svelte";
     import SignupFill from "$lib/components/signup-fill.svelte";
@@ -21,6 +21,7 @@
     let target_length: number;
     let signing_state: number = 0;
     let start_height: number = 0;
+    let user_exist: boolean = false;
 
     function on_card_content_load(): void
     {
@@ -57,8 +58,16 @@
         };
     }
 
-    onMount((): void =>
+    afterNavigate((): void =>
     {
+        signing_state = 0;
+        user_exist = false;
+
+        if($page.url.searchParams.has("error"))
+        {
+            user_exist = true;
+        }
+
         let image_idx = Math.round(Math.random() * (IMAGE_COUNT - 1));
         let chapa_idx = Math.round(Math.random() * (CHAPA_COLLECTION.length - 1));
         let image_src = "signin/" + image_idx + ".webp";
@@ -128,7 +137,7 @@
         <div class="flex flex-col align-center block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <div class="signup-card" bind:this={signup_card_div}>
                 {#if signing_state == 0}
-                    <SignupFill on_card_content_load={on_card_content_load} bind:form={form} bind:signup_card_content_div={signup_card_content_div} />
+                    <SignupFill user_exist={user_exist} on_card_content_load={on_card_content_load} bind:form={form} bind:signup_card_content_div={signup_card_content_div} />
                 {:else}
                     <Signing signing_text={"Signing Up"} on_card_content_load={on_card_content_load} bind:signin_card_content_div={signup_card_content_div} />
                 {/if}

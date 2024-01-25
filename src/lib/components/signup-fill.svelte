@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
+    import { afterNavigate, goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { signIn } from "@auth/sveltekit/client";
     import { onMount } from "svelte";
@@ -7,7 +7,7 @@
     export let signup_card_content_div: HTMLDivElement;
     export let form: HTMLFormElement;
     export let on_card_content_load: () => void;
-    let user_exist: boolean = false;
+    export let user_exist: boolean;
     let email: string = "";
     let username: string = "";
     let password: string = "";
@@ -64,13 +64,8 @@
         }
     }
 
-    onMount((): void =>
+    afterNavigate((): void =>
     {
-        if($page.url.searchParams.has("error"))
-        {
-            user_exist = true;
-        }
-
         on_card_content_load();
     });
 </script>
