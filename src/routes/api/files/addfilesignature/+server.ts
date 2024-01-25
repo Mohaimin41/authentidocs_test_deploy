@@ -28,7 +28,7 @@ export async function POST({
     given_signing_userid,
   });
 
-  // console.log(result);
+   console.log("signing"+result);
 
   let ret_text = result;
   let response: Response = new Response(JSON.stringify(ret_text), {
