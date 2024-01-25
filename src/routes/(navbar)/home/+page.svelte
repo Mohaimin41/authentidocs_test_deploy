@@ -378,7 +378,7 @@
     </ul>
   </div>
   <div
-    class="pg-right block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+    class="pg-right block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 ms-5"
   >
     {#if tab_index === 0}
       <div class="list-container m-6">
@@ -539,7 +539,7 @@
   .pg-center {
     position: absolute;
     top: 12vh;
-    bottom: 4vh;
+    bottom: 2vh;
     left: 10%;
     right: 10%;
   }
@@ -554,7 +554,7 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 32.5%;
+    left: 30%;
     right: 0;
   }
   .list-container {

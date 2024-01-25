@@ -23,7 +23,7 @@
 
 <Navbar fluid={false}>
     <NavBrand href="/">
-        <img src="favicon.png" class="me-3 h-6 sm:h-9" alt="Flowbite Logo" /> <!-- apatoto -->
+        <img src="/favicon.png" class="me-3 h-6 sm:h-9" alt="Flowbite Logo" /> <!-- apatoto -->
         <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Authentidocs</span>
     </NavBrand>
     <NavUl>
