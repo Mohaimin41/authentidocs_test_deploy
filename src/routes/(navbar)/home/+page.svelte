@@ -230,6 +230,11 @@
       let response_obj: any = await response.json();
       personal_files = [];
 
+      if(response_obj === null)
+      {
+        return;
+      }
+
       for (let i: number = 0; i < response_obj.length; ++i) {
         personal_files[i] = new File();
         personal_files[i].name = response_obj[i].f_filename;
