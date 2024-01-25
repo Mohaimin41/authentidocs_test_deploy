@@ -8,7 +8,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const provider = await request.json();
   console.log(provider);
-  let given_email='abcd@gmail.com'
+  let given_email=''
    let { data:result, error } = await supabase
    .rpc('can_signup_user', {
    given_email
