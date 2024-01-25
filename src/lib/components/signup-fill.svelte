@@ -1,8 +1,6 @@
 <script lang="ts">
     import { afterNavigate, goto } from "$app/navigation";
-    import { page } from "$app/stores";
     import { signIn } from "@auth/sveltekit/client";
-    import { onMount } from "svelte";
 
     export let signup_card_content_div: HTMLDivElement;
     export let form: HTMLFormElement;

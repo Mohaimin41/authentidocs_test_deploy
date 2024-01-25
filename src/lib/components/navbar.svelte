@@ -2,8 +2,20 @@
     import { Avatar, Button, Dropdown, DropdownDivider, DropdownHeader, DropdownItem, Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
     import { logged_in_store } from '../../stores';
     import { get } from 'svelte/store';
+    import { signOut } from '@auth/sveltekit/client';
+    import { afterNavigate } from '$app/navigation';
 
-    $: logged_in_state = get(logged_in_store);
+    let logged_in_state: boolean = false;
+
+    function logout(): void
+    {
+        signOut({callbackUrl: "/"});
+    }
+
+    afterNavigate((): void =>
+    {
+        logged_in_state = get(logged_in_store);
+    })
 </script>
 
 <Navbar fluid={false}>
@@ -31,7 +43,7 @@
             <DropdownItem>Settings</DropdownItem>
             <DropdownItem>Earnings</DropdownItem>
             <DropdownDivider />
-            <DropdownItem>Sign out</DropdownItem>
+            <DropdownItem on:click={logout}>Sign out</DropdownItem>
         </Dropdown>
     {:else}
         <div class="flex">

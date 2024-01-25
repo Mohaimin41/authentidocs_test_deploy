@@ -5,15 +5,7 @@
     import TeamCard from "$lib/components/home/team-card.svelte"
     import ThreadCard from "$lib/components/home/thread-card.svelte"
     import { goto } from "$app/navigation";
-
-    if($page.data.session === null)
-    {
-        goto("/");
-    }
-    else
-    {
-        console.log("dhuke ase");
-    }
+    import { logged_in_store } from "../../../stores";
 
     /**
      * Decides which tab to show according to these values:
@@ -81,7 +73,7 @@
         public type!: string;
     }
 
-    let personal_files: File[] = new Array(3);
+    let personal_files: File[] = new Array(10);
 
     for(let i: number = 0; i < personal_files.length; ++i)
     {
@@ -119,6 +111,15 @@
 
     onMount((): void =>
     {
+        if($page.data.session === null)
+        {
+            goto("/");
+        }
+        else
+        {
+            logged_in_store.set(true);
+        }
+
         tabs[0].callback();
 
         for(let i: number = 0; i < act_threads.length; ++i)
@@ -192,13 +193,16 @@
         {#if tab_index === 0}
             <div class="list-container m-6">
                 <p class="list-title text-2xl font-bold text-gray-900 dark:text-white pb-3 ps-1">My Personal Files</p>
-                <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
+                <ul class="list-elements space-y-2 mb-2" style="overflow-y: auto;">
                     {#each personal_files as file}
                         <li>
                             <FileCard file_name={file.name} file_type={file.type} />
                         </li>
                     {/each}
                 </ul>
+                <div class="list-upload flex justify-end">
+                    <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 m-0 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Upload</button>
+                </div>
             </div>
         {:else if tab_index === 1}
             <div class="list-container m-6">
@@ -282,6 +286,14 @@
     {
         position: absolute;
         top: 7%;
+        bottom: 7%;
+        left: 0;
+        right: 0;
+    }
+    .list-upload
+    {
+        position: absolute;
+        top: 93%;
         bottom: 0;
         left: 0;
         right: 0;

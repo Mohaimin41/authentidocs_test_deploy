@@ -18,14 +18,12 @@
         let password_buffer: ArrayBuffer = await subtle_crypto.digest("SHA-256", text_encoder.encode(password));
         let password_hash: string = [...new Uint8Array(password_buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
 
-        let login_response: Response | undefined = await signIn("credentials", 
+        signIn("credentials", 
         {
             email: email,
             password: password_hash,
             callbackUrl: "/home"
         });
-
-        console.log(await login_response?.json());
     }
 
     onMount((): void =>
