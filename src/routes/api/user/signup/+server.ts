@@ -9,7 +9,7 @@ export async function POST({
   const user = await request.json();
   console.log(user);
   let ret_text;
-  let given_email=''
+  let given_email=user.given_email
    let { data:result, error } = await supabase
    .rpc('can_signup_user', {
    given_email
@@ -41,7 +41,7 @@ export async function POST({
    else
    {
     console.log("user Already Exists")
-    ret_text=-1;
+    ret_text='-1';
    }
 
    
