@@ -8,6 +8,7 @@
   import { logged_in_store, priv_key, uid } from "../../../stores";
   import { get } from "svelte/store";
   import {common_fetch} from "$lib/fetch_func"
+    import { onMount } from "svelte";
 
   let file_input_elem: HTMLInputElement;
   let modal_elem: HTMLDivElement;
@@ -115,12 +116,36 @@
     modal_obj.hide();
   }
 
-  afterNavigate((): void => {
+  onMount((): void => {
     if($page.data.session === null) {
       goto("/");
     } else {
       logged_in_store.set(true);
     }
+
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/files/getpersonalfiles",
+      request_obj,
+      async (response: Response): Promise<void> => {
+      let response_obj: any = await response.json();
+
+      personal_files = [];
+
+      if(response_obj === null)
+      {
+        return;
+      }
+
+      for (let i: number = 0; i < response_obj.length; ++i) {
+        personal_files[i] = new File();
+        personal_files[i].name = response_obj[i].f_filename;
+        personal_files[i].type = response_obj[i].f_file_extension;
+      }
+    });
 
     file_input_elem.onchange = (event: Event): void => {
       modal_obj.hide();
@@ -167,7 +192,7 @@
             let signature_hex: string = [...new Uint8Array(signature)].map(x => x.toString(16).padStart(2, '0')).join('');
 
             let pubkey_json: string | null = localStorage.getItem("pub_key");
-
+            console.log("add file",pubkey_json)
             if(pubkey_json)
             {
               let jwk_key =<JsonWebKey> JSON.parse(pubkey_json);
@@ -219,31 +244,7 @@
       arch_threads[i] = new Thread();
       arch_threads[i].name = "Thread " + (i + 1).toString();
     }
-    let request_obj: any = {
-      given_userid: $page.data.session?.user?.name,
-    };
-
-    common_fetch(
-      "/api/files/getpersonalfiles",
-      request_obj,
-      async (response: Response): Promise<void> => {
-      let response_obj: any = await response.json();
-      personal_files = [];
-
-      if(response_obj === null)
-      {
-        return;
-      }
-
-      for (let i: number = 0; i < response_obj.length; ++i) {
-        personal_files[i] = new File();
-        personal_files[i].name = response_obj[i].f_filename;
-        personal_files[i].type = response_obj[i].f_file_extension;
-      }
-    }
-    )
-
-     });
+  });
 </script>
 
 <div class="pg-center flex">

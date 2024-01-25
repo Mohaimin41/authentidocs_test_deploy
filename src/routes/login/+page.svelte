@@ -3,6 +3,7 @@
     import { page } from "$app/stores";
     import LogginFill from "$lib/components/loggin-fill.svelte";
     import Signing from "$lib/components/signing.svelte";
+    import { onMount } from "svelte";
     import { new_key } from "../../stores";
 
     const IMAGE_COUNT: number = 2;
@@ -52,7 +53,7 @@
         };
     }
 
-    afterNavigate((): void =>
+    onMount((): void =>
     {
         if($page.data.session !== null)
         {

@@ -7,8 +7,9 @@
     import { db } from "$lib/db";
     import { page } from "$app/stores";
     import { common_fetch } from "$lib/fetch_func";
+    import { onMount } from "svelte";
 
-    afterNavigate(async (): Promise<void> =>
+    onMount(async (): Promise<void> =>
     {
         let new_key_need: string | null = localStorage.getItem("new_key");
 
@@ -29,6 +30,8 @@
               "jwk",
               keyPair.publicKey,
             );
+
+            console.log("hehe");
 
             await db.priv_key.add({
               id: get(uid),

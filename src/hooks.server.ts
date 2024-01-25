@@ -6,22 +6,22 @@ async function getUserFromDb(email:string,password:string)
   let given_email=email
   let given_pwd_hash=password
 
-    let { data:result, error } = await supabase
-    .rpc('can_log_in_user', {
-      given_email, 
-      given_pwd_hash
-    })
-    if (error) console.error(error)
-    else console.log(result)
+  let { data:result, error } = await supabase
+  .rpc('can_log_in_user', {
+    given_email, 
+    given_pwd_hash
+  })
+  if (error) console.error(error)
+  else console.log("dbresult:"+result)
   if(result.userid == null)
   {
     return {errors:'fked up'};
   }
   else
   {
-    return {id:<string>result.userid,name:result.username,email:result.email,image:result.pfp_url}
+    return {name:result.userid,email:result.email,image:result.pfp_url}
   }
-  }
+}
    
 export const handle = SvelteKitAuth({
   providers: [
@@ -34,7 +34,7 @@ export const handle = SvelteKitAuth({
       },
       authorize: async (credentials) => {
         let user = null
-        console.log(credentials)
+        //console.log(credentials)
         // logic to salt and hash password
         const pwHash = credentials.password
         // logic to verify if user exists

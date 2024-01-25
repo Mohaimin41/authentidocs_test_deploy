@@ -11,6 +11,7 @@
     async function logout(): Promise<void>
     {
         await db.priv_key.delete(get(uid));
+        await db.delete();
         signOut({callbackUrl: "/"});
     }
 

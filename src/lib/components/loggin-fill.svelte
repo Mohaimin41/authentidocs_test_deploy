@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { signIn } from "@auth/sveltekit/client";
     import { onMount } from "svelte";
@@ -21,7 +22,7 @@
         // new_key.set(true);
         localStorage.setItem("new_key", "1");
 
-        signIn("credentials", 
+        await signIn("credentials", 
         {
             email: email,
             password: password_hash,
