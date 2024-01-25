@@ -18,7 +18,7 @@
     afterNavigate((): void =>
     {
         logged_in_state = get(logged_in_store);
-    })
+    });
 </script>
 
 <Navbar fluid={false}>

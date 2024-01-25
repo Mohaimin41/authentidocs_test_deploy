@@ -2,7 +2,7 @@
     import "../app.pcss";
     import { db, type PriveKey } from "$lib/db";
     import { get } from "svelte/store";
-    import { priv_key, uid } from "../stores";
+    import { priv_key, uid, username as username_store } from "../stores";
     import { page } from "$app/stores";
     import { afterNavigate } from "$app/navigation";
 
