@@ -21,7 +21,7 @@ export async function POST({
     let given_email=user.given_email 
     let given_pfp_url='' 
     let given_publickey='' 
-    let given_pwd_hash=''  
+    let given_pwd_hash=user.given_pwd_hash  
     let given_username=user.given_username
 
         let { data:result, error } = await supabase
