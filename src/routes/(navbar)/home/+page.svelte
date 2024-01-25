@@ -195,24 +195,11 @@
             console.log("add file",pubkey_json)
             if(pubkey_json)
             {
-              let jwk_key =<JsonWebKey> JSON.parse(pubkey_json);
-                console.log(typeof jwk_key);
-              let pub_key= await subtle_crypto.importKey(
-                "jwk",
-                jwk_key,
-                {
-                  name: "ECDSA",
-                  namedCurve: "P-384",
-                },
-                true,
-                ["verify"]
-              );
-
               let request_obj: any =
               {
                 fileid: response_obj,
                 signature: signature_hex,
-                key: pub_key,
+                key: pubkey_json,
                 userid: $page.data.session?.user?.name
               };
 
