@@ -1,7 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
 import { supabase } from "$lib/server/supabase_client.server";
-import { fileTypeFromFile } from "file-type";
+import { fileTypeFromBuffer } from "file-type";
 const { v4: uuidv4 } = require("uuid");
 
 export async function POST({
@@ -20,26 +20,29 @@ export async function POST({
 
   const user_file = file_info.file;
   let fileExt = "";
-  let temp_ext = await fileTypeFromFile(user_file);
+  let file_mimetype = "";
+  let temp_ext = await fileTypeFromBuffer(user_file);
+
   if (temp_ext === undefined) {
-    const fileExt = user_file.name.split(".").pop();
+    fileExt = user_file.name.split(".").pop();
   } else {
     fileExt = temp_ext.ext;
+    file_mimetype = temp_ext.mime;
   }
+  const blob = new Blob([user_file], { type: file_mimetype });
   //
   let temp_name = uuidv4() + fileExt;
   const filePath = "personal_files/" + temp_name;
 
   const { data: result } = await supabase.storage
     .from("user_personal_files")
-    .upload(filePath, user_file);
-
+    .upload(filePath, blob);
   let given_file_extension = fileExt,
     given_file_ownerid = file_info.userid,
     given_file_url = filePath,
     given_filename = file_info.filename;
 
-  let { data:result1 } = await supabase.rpc("add_personal_file", {
+  let { data: result1 } = await supabase.rpc("add_personal_file", {
     given_file_extension,
     given_file_ownerid,
     given_file_url,
