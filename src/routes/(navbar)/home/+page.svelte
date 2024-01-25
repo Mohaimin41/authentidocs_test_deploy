@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import ANavbar from "$lib/components/a-navbar.svelte";
     import FileCard from "$lib/components/home/file-card.svelte"
     import TeamCard from "$lib/components/home/team-card.svelte"
     import ThreadCard from "$lib/components/home/thread-card.svelte"
@@ -124,8 +123,6 @@
         }
     });    
 </script>
-
-<ANavbar />
 
 <div class="pg-center flex">
     <!-- Select Tabs to see various lists -->

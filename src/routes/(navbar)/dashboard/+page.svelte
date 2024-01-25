@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Anavbar from "$lib/components/a-navbar.svelte";
     import FileCard from "$lib/components/dashboard/file-card.svelte";
     import OrgCard from "$lib/components/dashboard/org-card.svelte";
     import TeamCard from "$lib/components/dashboard/team-card.svelte";
@@ -128,9 +127,6 @@
         privkey_visible = !privkey_visible;
     }
 </script>
-
-<!-- Navbar -->
-<Anavbar />
 
 <!-- Dashboard card root div -->
 <div class="dash-root flex block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">

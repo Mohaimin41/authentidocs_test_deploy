@@ -1,6 +1,6 @@
 <script lang="ts">
     import LogginFill from "$lib/components/loggin-fill.svelte";
-import Signing from "$lib/components/signing.svelte";
+    import Signing from "$lib/components/signing.svelte";
     import { onMount } from "svelte";
 
     const IMAGE_COUNT: number = 2;

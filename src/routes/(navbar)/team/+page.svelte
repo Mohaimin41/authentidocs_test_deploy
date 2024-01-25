@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Anavbar from "$lib/components/a-navbar.svelte";
     import FileCard from "$lib/components/team/file-card.svelte";
     import ThreadCard from "$lib/components/team/thread-card.svelte";
     import { Avatar, Button } from "flowbite-svelte";
@@ -12,8 +11,6 @@
         selected_thread_name = "Thread 1";
     });
 </script>
-
-<Anavbar/>
 
 <div class="pg-center flex justify-between">
     <div class="pg-left">
