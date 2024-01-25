@@ -7,15 +7,15 @@ export async function POST({
   cookies,
 }: RequestEvent): Promise<Response> {
   const user = await request.json();
-  console.log(user);
+  // console.log(user);
   let ret_text;
   let given_email=user.given_email
    let { data:result, error } = await supabase
    .rpc('can_signup_user', {
    given_email
    })
-   if (error) console.error(error)
-   else console.log(result)
+  //  if (error) console.error(error)
+  //  else console.log(result)
    if(result == true)
    {
     let given_email=user.given_email 
@@ -32,14 +32,14 @@ export async function POST({
         given_pwd_hash,
         given_username
       })
-    if (error) console.error(error)
-    else console.log(result)
+    // if (error) console.error(error)
+    // else console.log(result)
     ret_text = result
-    console.log(ret_text);
+    // console.log(ret_text);
 
   }
   else {
-    console.log("user Already Exists")
+    // console.log("user Already Exists")
     ret_text=-1;
    }
 

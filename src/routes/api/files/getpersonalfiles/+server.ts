@@ -11,7 +11,7 @@ export async function POST({
     if (!session?.user) {
       throw error(401, "You must sign in to add files.")
     }
-    console.log(session)
+    // console.log(session)
   
     const user_info = await request.json()
     let given_userid=user_info.given_userid
@@ -19,7 +19,7 @@ export async function POST({
     .rpc('get_user_personal_files_userid', {
     given_userid
     })
-    console.log(data)
+    // console.log(data)
 
     
   

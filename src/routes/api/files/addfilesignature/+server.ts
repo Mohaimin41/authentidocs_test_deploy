@@ -11,10 +11,10 @@ export async function POST({
   if (!session?.user) {
     throw error(401, "You must sign in to add file signatures.");
   }
-  console.log(session);
+  // console.log(session);
 
   const file_signature_info = await request.json();
-  console.log(file_signature_info);
+  // console.log(file_signature_info);
 
   let given_fileid = file_signature_info.fileid,
     given_signature = file_signature_info.signature,
@@ -28,7 +28,7 @@ export async function POST({
     given_signing_userid,
   });
 
-  console.log(result);
+  // console.log(result);
 
   let ret_text = result;
   let response: Response = new Response(JSON.stringify(ret_text), {

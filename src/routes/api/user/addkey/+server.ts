@@ -13,9 +13,9 @@ export async function POST({
   if (!session?.user) {
     throw error(401, "You must sign in to add file signatures.");
   }
-  console.log(session);
+  // console.log(session);
   const key_info = await request.json();
-  console.log(key_info);
+  // console.log(key_info);
   let ret_text;
   let given_publickey=key_info.key
   let given_userid=key_info.user_id
@@ -25,7 +25,7 @@ export async function POST({
     given_publickey, 
     given_userid
     })
-    console.log(result)
+    // console.log(result)
 
     ret_text=result;
    
