@@ -4,8 +4,8 @@
   import FileCard from "$lib/components/home/file-card.svelte";
   import TeamCard from "$lib/components/home/team-card.svelte";
   import ThreadCard from "$lib/components/home/thread-card.svelte";
-  import { afterNavigate, goto } from "$app/navigation";
-  import { logged_in_store, priv_key, uid } from "../../../stores";
+  import { goto } from "$app/navigation";
+  import { logged_in_store, priv_key } from "../../../stores";
   import { get } from "svelte/store";
   import {common_fetch} from "$lib/fetch_func"
     import { onMount } from "svelte";

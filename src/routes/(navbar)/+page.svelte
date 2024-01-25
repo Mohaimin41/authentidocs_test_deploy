@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { afterNavigate, goto } from "$app/navigation";
+    import { goto } from "$app/navigation";
     import { page } from "$app/stores";
+    import { onMount } from "svelte";
     import { logged_in_store } from "../../stores";
 
-    afterNavigate(async (): Promise<void> =>
+    onMount(async (): Promise<void> =>
     {
         if($page.data.session)
         {

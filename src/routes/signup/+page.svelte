@@ -58,7 +58,7 @@
         };
     }
 
-    afterNavigate((): void =>
+    onMount((): void =>
     {
         signing_state = 0;
         user_exist = false;
