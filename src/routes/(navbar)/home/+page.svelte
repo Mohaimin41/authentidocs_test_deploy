@@ -6,7 +6,7 @@
   import FileCard from "$lib/components/home/file-card.svelte";
   import TeamCard from "$lib/components/home/team-card.svelte";
   import ThreadCard from "$lib/components/home/thread-card.svelte";
-  import { goto } from "$app/navigation";
+  import { afterNavigate, goto } from "$app/navigation";
   import { logged_in_store, priv_key, uid } from "../../../stores";
   import { get } from "svelte/store";
   import {common_fetch} from "$lib/fetch_func"
@@ -117,7 +117,13 @@
     modal_obj.hide();
   }
 
-  onMount((): void => {
+  afterNavigate((): void => {
+    if($page.data.session === null) {
+      goto("/");
+    } else {
+      logged_in_store.set(true);
+    }
+
     file_input_elem.onchange = (event: Event): void => {
       modal_obj.hide();
 
@@ -163,12 +169,6 @@
 
     modal_obj = new Modal(modal_elem);
 
-    if ($page.data.session === null) {
-      goto("/");
-    } else {
-      logged_in_store.set(true);
-    }
-
     tabs[0].callback();
 
     for (let i: number = 0; i < act_threads.length; ++i) {
@@ -180,7 +180,6 @@
       arch_threads[i] = new Thread();
       arch_threads[i].name = "Thread " + (i + 1).toString();
     }
-    console.log("navbar home line 183: user.id", $page.data.session?.user?.name)
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
     };

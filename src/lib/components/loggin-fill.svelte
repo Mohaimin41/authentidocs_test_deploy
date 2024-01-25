@@ -2,6 +2,8 @@
     import { page } from "$app/stores";
     import { signIn } from "@auth/sveltekit/client";
     import { onMount } from "svelte";
+    import { new_key } from "../../stores";
+    import { goto } from "$app/navigation";
 
     export let login_card_content_div: HTMLDivElement;
     export let form: HTMLFormElement;
@@ -17,6 +19,9 @@
         let text_encoder: TextEncoder = new TextEncoder();
         let password_buffer: ArrayBuffer = await subtle_crypto.digest("SHA-256", text_encoder.encode(password));
         let password_hash: string = [...new Uint8Array(password_buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
+
+        // new_key.set(true);
+        localStorage.setItem("new_key", "1");
 
         signIn("credentials", 
         {

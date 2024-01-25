@@ -1,14 +1,9 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
+    import { afterNavigate, goto } from "$app/navigation";
     import { page } from "$app/stores";
     import LogginFill from "$lib/components/loggin-fill.svelte";
     import Signing from "$lib/components/signing.svelte";
-    import { onMount } from "svelte";
-
-    if($page.data.session !== null)
-    {
-        goto("/home");
-    }
+    import { new_key } from "../../stores";
 
     const IMAGE_COUNT: number = 2;
     const CHAPA_COLLECTION: string[] = ["Everything you need to agree", "It starts with a signature"];
@@ -57,8 +52,18 @@
         };
     }
 
-    onMount((): void =>
+    afterNavigate((): void =>
     {
+        if($page.data.session !== null)
+        {
+            goto("/home");
+        }
+
+        // if($page.url.searchParams.has("error"))
+        // {
+        //     new_key.set(false);
+        // }
+
         let image_idx = Math.round(Math.random() * (IMAGE_COUNT - 1));
         let chapa_idx = Math.round(Math.random() * (CHAPA_COLLECTION.length - 1));
         let image_src = "signin/" + image_idx + ".webp";

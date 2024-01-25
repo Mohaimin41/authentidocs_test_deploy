@@ -2,7 +2,7 @@
   import { afterNavigate, goto } from "$app/navigation";
   import { db, type PriveKey } from "$lib/db";
   import { signIn } from "@auth/sveltekit/client";
-  import { uid } from "../../stores";
+  import { new_key, uid } from "../../stores";
   import { get } from "svelte/store";
   import { common_fetch } from "$lib/fetch_func";
 
@@ -21,7 +21,7 @@
       let text_encoder: TextEncoder = new TextEncoder();
       let password_buffer: ArrayBuffer = await subtle_crypto.digest(
         "SHA-256",
-        text_encoder.encode(password)
+        text_encoder.encode(password),
       );
       let password_hash: string = [...new Uint8Array(password_buffer)]
         .map((x) => x.toString(16).padStart(2, "0"))
@@ -41,54 +41,19 @@
           console.log(response_obj);
 
           if (response_obj !== -1) {
-            let subtle_crypto: SubtleCrypto = window.crypto.subtle;
-
-            let keyPair = await subtle_crypto.generateKey(
-              {
-                name: "ECDSA",
-                namedCurve: "P-384",
-              },
-              true,
-              ["sign", "verify"]
-            );
-
-            let public_key = await subtle_crypto.exportKey(
-              "jwk",
-              keyPair.publicKey
-            );
-
-            await db.priv_key.add({
-              id: get(uid),
-              key: keyPair.privateKey,
+            // new_key.set(true);
+            window.localStorage.setItem("new_key", "1");
+            signIn("credentials",
+            {
+              email: email,
+              password: password_hash,
+              callbackUrl: "/home",
             });
-
-            let request_obj: any = {
-              user_id: response_obj,
-              key: JSON.stringify(public_key),
-            };
-            common_fetch(
-              "/api/user/addkey",
-              request_obj,
-              async (response: Response): Promise<void> => {
-                let response_obj: any = await response.json();
-
-                if (response_obj == 1) {
-                  signIn("credentials", {
-                    email: email,
-                    password: password_hash,
-                    callbackUrl: "/home",
-                  });
-                } else {
-                  // add key failed
-                }
-              }
-            );
           } else {
             goto("/signup?error");
           }
-        }
+        },
       );
-
     } else {
     }
   }

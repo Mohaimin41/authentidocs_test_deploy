@@ -3,9 +3,10 @@
     import "../app.pcss";
     import { db, type PriveKey } from "$lib/db";
     import { get } from "svelte/store";
-    import { priv_key, uid } from "../stores";
+    import { new_key, priv_key, uid } from "../stores";
     import { page } from "$app/stores";
     import { afterNavigate } from "$app/navigation";
+    import { common_fetch } from "$lib/fetch_func";
 
     afterNavigate(async (): Promise<void> =>
     {

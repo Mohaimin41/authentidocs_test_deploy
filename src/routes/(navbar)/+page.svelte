@@ -1,11 +1,14 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
+    import { afterNavigate, goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { logged_in_store } from "../../stores";
 
-    if($page.data.session)
+    afterNavigate(async (): Promise<void> =>
     {
-        logged_in_store.set(true);
-        goto("/home");
-    }
+        if($page.data.session)
+        {
+            logged_in_store.set(true);
+            goto("/home");
+        }
+    });
 </script>
