@@ -5,6 +5,7 @@
 
     let image_src: string = "/placeholder.webp";
     let file_name: string = "";
+    let file_type: number = 0;
 
     onMount(async (): Promise<void> =>
     {
@@ -18,10 +19,8 @@
         async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-
-            console.log(response_obj.file_data);
-
             file_name = response_obj.file_data.filename;
+            file_type = response_obj.file_data.file_mimetype;
             let file_uint8: Uint8Array = new Uint8Array(response_obj.file_blob);
             image_src = URL.createObjectURL(new Blob([file_uint8]));
         });
@@ -30,7 +29,13 @@
 
 <div class="preview-root">
     <div class="preview-body block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
-        <img class="image-preview rounded" src={image_src} alt="pochita" />
+        {#if file_type === 0}
+            <div></div>
+        {:else if file_type === 1}
+            <img class="image-preview rounded" src={image_src} alt="pochita" />
+        {:else if file_type === 2}
+            <div></div>
+        {/if}
     </div>
     <div class="preview-meta flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <div class="meta-data">
