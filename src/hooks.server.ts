@@ -56,5 +56,6 @@ export const handle = SvelteKitAuth({
   ],
   pages:{
     error: '/login', // Error code passed in query string as ?error=
-  }
+  },
+  trustHost:true,
 })
