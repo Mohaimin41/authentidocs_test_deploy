@@ -6,6 +6,7 @@
     let file_src: string = "/placeholder.webp";
     let file_name: string = "";
     let file_type: number = 0;
+    let download_anchor: HTMLAnchorElement;
 
     onMount(async (): Promise<void> =>
     {
@@ -21,6 +22,9 @@
             let response_obj: any = await response.json();
             file_name = response_obj.file_data.filename;
             file_type = response_obj.file_data.file_mimetype;
+
+            console.log(file_name);
+
             let file_uint8: Uint8Array = new Uint8Array(response_obj.file_blob);
             let mime_text: string = "Application/octet-stream";
 
@@ -33,7 +37,9 @@
                 mime_text = "Application/pdf";
             }
 
-            file_src = URL.createObjectURL(new Blob([file_uint8], {type: mime_text}));
+            let file_object: File = new File([file_uint8], file_name, {type: mime_text});
+            file_src = URL.createObjectURL(file_object);
+            // download_anchor.download = file_src;
         });
     });
 </script>
@@ -43,7 +49,7 @@
         {#if file_type === 0}
             <div></div>
         {:else if file_type === 1}
-            <img class="img-preview rounded" src={file_src} alt="pochita" />
+            <img class="img-preview rounded" src={file_src} alt="img-placeholder" />
         {:else if file_type === 2}
             <embed class="pdf-preview rounded" src={file_src} />
         {/if}
@@ -98,8 +104,10 @@
             </div>
         </div>
         <div class="flex justify-end">
+            <!-- certificate button -->
             <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">View Certificate</button>
-            <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2">Download</button>
+            <!-- download button -->
+            <a download={file_name} href={file_src} bind:this={download_anchor} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2">Download</a>
         </div>
     </div>
 </div>

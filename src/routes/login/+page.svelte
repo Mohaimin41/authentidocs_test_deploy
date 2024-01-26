@@ -1,10 +1,9 @@
 <script lang="ts">
-    import { afterNavigate, goto } from "$app/navigation";
+    import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import LogginFill from "$lib/components/loggin-fill.svelte";
     import Signing from "$lib/components/signing.svelte";
     import { onMount } from "svelte";
-    import { new_key } from "../../stores";
 
     const IMAGE_COUNT: number = 2;
     const CHAPA_COLLECTION: string[] = ["Everything you need to agree", "It starts with a signature"];
