@@ -26,8 +26,8 @@ export async function POST({
     given_fileid, 
     given_userid
   })
-if (error) console.error(error)
-else console.log(result)
+// if (error) console.error(error)
+// else console.log(result)
 
 // console.log(result)
 
@@ -45,8 +45,8 @@ let { data:result2, error } = await supabase
   given_fileid, 
   given_userid
 })
-if (error) console.error(error)
-else console.log(result2)
+// if (_error) console.error(_error)
+// else console.log(result2)
 
   let response_obj = {file_blob:ret_text,file_data:result2}
   let response: Response = new Response(JSON.stringify(response_obj), {

@@ -21,16 +21,30 @@ export async function POST({
   const user_file = file_info.file;
   let fileExt = "";
   let file_mimetype = "";
+  let ret_mime;
   let temp_ext = await fileTypeFromBuffer(new Uint8Array(user_file));
 
   if (temp_ext === undefined) {
     fileExt = file_info.filename.split(".").pop();
+    ret_mime=3;
   } else {
     fileExt = temp_ext.ext;
     file_mimetype = temp_ext.mime;
+    let file_mime = file_mimetype.split("/").reverse().pop();
+    if(file_mime === "image")
+    {
+      ret_mime=1
+    }
+    else if(file_mimetype === "application/pdf")
+    {
+      ret_mime=2
+    }
+    else
+    {
+      ret_mime=3
+    }
   }
-
-
+ 
   const blob = new Blob([new Uint8Array(user_file)], { type: file_mimetype });
   //
   let temp_name = uuidv4() +"."+ fileExt;
@@ -44,14 +58,20 @@ export async function POST({
   let given_file_extension = fileExt,
     given_file_ownerid = file_info.userid,
     given_file_url = filePath,
-    given_filename = file_info.filename;
+    given_filename = file_info.filename,
+    given_file_mimetype = ret_mime
 
-  let { data: result1 } = await supabase.rpc("add_personal_file", {
-    given_file_extension,
-    given_file_ownerid,
-    given_file_url,
-    given_filename,
-  });
+
+    let { data:result1} = await supabase
+    .rpc('add_personal_file', {
+      given_file_extension, 
+      given_file_mimetype, 
+      given_file_ownerid, 
+      given_file_url, 
+      given_filename
+    })
+
+  
   console.log("add_file"+result1);
 
   let ret_text = result1;
