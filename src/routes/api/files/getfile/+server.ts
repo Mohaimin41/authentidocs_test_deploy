@@ -36,13 +36,15 @@ const { data:result1} = await supabase
   .from("user_personal_files")
   .download(result.file_url)
 
-    ret_text=result1;
+  let file_buffer: ArrayBuffer | undefined = await result1?.arrayBuffer();
+
+  ret_text= Array.from(new Uint8Array(file_buffer as ArrayBuffer));
    
-   let response: Response = new Response(JSON.stringify(ret_text), {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  let response: Response = new Response(JSON.stringify(ret_text), {
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 
   return response;

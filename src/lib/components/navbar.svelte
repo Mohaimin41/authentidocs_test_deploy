@@ -12,6 +12,7 @@
     {
         await db.priv_key.delete(get(uid));
         await db.delete();
+
         signOut({callbackUrl: "/"});
     }
 

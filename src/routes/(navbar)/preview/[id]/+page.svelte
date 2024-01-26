@@ -1,10 +1,32 @@
 <script lang="ts">
+    import { page } from "$app/stores";
+    import { common_fetch } from "$lib/fetch_func";
+    import { onMount } from "svelte";
 
+    let image_src: string = "/placeholder.webp";
+
+    onMount(async (): Promise<void> =>
+    {
+        let request_obj: any =
+        {
+            fileid: $page.params.id,
+            user_id: $page.data.session?.user?.name
+        };
+
+        common_fetch("/api/files/getfile", request_obj,
+        async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+
+            let file_uint8: Uint8Array = new Uint8Array(response_obj);
+            image_src = URL.createObjectURL(new Blob([file_uint8]));
+        });
+    });
 </script>
 
 <div class="preview-root">
     <div class="preview-body block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
-
+        <img class="image-preview rounded" src={image_src} alt="pochita" />
     </div>
     <div class="preview-meta flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <div class="meta-data">
@@ -86,5 +108,11 @@
         bottom: 0;
         left: 0;
         right: 0;
+    }
+    .image-preview
+    {
+        height: 100%;
+        margin-left: auto;
+        margin-right: auto;
     }
 </style>

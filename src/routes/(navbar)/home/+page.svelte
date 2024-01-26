@@ -70,6 +70,7 @@
    * file list element data object
    */
   class File {
+    public id!: string;
     public name!: string;
     public type!: string;
   }
@@ -133,6 +134,8 @@
       async (response: Response): Promise<void> => {
       let response_obj: any = await response.json();
 
+      console.log(response_obj);
+
       personal_files = [];
 
       if(response_obj === null)
@@ -142,14 +145,13 @@
 
       for (let i: number = 0; i < response_obj.length; ++i) {
         personal_files[i] = new File();
+        personal_files[i].id = response_obj[i].f_fileid;
         personal_files[i].name = response_obj[i].f_filename;
         personal_files[i].type = response_obj[i].f_file_extension;
       }
     });
 
     file_input_elem.onchange = (event: Event): void => {
-      modal_obj.hide();
-
       if (file_input_elem.files === null) {
         return;
       }
@@ -210,6 +212,7 @@
 
                 console.log(response_obj);
               });
+              modal_obj.hide();
             }
           });
         }
@@ -377,7 +380,7 @@
         <ul class="list-elements space-y-2 mb-2 pb-2" style="overflow-y: auto;">
           {#each personal_files as file}
             <li>
-              <FileCard file_name={file.name} file_type={file.type} />
+              <FileCard file_id={file.id} file_name={file.name} file_type={file.type} />
             </li>
           {/each}
         </ul>
