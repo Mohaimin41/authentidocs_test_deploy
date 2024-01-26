@@ -3,7 +3,7 @@
     import { common_fetch } from "$lib/fetch_func";
     import { onMount } from "svelte";
 
-    let image_src: string = "/placeholder.webp";
+    let file_src: string = "/placeholder.webp";
     let file_name: string = "";
     let file_type: number = 0;
 
@@ -22,7 +22,18 @@
             file_name = response_obj.file_data.filename;
             file_type = response_obj.file_data.file_mimetype;
             let file_uint8: Uint8Array = new Uint8Array(response_obj.file_blob);
-            image_src = URL.createObjectURL(new Blob([file_uint8]));
+            let mime_text: string = "Application/octet-stream";
+
+            if(file_type === 1)
+            {
+                mime_text = "image/*";
+            }
+            else if(file_type === 2)
+            {
+                mime_text = "Application/pdf";
+            }
+
+            file_src = URL.createObjectURL(new Blob([file_uint8], {type: mime_text}));
         });
     });
 </script>
@@ -32,9 +43,9 @@
         {#if file_type === 0}
             <div></div>
         {:else if file_type === 1}
-            <img class="image-preview rounded" src={image_src} alt="pochita" />
+            <img class="img-preview rounded" src={file_src} alt="pochita" />
         {:else if file_type === 2}
-            <div></div>
+            <embed class="pdf-preview" src={file_src} />
         {/if}
     </div>
     <div class="preview-meta flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -118,10 +129,15 @@
         left: 0;
         right: 0;
     }
-    .image-preview
+    .img-preview
     {
         height: 100%;
         margin-left: auto;
         margin-right: auto;
+    }
+    .pdf-preview
+    {
+        width: 100%;
+        height: 100%;
     }
 </style>
