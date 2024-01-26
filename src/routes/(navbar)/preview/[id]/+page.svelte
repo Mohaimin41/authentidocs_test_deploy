@@ -3,7 +3,7 @@
 </script>
 
 <div class="preview-root">
-    <div class="preview-body block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <div class="preview-body block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
 
     </div>
     <div class="preview-meta flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -75,7 +75,7 @@
     {
         position: absolute;
         top: 0;
-        bottom: 32.5%;
+        bottom: 30%;
         left: 0;
         right: 0;
     }

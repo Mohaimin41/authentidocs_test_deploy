@@ -8,7 +8,7 @@
   import { logged_in_store, priv_key } from "../../../stores";
   import { get } from "svelte/store";
   import {common_fetch} from "$lib/fetch_func"
-    import { onMount } from "svelte";
+  import { onMount } from "svelte";
 
   let file_input_elem: HTMLInputElement;
   let modal_elem: HTMLDivElement;
