@@ -13,13 +13,13 @@ async function getUserFromDb(email:string,password:string)
   })
   // if (error) console.error(error)
   // else console.log("dbresult:"+result)
-  if(result.userid == null)
+  if(result == null)
   {
-    return {errors:'fked up'};
+    return {user:{error:'fked up'}, success:false};
   }
   else
   {
-    return {name:result.userid,email:result.email,image:result.pfp_url}
+    return {user:{name:result.userid,email:result.email,image:result.pfp_url},success:true}
   }
 }
    
@@ -38,15 +38,15 @@ export const handle = SvelteKitAuth({
         // logic to salt and hash password
         const pwHash = credentials.password
         // logic to verify if user exists
-        user = await <User>getUserFromDb(<string>credentials.email,<string>credentials.password)
+        let response_from_db = await getUserFromDb(<string>credentials.email,<string>credentials.password)
         
-        if(!user.errors)
+        if(response_from_db.success)
         {
-          return user;
+          return <User>response_from_db.user;
         }
         else
         {
-          throw new Error(JSON.stringify({errors:user.error,status:false}))
+          throw new Error(JSON.stringify({errors:<User>response_from_db.user,status:false}))
         }
 
         // return json object with the user data
