@@ -26,7 +26,7 @@ export async function POST({
     given_fileid, 
     given_userid
   })
-// if (_error) console.error(_error)
+// if (error) console.error(error)
 // else console.log(result)
 
 // console.log(result)
