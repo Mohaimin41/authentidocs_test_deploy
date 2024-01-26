@@ -45,7 +45,7 @@
         {:else if file_type === 1}
             <img class="img-preview rounded" src={file_src} alt="pochita" />
         {:else if file_type === 2}
-            <embed class="pdf-preview" src={file_src} />
+            <embed class="pdf-preview rounded" src={file_src} />
         {/if}
     </div>
     <div class="preview-meta flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
