@@ -39,8 +39,17 @@ const { data:result1} = await supabase
   let file_buffer: ArrayBuffer | undefined = await result1?.arrayBuffer();
 
   ret_text= Array.from(new Uint8Array(file_buffer as ArrayBuffer));
-   
-  let response: Response = new Response(JSON.stringify(ret_text), {
+
+let { data:result2, error } = await supabase
+.rpc('get_single_filedata_fileid', {
+  given_fileid, 
+  given_userid
+})
+if (error) console.error(error)
+else console.log(result2)
+
+  let response_obj = {file_blob:ret_text,file_data:result2}
+  let response: Response = new Response(JSON.stringify(response_obj), {
   headers: {
     "Content-Type": "application/json",
   },
