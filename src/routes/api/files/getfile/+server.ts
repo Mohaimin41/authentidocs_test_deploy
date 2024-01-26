@@ -26,8 +26,8 @@ export async function POST({
     given_fileid, 
     given_userid
   })
-if (error) console.error(error)
-else console.log(result)
+// if (_error) console.error(_error)
+// else console.log(result)
 
 // console.log(result)
 
@@ -40,13 +40,13 @@ const { data:result1} = await supabase
 
   ret_text= Array.from(new Uint8Array(file_buffer as ArrayBuffer));
 
-let { data:result2, error } = await supabase
+let { data:result2, error: _error } = await supabase
 .rpc('get_single_filedata_fileid', {
   given_fileid, 
   given_userid
 })
-if (error) console.error(error)
-else console.log(result2)
+// if (_error) console.error(_error)
+// else console.log(result2)
 
   let response_obj = {file_blob:ret_text,file_data:result2}
   let response: Response = new Response(JSON.stringify(response_obj), {

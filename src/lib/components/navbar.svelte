@@ -1,10 +1,11 @@
 <script lang="ts">
-    import { Avatar, Button, Dropdown, DropdownDivider, DropdownHeader, DropdownItem, Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
-    import { logged_in_store, uid } from '../../stores';
+    import { Avatar, Dropdown, DropdownHeader, DropdownItem, Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
+    import { uid } from '../../stores';
     import { get } from 'svelte/store';
     import { signOut } from '@auth/sveltekit/client';
-    import { afterNavigate } from '$app/navigation';
     import { db } from '$lib/db';
+    import { onMount } from 'svelte';
+    import { page } from '$app/stores';
 
     let logged_in_state: boolean = false;
 
@@ -16,9 +17,16 @@
         signOut({callbackUrl: "/"});
     }
 
-    afterNavigate((): void =>
+    onMount((): void =>
     {
-        logged_in_state = get(logged_in_store);
+        if($page.data.session)
+        {
+            logged_in_state = true;
+        }
+        else
+        {
+            logged_in_state = false;
+        }
     });
 </script>
 
@@ -37,7 +45,7 @@
     {#if logged_in_state}
         <div class="flex items-center md:order-2">
             <a id="avatar-menu" role="button" data-dropdown-toggle="dropdown" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                <Avatar src="pochita.webp" />
+                <Avatar src="/pochita.webp" />
             </a>
             <Dropdown placement="bottom" triggeredBy="#avatar-menu">
                 <DropdownHeader>

@@ -4,6 +4,7 @@
     import { onMount } from "svelte";
 
     let image_src: string = "/placeholder.webp";
+    let file_name: string = "";
 
     onMount(async (): Promise<void> =>
     {
@@ -18,7 +19,10 @@
         {
             let response_obj: any = await response.json();
 
-            let file_uint8: Uint8Array = new Uint8Array(response_obj);
+            console.log(response_obj.file_data);
+
+            file_name = response_obj.file_data.filename;
+            let file_uint8: Uint8Array = new Uint8Array(response_obj.file_blob);
             image_src = URL.createObjectURL(new Blob([file_uint8]));
         });
     });
@@ -30,7 +34,7 @@
     </div>
     <div class="preview-meta flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <div class="meta-data">
-            <p class="text-2xl font-medium text-gray-900 dark:text-white mb-2">Birb.fakepng</p>
+            <p class="text-2xl font-medium text-gray-900 dark:text-white mb-2">{file_name}</p>
             <div class="grid grid-cols-6 gap-1 me-6">
                 <div>
                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
