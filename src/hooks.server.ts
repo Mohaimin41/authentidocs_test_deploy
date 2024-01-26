@@ -7,15 +7,15 @@ async function getUserFromDb(email:string,password:string)
   let given_pwd_hash=password
 
   let { data:result, error } = await supabase
-  .rpc('can_log_in_user_boolean', {
+  .rpc('can_log_in_user_errorcode', {
     given_email, 
     given_pwd_hash
   })
   // if (error) console.error(error)
   // else console.log("dbresult:"+result)
-  if(result == false)
+  if(result !=0)
   {
-    return {user:{error:'fked up'}, success:false};
+    return {user:{error:result}, success:false};
   }
   else
   {
@@ -53,7 +53,7 @@ export const handle = SvelteKitAuth({
         }
         else
         {
-          throw new Error(JSON.stringify({errors:<User>response_from_db.user,status:false}))
+          throw new Error(response_from_db.user.error)
         }
 
         // return json object with the user data
