@@ -11,8 +11,8 @@ async function getUserFromDb(email:string,password:string)
     given_email, 
     given_pwd_hash
   })
-  if (error) console.error(error)
-  else console.log("dbresult:"+result)
+  // if (error) console.error(error)
+  // else console.log("dbresult:"+result)
   if(result.userid == null)
   {
     return {errors:'fked up'};

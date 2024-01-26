@@ -13,17 +13,25 @@ export async function POST({
   if (!session?.user) {
     throw error(401, "You must sign in to add file signatures.");
   }
-  const key_info = await request.json();
+  const file_info = await request.json();
   // console.log(key_info);
   let ret_text;
-  let given_userid=key_info.user_id
+  let given_fileid=file_info.fileid
+  let given_userid=file_info.user_id
 
     
-let { data:result } = await supabase
-.rpc('get_user_publickey_userid', {
-  given_userid
-})
+
+
+  let { data:result } = await supabase
+  .rpc('get_personal_file_signatures_fileid', {
+    given_fileid, 
+    given_userid
+  })
+if (error) console.error(error)
+else console.log(result)
+
 // console.log(result)
+
 
 
     ret_text=result;

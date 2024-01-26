@@ -6,7 +6,7 @@ export async function GET({ locals }: RequestEvent) {
   if (!session?.user) {
     throw error(401, "You must sign in to view movies.")
   }
-  console.log(session)
+  // console.log(session)
   return json({
     movies: [
       { title: "Alien vs Predator", id: 1 },
