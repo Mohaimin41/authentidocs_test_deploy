@@ -79,6 +79,7 @@
   }
 
   let personal_files: File[] = new Array(0);
+  $: personal_files_length = personal_files.length;
 
   for (let i: number = 0; i < personal_files.length; ++i) {
     personal_files[i] = new File();
@@ -433,17 +434,23 @@
         >
           My Personal Files
         </p>
-        <ul class="list-elements space-y-2" style="overflow-y: auto;">
-          {#each personal_files as file}
-            <li>
-              <FileCard
-                file_id={file.id}
-                file_name={file.name}
-                file_type={file.type}
-              />
-            </li>
-          {/each}
-        </ul>
+        {#if personal_files_length > 0}
+          <ul class="list-elements space-y-2" style="overflow-y: auto;">
+            {#each personal_files as file}
+              <li>
+                <FileCard
+                  file_id={file.id}
+                  file_name={file.name}
+                  file_type={file.type}
+                />
+              </li>
+            {/each}
+          </ul>
+        {:else}
+          <div class="list-empty flex justify-center p-4 text-sm text-gray-800 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300" role="alert">
+            <p>Wow! Such empty *_*</p>
+          </div>
+        {/if}
         <div class="list-upload flex justify-end">
           <div class="flex flex-col justify-end">
             <button
@@ -632,6 +639,13 @@
     position: absolute;
     top: 2.5rem;
     bottom: 3rem;
+    left: 0;
+    right: 0;
+  }
+  .list-empty
+  {
+    position: absolute;
+    top: 2.5rem;
     left: 0;
     right: 0;
   }
