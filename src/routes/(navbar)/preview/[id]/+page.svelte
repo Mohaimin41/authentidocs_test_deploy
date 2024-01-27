@@ -77,7 +77,7 @@
             <embed class="pdf-preview rounded" src={file_view_link} />
         {/if}
     </div>
-    <div class="preview-meta flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <div class="flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <div class="meta-data">
             <p class="text-2xl font-medium text-gray-900 dark:text-white mb-2">{file_name}</p>
             <div class="grid grid-cols-6 gap-1 me-6">
@@ -189,19 +189,6 @@
     .preview-body
     {
         max-height: 70%;
-        /* position: absolute;
-        top: 0;
-        bottom: 30%;
-        left: 0;
-        right: 0; */
-    }
-    .preview-meta
-    {
-        /* position: absolute;
-        top: 70%;
-        bottom: 0;
-        left: 0;
-        right: 0; */
     }
     .img-preview
     {
