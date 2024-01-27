@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
+    export let file_id: string;
     export let file_name: string;
     export let file_type: string;
     const all_colors: string[] = ["red", "green", "blue", "purple"];
@@ -13,7 +14,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<a href="javascript:" class="block p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
+<a href={"/preview/" + file_id} class="block p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
     <div class="flex">
         <div class="text-{color}-500 dark:text-{color}-400 pe-2">
             {#if file_type === "png"}

@@ -68,7 +68,9 @@
                 <span class="block text-sm">{$username}</span>
                 <span class="block truncate text-sm font-medium">{$useremail}</span>
                 </DropdownHeader>
+                <a href="/dashboard">
                 <DropdownItem>Settings</DropdownItem>
+                </a>
                 <DropdownItem on:click={logout}>Logout</DropdownItem>
             </Dropdown>
         </div>
