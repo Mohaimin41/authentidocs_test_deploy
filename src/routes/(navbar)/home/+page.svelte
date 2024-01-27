@@ -186,7 +186,7 @@
           let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
           let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
           let response: Response = await fetch(
-            "/api/files/testup/continue?filename=" + file.name,
+            "/api/files/addchunkfile/continue?filename=" + file.name,
             {
               method: "POST",
               headers: {
@@ -211,7 +211,7 @@
           }
         }
         if (success) {
-          await fetch("/api/files/testup/finish?filename=" + file.name, {
+          await fetch("/api/files/addchunkfile/finish?filename=" + file.name, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

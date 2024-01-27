@@ -3,10 +3,12 @@
     import { common_fetch } from "$lib/fetch_func";
     import { onMount } from "svelte";
 
-    let file_src: string = "/placeholder.webp";
     let file_name: string = "";
     let file_type: number = 0;
     let download_anchor: HTMLAnchorElement;
+
+    let file_view_link: string ="";
+    let file_download_link: string="";
 
     onMount(async (): Promise<void> =>
     {
@@ -15,17 +17,16 @@
             fileid: $page.params.id,
             user_id: $page.data.session?.user?.name
         };
-
-        common_fetch("/api/files/getfile", request_obj,
+        common_fetch("/api/files/getfilelink", request_obj,
         async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            file_name = response_obj.file_data.filename;
-            file_type = response_obj.file_data.file_mimetype;
+            console.log(response_obj);
+             file_name = response_obj.file_data.filename;
+             file_type = response_obj.file_data.file_mimetype;
 
-            console.log(file_name);
+             console.log(file_name);
 
-            let file_uint8: Uint8Array = new Uint8Array(response_obj.file_blob);
             let mime_text: string = "Application/octet-stream";
 
             if(file_type === 1)
@@ -36,11 +37,14 @@
             {
                 mime_text = "Application/pdf";
             }
-
-            let file_object: File = new File([file_uint8], file_name, {type: mime_text});
-            file_src = URL.createObjectURL(file_object);
-            // download_anchor.download = file_src;
+            
+             file_view_link =response_obj.file_link_preview;
+             file_download_link = response_obj.file_link_download;
+             console.log(file_view_link)
+             console.log(file_download_link)
+             download_anchor.download = file_download_link;
         });
+
     });
 </script>
 
@@ -49,9 +53,9 @@
         {#if file_type === 0}
             <div></div>
         {:else if file_type === 1}
-            <img class="img-preview rounded" src={file_src} alt="img-placeholder" />
+            <img class="img-preview rounded" src={file_view_link} alt="img-placeholder" />
         {:else if file_type === 2}
-            <embed class="pdf-preview rounded" src={file_src} />
+            <embed class="pdf-preview rounded" src={file_view_link} />
         {/if}
     </div>
     <div class="preview-meta flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -107,7 +111,7 @@
             <!-- certificate button -->
             <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">View Certificate</button>
             <!-- download button -->
-            <a download={file_name} href={file_src} bind:this={download_anchor} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2">Download</a>
+            <a download={file_name} href={file_download_link} bind:this={download_anchor} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2">Download</a>
         </div>
     </div>
 </div>
