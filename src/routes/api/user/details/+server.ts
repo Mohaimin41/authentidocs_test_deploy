@@ -28,7 +28,7 @@ export async function POST({
   })
 
 
- console.log(result)
+//  console.log(result)
 
 
     ret_text=result;

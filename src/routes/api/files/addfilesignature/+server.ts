@@ -14,7 +14,7 @@ export async function POST({
   // console.log(session);
 
   const file_signature_info = await request.json();
-  console.log(file_signature_info);
+  // console.log(file_signature_info);
 
   let given_fileid = file_signature_info.fileid,
     given_signature = file_signature_info.signature,
@@ -28,7 +28,7 @@ export async function POST({
     given_signing_userid,
   });
 
-   console.log("signing"+result);
+  //  console.log("signing"+result);
 
   let ret_text = result;
   let response: Response = new Response(JSON.stringify(ret_text), {

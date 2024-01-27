@@ -2,8 +2,6 @@ import { supabase } from "$lib/server/supabase_client.server";
 import type { RequestEvent } from "./$types";
 import { json, error } from "@sveltejs/kit";
 
-
-
 export async function POST({
   request,
   cookies,
@@ -13,34 +11,26 @@ export async function POST({
   if (!session?.user) {
     throw error(401, "You must sign in to add file signatures.");
   }
+
   const file_info = await request.json();
-  // console.log(key_info);
+
   let ret_text;
-  let given_fileid=file_info.fileid
-  let given_userid=file_info.user_id
+  let given_fileid = file_info.fileid;
+  // console.log("getfilesigns 19:", given_fileid);
 
-    
-
-
-  let { data:result } = await supabase
-  .rpc('get_file_signatures_fileid', {
+  let { data:result } = await supabase.rpc("get_file_signatures_fileid", {
     given_fileid
-  })
-if (error) console.error(error)
-else console.log(result)
+  });
+  // if (error) console.log("getfilesigns 24: ",error.toString());
+  // console.log("getfilesigns 25: ", result);
 
-// console.log(result)
+  ret_text = result;
 
-
-
-    ret_text=result;
-   
-   let response: Response = new Response(JSON.stringify(ret_text), {
+  let response: Response = new Response(JSON.stringify(ret_text), {
     headers: {
       "Content-Type": "application/json",
     },
   });
-
 
   return response;
 }

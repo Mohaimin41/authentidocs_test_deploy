@@ -29,7 +29,7 @@ export async function POST({
 
   let file_uint8: Uint8Array = new Uint8Array(file_array);
 
-  console.log(file_array);
+  // console.log(file_array);
 
   let fileExt = "";
   let file_mimetype = "";
@@ -60,7 +60,7 @@ export async function POST({
   const { data } = await supabase.storage
     .from("user_personal_files")
     .upload(filePath, blob);
-  console.log("supabaseupload" + data);
+  // console.log("supabaseupload" + data);
   let given_file_extension = fileExt,
     given_file_ownerid = session?.user.name,
     given_file_url = filePath,
@@ -75,7 +75,7 @@ export async function POST({
     given_filename,
   });
 
-  console.log("add_file" + result1);
+  // console.log("add_file" + result1);
 
   // flush
   //get(filemap).set(filename, []);

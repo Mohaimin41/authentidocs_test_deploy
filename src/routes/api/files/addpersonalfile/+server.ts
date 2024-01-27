@@ -53,8 +53,8 @@ export async function POST({
   const { data,error } = await supabase.storage
     .from("user_personal_files")
     .upload(filePath, blob);
-     if(error)console.log("04",error)
-     else console.log("supabaseupload"+data)
+    //  if(error)console.log("04",error)
+    //  else console.log("supabaseupload"+data)
   let given_file_extension = fileExt,
     given_file_ownerid = file_info.userid,
     given_file_url = filePath,
@@ -72,7 +72,7 @@ export async function POST({
     })
 
   
-  console.log("add_file"+result1);
+  // console.log("add_file"+result1);
 
   let ret_text = result1;
   let response: Response = new Response(JSON.stringify(ret_text), {
