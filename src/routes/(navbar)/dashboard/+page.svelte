@@ -15,12 +15,12 @@
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"
    */
   let profile_edit_mode: boolean = false;
-  let username: string = "Mustafa Siam";
-  let email: string = "siam11651@outlook.com";
+  let username: string = "";
+  let email: string = "";
   let pubkey: string =
-    "0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa";
+    "";
   let privkey: string =
-    "af1706bffb2d7ea2bbe6c28bc9940af1706bffb2d7ea2bbe6c28bc9940af1706bffb2d7ea2bbe6c28bc9940";
+    "";
   /**
    * Visibility/truncated state of public key
    */
