@@ -187,44 +187,99 @@
             file_buffer
           );
 
-          let request_obj: any = {
-            filename: file.name,
-            userid: $page.data.session?.user?.name,
-            file: Array.from(new Uint8Array(file_buffer))
-          };
+          let success: boolean = true;
 
-          common_fetch("/api/files/addpersonalfile", request_obj,
-          async (response: Response): Promise<void> =>
+          console.log(file_buffer.byteLength);
+
+          for(let i: number = 0; i < file_buffer.byteLength; i += 1048576)
           {
-            let response_obj: any = await response.json();
-            let signature_hex: string = [...new Uint8Array(signature)].map(x => x.toString(16).padStart(2, '0')).join('');
+            console.log(i);
 
-            let pubkey_json: string | null = localStorage.getItem("pub_key");
-            console.log("add file",pubkey_json)
-            if(pubkey_json)
+            let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
+            let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
+            let response: Response =  await fetch("/api/files/testup/continue?filename=" + file.name,
             {
-              let request_obj: any =
+              method: "POST",
+              headers:
               {
-                fileid: response_obj,
-                signature: signature_hex,
-                key: pubkey_json,
-                userid: $page.data.session?.user?.name
-              };
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(
+                {
+                  data: small_array
+                })
+            });
 
-              common_fetch("/api/files/addfilesignature", request_obj,
-              async (response: Response): Promise<void> =>
-              {
-                let response_obj: any = await response.json();
+            let response_obj: any = await response.json();
 
-                console.log(response_obj);
-              });
-              
-              uploading = false;
+            console.log(response_obj);
 
-              modal_obj.hide();
-              get_personal_files();
+            if(response_obj.success === false)
+            {
+              console.error("dhuru");
+
+              success = false;
+
+              break;
             }
-          });
+          }
+
+          if(success)
+          {
+            fetch("/api/files/testup/finish?filename=" + file.name,
+            {
+              method: "POST",
+              headers:
+              {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({})
+            }).then(async (response: Response): Promise<void> =>
+            {
+              let response_obj: any = await response.json();
+
+              console.log(response_obj);
+            });
+          }
+
+          // let request_obj: any = {
+          //   filename: file.name,
+          //   userid: $page.data.session?.user?.name,
+          //   file: Array.from(new Uint8Array(file_buffer))
+          // };
+
+          // common_fetch("/api/files/addpersonalfile", request_obj,
+          // async (response: Response): Promise<void> =>
+          // {
+          //   let response_obj: any = await response.json();
+          //   let signature_hex: string = [...new Uint8Array(signature)].map(x => x.toString(16).padStart(2, '0')).join('');
+
+          //   let pubkey_json: string | null = localStorage.getItem("pub_key");
+          //   console.log("add file",pubkey_json)
+          //   if(pubkey_json)
+          //   {
+          //     let request_obj: any =
+          //     {
+          //       fileid: response_obj,
+          //       signature: signature_hex,
+          //       key: pubkey_json,
+          //       userid: $page.data.session?.user?.name
+          //     };
+
+          //     common_fetch("/api/files/addfilesignature", request_obj,
+          //     async (response: Response): Promise<void> =>
+          //     {
+          //       let response_obj: any = await response.json();
+
+          //       console.log(response_obj);
+          //     });
+              
+          //     uploading = false;
+
+          //     modal_obj.hide();
+          //     get_personal_files();
+          //   }
+          // });
         }
       };
 

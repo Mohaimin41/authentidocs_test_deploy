@@ -18,7 +18,6 @@
         let password_buffer: ArrayBuffer = await subtle_crypto.digest("SHA-256", text_encoder.encode(password));
         let password_hash: string = [...new Uint8Array(password_buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
 
-        // new_key.set(true);
         localStorage.setItem("new_key", "1");
 
         await signIn("credentials", 
