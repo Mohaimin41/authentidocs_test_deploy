@@ -146,6 +146,118 @@
     );
   }
 
+  async function upload(event: Event): Promise<void>
+  {
+    if(file_input_elem.value === "")
+    {
+      return;
+    }
+
+    if (file_input_elem.files === null) {
+      return;
+    }
+
+    let file: globalThis.File = file_input_elem.files[0];
+
+    if (file === null) {
+      return;
+    }
+
+    let file_buffer: ArrayBuffer = await file.arrayBuffer();
+    file_input_elem.value = "";
+
+    uploading = true;
+    let success: boolean = true;
+    let file_success_response_obj: any = { fileid: "" };
+
+    for (let i: number = 0; i < file_buffer.byteLength; i += 1048576) {
+      console.log(i);
+
+      let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
+      let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
+      let response: Response = await fetch(
+        "/api/files/addchunkfile/continue?filename=" + file.name,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data: small_array,
+          }),
+        }
+      );
+
+      let response_obj: any = await response.json();
+
+      console.log(response_obj);
+
+      if (response_obj.success === false) {
+        console.error("dhuru");
+
+        success = false;
+
+        break;
+      }
+    }
+    if (success) {
+      await fetch("/api/files/addchunkfile/finish?filename=" + file.name, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      }).then(async (response: Response): Promise<void> => {
+        file_success_response_obj = await response.json();
+
+        console.log("file upload shesh:line223",file_success_response_obj);
+      });
+
+      let subtle_crypto = window.crypto.subtle;
+      let temp_priv_key = get(priv_key);
+
+      if (temp_priv_key) {
+        let signature: ArrayBuffer = await subtle_crypto.sign(
+          {
+            name: "ECDSA",
+            hash: { name: "SHA-384" },
+          },
+          temp_priv_key,
+          file_buffer
+        );
+
+        let signature_hex: string = [...new Uint8Array(signature)]
+          .map((x) => x.toString(16).padStart(2, "0"))
+          .join("");
+        let pubkey_json: string | null = localStorage.getItem("pub_key");
+        console.log("add file", pubkey_json);
+        if (pubkey_json) {
+          let request_obj: any = {
+            fileid: file_success_response_obj.fileid,
+            signature: signature_hex,
+            key: pubkey_json,
+            userid: $page.data.session?.user?.name,
+          };
+
+          common_fetch(
+            "/api/files/addfilesignature",
+            request_obj,
+            async (response: Response): Promise<void> => {
+              let response_obj: any = await response.json();
+
+              console.log(response_obj);
+            }
+          );
+        }
+      }
+
+      uploading = false;
+
+      modal_obj.hide();
+      get_personal_files();
+    }
+  };
+
   onMount((): void => {
     if ($page.data.session === null) {
       goto("/");
@@ -156,122 +268,6 @@
     }
 
     get_personal_files();
-
-    file_input_elem.onchange = (event: Event): void => {
-      if (file_input_elem.files === null) {
-        return;
-      }
-
-      let file: globalThis.File = file_input_elem.files[0];
-
-      if (file === null) {
-        return;
-      }
-
-      let file_reader: FileReader = new FileReader();
-
-      file_reader.onload = async (
-        event: ProgressEvent<FileReader>
-      ): Promise<void> => {
-        uploading = true;
-
-        let file_buffer: ArrayBuffer = file_reader.result as ArrayBuffer;
-
-        let success: boolean = true;
-
-        console.log(file_buffer.byteLength);
-        let file_success_response_obj: any = { fileid: "" };
-
-        for (let i: number = 0; i < file_buffer.byteLength; i += 1048576) {
-          console.log(i);
-
-          let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
-          let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
-          let response: Response = await fetch(
-            "/api/files/addchunkfile/continue?filename=" + file.name,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                data: small_array,
-              }),
-            }
-          );
-
-          let response_obj: any = await response.json();
-
-          console.log(response_obj);
-
-          if (response_obj.success === false) {
-            console.error("dhuru");
-
-            success = false;
-
-            break;
-          }
-        }
-        if (success) {
-          await fetch("/api/files/addchunkfile/finish?filename=" + file.name, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({}),
-          }).then(async (response: Response): Promise<void> => {
-            file_success_response_obj = await response.json();
-
-            console.log("file upload shesh:line223",file_success_response_obj);
-          });
-
-          let subtle_crypto = window.crypto.subtle;
-          let temp_priv_key = get(priv_key);
-
-          if (temp_priv_key) {
-            let signature: ArrayBuffer = await subtle_crypto.sign(
-              {
-                name: "ECDSA",
-                hash: { name: "SHA-384" },
-              },
-              temp_priv_key,
-              file_buffer
-            );
-
-            let signature_hex: string = [...new Uint8Array(signature)]
-              .map((x) => x.toString(16).padStart(2, "0"))
-              .join("");
-            let pubkey_json: string | null = localStorage.getItem("pub_key");
-            console.log("add file", pubkey_json);
-            if (pubkey_json) {
-              let request_obj: any = {
-                fileid: file_success_response_obj.fileid,
-                signature: signature_hex,
-                key: pubkey_json,
-                userid: $page.data.session?.user?.name,
-              };
-
-              common_fetch(
-                "/api/files/addfilesignature",
-                request_obj,
-                async (response: Response): Promise<void> => {
-                  let response_obj: any = await response.json();
-
-                  console.log(response_obj);
-                }
-              );
-            }
-          }
-
-          uploading = false;
-
-          modal_obj.hide();
-          get_personal_files();
-        }
-      };
-
-      file_reader.readAsArrayBuffer(file);
-    };
 
     modal_obj = new Modal(modal_elem, {
       onHide: (): void => {
@@ -600,6 +596,7 @@
               </div>
               <input
                 bind:this={file_input_elem}
+                on:input={upload}
                 id="dropzone-file"
                 type="file"
                 class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
