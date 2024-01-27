@@ -1,9 +1,14 @@
 import { filemap } from "$lib/server/stores";
-import { json, type RequestEvent } from "@sveltejs/kit";
+import { error, json, type RequestEvent } from "@sveltejs/kit";
 import { get } from "svelte/store";
 
 export async function POST({request, cookies, locals}: RequestEvent): Promise<Response>
 {
+    const session = await locals.getSession()
+    if (!session?.user) {
+      throw error(401, "You must sign in to add files.")
+    }
+    
     let url: URL = new URL(request.url);
     let filename: string | null = url.searchParams.get("filename");
 

@@ -7,7 +7,7 @@
   import { goto } from "$app/navigation";
   import { logged_in_store, priv_key } from "../../../stores";
   import { get } from "svelte/store";
-  import {common_fetch} from "$lib/fetch_func"
+  import { common_fetch } from "$lib/fetch_func";
   import { onMount } from "svelte";
 
   let file_input_elem: HTMLInputElement;
@@ -119,8 +119,7 @@
     modal_obj.hide();
   }
 
-  function get_personal_files(): void
-  {
+  function get_personal_files(): void {
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
     };
@@ -129,26 +128,26 @@
       "/api/files/getpersonalfiles",
       request_obj,
       async (response: Response): Promise<void> => {
-      let response_obj: any = await response.json();
+        let response_obj: any = await response.json();
 
-      personal_files = [];
+        personal_files = [];
 
-      if(response_obj === null)
-      {
-        return;
+        if (response_obj === null) {
+          return;
+        }
+
+        for (let i: number = 0; i < response_obj.length; ++i) {
+          personal_files[i] = new File();
+          personal_files[i].id = response_obj[i].f_fileid;
+          personal_files[i].name = response_obj[i].f_filename;
+          personal_files[i].type = response_obj[i].f_file_extension;
+        }
       }
-
-      for (let i: number = 0; i < response_obj.length; ++i) {
-        personal_files[i] = new File();
-        personal_files[i].id = response_obj[i].f_fileid;
-        personal_files[i].name = response_obj[i].f_filename;
-        personal_files[i].type = response_obj[i].f_file_extension;
-      }
-    });
+    );
   }
 
   onMount((): void => {
-    if($page.data.session === null) {
+    if ($page.data.session === null) {
       goto("/");
     } else {
       logged_in_store.set(true);
@@ -169,133 +168,116 @@
 
       let file_reader: FileReader = new FileReader();
 
-      file_reader.onload = async (event: ProgressEvent<FileReader>): Promise<void> =>
-      {
+      file_reader.onload = async (
+        event: ProgressEvent<FileReader>
+      ): Promise<void> => {
         uploading = true;
 
         let file_buffer: ArrayBuffer = file_reader.result as ArrayBuffer;
-        let subtle_crypto = window.crypto.subtle;
-        let temp_priv_key = get(priv_key);
 
-        if (temp_priv_key) {
-          let signature: ArrayBuffer = await subtle_crypto.sign(
-            {
-              name: "ECDSA",
-              hash: { name: "SHA-384" },
-            },
-            temp_priv_key,
-            file_buffer
-          );
+        let success: boolean = true;
 
-          let success: boolean = true;
+        console.log(file_buffer.byteLength);
+        let file_success_response_obj: any = { fileid: "" };
 
-          console.log(file_buffer.byteLength);
+        for (let i: number = 0; i < file_buffer.byteLength; i += 1048576) {
+          console.log(i);
 
-          for(let i: number = 0; i < file_buffer.byteLength; i += 1048576)
-          {
-            console.log(i);
-
-            let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
-            let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
-            let response: Response =  await fetch("/api/files/testup/continue?filename=" + file.name,
+          let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
+          let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
+          let response: Response = await fetch(
+            "/api/files/testup/continue?filename=" + file.name,
             {
               method: "POST",
-              headers:
-              {
-                "Content-Type": "application/json"
+              headers: {
+                "Content-Type": "application/json",
               },
-              body: JSON.stringify(
-                {
-                  data: small_array
-                })
-            });
+              body: JSON.stringify({
+                data: small_array,
+              }),
+            }
+          );
 
-            let response_obj: any = await response.json();
+          let response_obj: any = await response.json();
 
-            console.log(response_obj);
+          console.log(response_obj);
 
-            if(response_obj.success === false)
-            {
-              console.error("dhuru");
+          if (response_obj.success === false) {
+            console.error("dhuru");
 
-              success = false;
+            success = false;
 
-              break;
+            break;
+          }
+        }
+        if (success) {
+          await fetch("/api/files/testup/finish?filename=" + file.name, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}),
+          }).then(async (response: Response): Promise<void> => {
+            file_success_response_obj = await response.json();
+
+            console.log("file upload shesh:line223",file_success_response_obj);
+          });
+
+          let subtle_crypto = window.crypto.subtle;
+          let temp_priv_key = get(priv_key);
+
+          if (temp_priv_key) {
+            let signature: ArrayBuffer = await subtle_crypto.sign(
+              {
+                name: "ECDSA",
+                hash: { name: "SHA-384" },
+              },
+              temp_priv_key,
+              file_buffer
+            );
+
+            let signature_hex: string = [...new Uint8Array(signature)]
+              .map((x) => x.toString(16).padStart(2, "0"))
+              .join("");
+            let pubkey_json: string | null = localStorage.getItem("pub_key");
+            console.log("add file", pubkey_json);
+            if (pubkey_json) {
+              let request_obj: any = {
+                fileid: file_success_response_obj.fileid,
+                signature: signature_hex,
+                key: pubkey_json,
+                userid: $page.data.session?.user?.name,
+              };
+
+              common_fetch(
+                "/api/files/addfilesignature",
+                request_obj,
+                async (response: Response): Promise<void> => {
+                  let response_obj: any = await response.json();
+
+                  console.log(response_obj);
+                }
+              );
             }
           }
 
-          if(success)
-          {
-            fetch("/api/files/testup/finish?filename=" + file.name,
-            {
-              method: "POST",
-              headers:
-              {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({})
-            }).then(async (response: Response): Promise<void> =>
-            {
-              let response_obj: any = await response.json();
+          uploading = false;
 
-              console.log(response_obj);
-            });
-          }
-
-          // let request_obj: any = {
-          //   filename: file.name,
-          //   userid: $page.data.session?.user?.name,
-          //   file: Array.from(new Uint8Array(file_buffer))
-          // };
-
-          // common_fetch("/api/files/addpersonalfile", request_obj,
-          // async (response: Response): Promise<void> =>
-          // {
-          //   let response_obj: any = await response.json();
-          //   let signature_hex: string = [...new Uint8Array(signature)].map(x => x.toString(16).padStart(2, '0')).join('');
-
-          //   let pubkey_json: string | null = localStorage.getItem("pub_key");
-          //   console.log("add file",pubkey_json)
-          //   if(pubkey_json)
-          //   {
-          //     let request_obj: any =
-          //     {
-          //       fileid: response_obj,
-          //       signature: signature_hex,
-          //       key: pubkey_json,
-          //       userid: $page.data.session?.user?.name
-          //     };
-
-          //     common_fetch("/api/files/addfilesignature", request_obj,
-          //     async (response: Response): Promise<void> =>
-          //     {
-          //       let response_obj: any = await response.json();
-
-          //       console.log(response_obj);
-          //     });
-              
-          //     uploading = false;
-
-          //     modal_obj.hide();
-          //     get_personal_files();
-          //   }
-          // });
+          modal_obj.hide();
+          get_personal_files();
         }
       };
 
       file_reader.readAsArrayBuffer(file);
     };
 
-    modal_obj = new Modal(modal_elem, 
-    {
-      onHide: (): void =>
-      {
+    modal_obj = new Modal(modal_elem, {
+      onHide: (): void => {
         modal_show = false;
       },
-      onShow: (): void =>
-      {
+      onShow: (): void => {
         modal_show = true;
-      }
+      },
     });
 
     tabs[0].callback();
@@ -455,7 +437,11 @@
         <ul class="list-elements space-y-2 mb-2 pb-2" style="overflow-y: auto;">
           {#each personal_files as file}
             <li>
-              <FileCard file_id={file.id} file_name={file.name} file_type={file.type} />
+              <FileCard
+                file_id={file.id}
+                file_name={file.name}
+                file_type={file.type}
+              />
             </li>
           {/each}
         </ul>
@@ -559,11 +545,23 @@
       <!-- Modal body -->
       <div class="p-4 md:p-5 space-y-4">
         <div class="flex items-center justify-center w-full">
-          {#if uploading}            
+          {#if uploading}
             <div role="status">
-              <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                  <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+              <svg
+                aria-hidden="true"
+                class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                viewBox="0 0 100 101"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                  fill="currentFill"
+                />
               </svg>
               <span class="sr-only">Loading...</span>
             </div>
@@ -589,7 +587,8 @@
                   />
                 </svg>
                 <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span class="font-semibold">Click to upload</span> or drag and drop
+                  <span class="font-semibold">Click to upload</span> or drag and
+                  drop
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                   SVG, PNG, JPG or GIF (MAX. 800x400px)
