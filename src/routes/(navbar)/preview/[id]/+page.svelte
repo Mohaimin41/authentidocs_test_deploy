@@ -22,6 +22,13 @@
     {
         modal_obj.show();
     }
+    let response_obj:any={};
+    let username:string;
+    let current_custody:string;
+    let upload_timestamp:string;
+    let current_state:string;
+    let upload_date:string|undefined;
+    let upload_time:string|undefined;
 
     onMount(async (): Promise<void> =>
     {
@@ -49,6 +56,24 @@
             let response_obj: any = await response.json();
             file_name = response_obj.file_data.filename;
             file_type = response_obj.file_data.file_mimetype;
+             response_obj = await response.json();
+             console.log(response_obj);
+             file_name = response_obj.file_data.filename;
+             file_type = response_obj.file_data.file_mimetype;
+             username=response_obj.file_data.username;
+             upload_timestamp=response_obj.file_data.created_at;
+             current_state=response_obj.file_data.current_state;
+             if(upload_timestamp!== undefined)
+             {
+             upload_date=upload_timestamp.split("T").reverse().pop();
+             let temp_time:string|undefined;
+             temp_time=upload_timestamp.split("T").pop();
+             if(temp_time!=undefined)
+             upload_time=temp_time.split(".").reverse().pop();
+             }
+             
+             console.log(file_name);
+
             let mime_text: string = "Application/octet-stream";
 
             if(file_type === 1)
@@ -109,7 +134,7 @@
                 </div>
                 <div class="flex items-center">
                     <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">Mohaemen</p>
+                    <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
                 </div>
                 <div class="flex -space-x-2 rtl:space-x-reverse items-center">
                     <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
@@ -119,15 +144,15 @@
                     <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
                 </div>
                 <div class="flex flex-col justify-center">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">29 November 2023</p>
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">07:45 PM</p>
+                    <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_date}</p>
+                    <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_time}</p>
                 </div>
                 <div class="flex items-center">
                     <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">Mohaemen</p>
+                    <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
                 </div>
                 <div class="flex items-center">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">Viewed</p>
+                    <p class="text-xs font-medium text-gray-900 dark:text-white">{current_state}</p>
                 </div>
                 <div class="flex items-center">
                     <p class="text-xs font-medium text-gray-900 dark:text-white">Thread 2 @ Team 4</p>

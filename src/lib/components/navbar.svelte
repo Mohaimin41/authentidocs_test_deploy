@@ -1,11 +1,12 @@
 <script lang="ts">
     import { Avatar, Dropdown, DropdownHeader, DropdownItem, Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
-    import { uid } from '../../stores';
+    import { uid,useremail,username } from '../../stores';
     import { get } from 'svelte/store';
     import { signOut } from '@auth/sveltekit/client';
     import { db } from '$lib/db';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
+  import { common_fetch } from '$lib/fetch_func';
 
     let logged_in_state: boolean = false;
 
@@ -22,6 +23,21 @@
         if($page.data.session)
         {
             logged_in_state = true;
+            
+            let request_obj: any = {
+                userid: $page.data.session?.user?.name,
+              };
+
+                common_fetch(
+                "/api/user/details",
+                request_obj,
+                async (response: Response): Promise<void> => {
+                  let response_obj: any = await response.json();
+                  username.set(response_obj.username)
+                  //console.log(response_obj);
+
+                }
+              );
         }
         else
         {
@@ -49,8 +65,8 @@
             </a>
             <Dropdown placement="bottom" triggeredBy="#avatar-menu">
                 <DropdownHeader>
-                <span class="block text-sm">Bonnie Green</span>
-                <span class="block truncate text-sm font-medium">name@flowbite.com</span>
+                <span class="block text-sm">{$username}</span>
+                <span class="block truncate text-sm font-medium">{$useremail}</span>
                 </DropdownHeader>
                 <DropdownItem>Settings</DropdownItem>
                 <DropdownItem on:click={logout}>Logout</DropdownItem>

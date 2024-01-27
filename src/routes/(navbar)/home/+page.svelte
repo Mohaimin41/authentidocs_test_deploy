@@ -5,7 +5,7 @@
   import TeamCard from "$lib/components/home/team-card.svelte";
   import ThreadCard from "$lib/components/home/thread-card.svelte";
   import { goto } from "$app/navigation";
-  import { logged_in_store, priv_key } from "../../../stores";
+  import { logged_in_store, priv_key,useremail,uid } from "../../../stores";
   import { get } from "svelte/store";
   import { common_fetch } from "$lib/fetch_func";
   import { onMount } from "svelte";
@@ -151,6 +151,8 @@
       goto("/");
     } else {
       logged_in_store.set(true);
+      uid.set($page.data.session?.user?.name as string)
+      useremail.set($page.data.session?.user?.email as string)
     }
 
     get_personal_files();
