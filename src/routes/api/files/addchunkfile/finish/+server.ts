@@ -12,7 +12,12 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    throw error(401, "You must sign in to add files.");
+    return new Response(JSON.stringify("you must be logged in to add files"), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      status: 401,
+    });
   }
   let url: URL = new URL(request.url);
   let filename: string | null = url.searchParams.get("filename");
@@ -34,7 +39,7 @@ export async function POST({
   let fileExt = "";
   let file_mimetype = "";
   let ret_mime;
-  let temp_ext = await fileTypeFromBuffer(new Uint8Array(file_uint8));
+  let temp_ext = await fileTypeFromBuffer(file_uint8);
 
   if (temp_ext === undefined) {
     fileExt = filename.split(".").pop() as string;
@@ -57,23 +62,39 @@ export async function POST({
   let temp_name = uuidv4() + "." + fileExt;
   const filePath = "personal_files/" + temp_name;
 
-  const { data } = await supabase.storage
+  const storage_call_response = await supabase.storage
     .from("user_personal_files")
     .upload(filePath, blob);
   // console.log("supabaseupload" + data);
+  if (storage_call_response.error) {
+    return new Response(JSON.stringify("internal server error while uploading to file server"+storage_call_response.error), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      status: 500,
+    });
+  }
   let given_file_extension = fileExt,
     given_file_ownerid = session?.user.name,
     given_file_url = filePath,
     given_filename = filename,
     given_file_mimetype = ret_mime;
 
-  let { data: result1 } = await supabase.rpc("add_personal_file", {
+  let {data:result, error:_error} = await supabase.rpc("add_personal_file", {
     given_file_extension,
     given_file_mimetype,
     given_file_ownerid,
     given_file_url,
     given_filename,
   });
+  if (_error){
+    return new Response(JSON.stringify("internal server error: "+_error), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      status: 500,
+    });
+  }
 
   // console.log("add_file" + result1);
 
@@ -82,5 +103,5 @@ export async function POST({
   get(filemap).clear()
   //fs.writeFileSync("/home/siam11651/" + filename, file_uint8);
 
-  return json({ fileid: result1, sucess: true });
+  return json({ fileid: result, sucess: true });
 }
