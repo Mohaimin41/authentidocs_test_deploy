@@ -23,9 +23,8 @@ export async function POST({
 
 
   let { data:result } = await supabase
-  .rpc('get_personal_file_signatures_fileid', {
-    given_fileid, 
-    given_userid
+  .rpc('get_file_signatures_fileid', {
+    given_fileid
   })
 if (error) console.error(error)
 else console.log(result)

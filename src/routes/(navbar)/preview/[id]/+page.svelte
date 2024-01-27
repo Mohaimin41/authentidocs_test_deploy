@@ -4,6 +4,15 @@
     import { Modal } from "flowbite";
     import { onMount } from "svelte";
 
+    class Signature
+    {
+        public by: string = "";
+        public on: string = "";
+        public signature: string = "";
+        public pubkey: string = "";
+    };
+
+    let certificates: Signature[] = [];
     let file_name: string = "";
     let file_type: number = 0;
     let download_anchor: HTMLAnchorElement;
@@ -54,7 +63,6 @@
         async (response: Response): Promise<void> =>
         {
              response_obj = await response.json();
-             console.log(response_obj);
              file_name = response_obj.file_data.filename;
              file_type = response_obj.file_data.file_mimetype;
              username=response_obj.file_data.username;
@@ -68,8 +76,6 @@
              if(temp_time!=undefined)
              upload_time=temp_time.split(".").reverse().pop();
              }
-             
-             console.log(file_name);
 
             let mime_text: string = "Application/octet-stream";
 
@@ -85,16 +91,24 @@
              file_view_link =response_obj.file_link_preview;
              file_download_link = response_obj.file_link_download;
              download_anchor.download = file_download_link;
-
-             console.log(file_view_link);
         });
 
         common_fetch("/api/files/getfilesigns", request_obj,
         async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            certificates = [];
 
-            console.log(response_obj);
+            for(let i: number = 0; i < response_obj.length; ++i)
+            {
+                let new_certificate: Signature = new Signature();
+                new_certificate.by = response_obj[i].f_signing_username;
+                new_certificate.on = response_obj[i].f_created_at;
+                new_certificate.signature = response_obj[i].f_signature;
+                new_certificate.pubkey = [...new Uint8Array(new TextEncoder().encode(JSON.stringify(response_obj[i].f_signing_key)))].map((x) => x.toString(16).padStart(2, "0")).join("");
+
+                certificates.push(new_certificate);
+            }
         });
     });
 </script>
@@ -190,16 +204,22 @@
       </div>
       <!-- Modal body -->
       <div class="p-4 md:p-5 space-y-4">
-        <div class="w-full">
-          <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed By</p>
-          <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">123</p>
-          <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed On</p>
-          <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">123</p>
-          <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signature</p>
-          <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">123</p>
-          <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Public Key</p>
-          <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">123</p>
-        </div>
+        {#each certificates as  certificate}
+            <div class="w-full">
+                <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed By</p>
+                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{certificate.by}</p>
+                <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed On</p>
+                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{certificate.on}</p>
+                <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signature</p>
+                <div class="mb-2" style="max-width: 100%; overflow-x: auto">
+                    <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">{certificate.signature}</p>
+                </div>
+                <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Public Key</p>
+                <div class="mb-2" style="max-width: 100%; overflow-x: auto">
+                    <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">{certificate.pubkey}</p>
+                </div>
+            </div>
+        {/each}
       </div>
     </div>
   </div>
