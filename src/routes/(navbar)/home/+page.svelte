@@ -430,11 +430,11 @@
     {#if tab_index === 0}
       <div class="list-container m-6">
         <p
-          class="list-title text-2xl font-bold text-gray-900 dark:text-white pb-3 ps-1"
+          class="list-title text-2xl font-bold text-gray-900 dark:text-white ps-1"
         >
           My Personal Files
         </p>
-        <ul class="list-elements space-y-2 mb-2 pb-2" style="overflow-y: auto;">
+        <ul class="list-elements space-y-2" style="overflow-y: auto;">
           {#each personal_files as file}
             <li>
               <FileCard
@@ -446,12 +446,14 @@
           {/each}
         </ul>
         <div class="list-upload flex justify-end">
-          <button
-            on:click={show_modal}
-            type="button"
-            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 m-0 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-            >Upload</button
-          >
+          <div class="flex flex-col justify-end">
+            <button
+              on:click={show_modal}
+              type="button"
+              class="shrink text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 m-0 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+              >Upload</button
+            >
+          </div>
         </div>
       </div>
     {:else if tab_index === 1}
@@ -615,8 +617,8 @@
 <style>
   .pg-center {
     position: absolute;
-    top: 12vh;
-    bottom: 2vh;
+    top: 5.5rem;
+    bottom: 1rem;
     left: 10%;
     right: 10%;
   }
@@ -643,23 +645,23 @@
   }
   .list-title {
     position: absolute;
-    top: 0;
+    height: 2.5rem;
+    /* top: 0;
     bottom: 93%;
     left: 0;
-    right: 0;
+    right: 0; */
   }
   .list-elements {
     position: absolute;
-    top: 7%;
-    bottom: 7%;
+    top: 2.5rem;
+    bottom: 3rem;
     left: 0;
     right: 0;
   }
   .list-upload {
     position: absolute;
-    top: 93%;
-    bottom: 0;
-    left: 0;
+    height: 3rem;
     right: 0;
+    bottom: 0;
   }
 </style>
