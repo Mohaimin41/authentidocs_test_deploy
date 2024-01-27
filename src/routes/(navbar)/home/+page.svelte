@@ -590,9 +590,6 @@
                   <span class="font-semibold">Click to upload</span> or drag and
                   drop
                 </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                  SVG, PNG, JPG or GIF (MAX. 800x400px)
-                </p>
               </div>
               <input
                 bind:this={file_input_elem}
