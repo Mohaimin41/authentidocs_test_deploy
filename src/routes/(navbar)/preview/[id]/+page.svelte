@@ -53,9 +53,6 @@
         common_fetch("/api/files/getfilelink", request_obj,
         async (response: Response): Promise<void> =>
         {
-            let response_obj: any = await response.json();
-            file_name = response_obj.file_data.filename;
-            file_type = response_obj.file_data.file_mimetype;
              response_obj = await response.json();
              console.log(response_obj);
              file_name = response_obj.file_data.filename;
@@ -88,6 +85,8 @@
              file_view_link =response_obj.file_link_preview;
              file_download_link = response_obj.file_link_download;
              download_anchor.download = file_download_link;
+
+             console.log(file_view_link);
         });
 
         common_fetch("/api/files/getfilesigns", request_obj,
