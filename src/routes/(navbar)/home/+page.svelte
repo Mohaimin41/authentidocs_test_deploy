@@ -435,7 +435,7 @@
           My Personal Files
         </p>
         {#if personal_files_length > 0}
-          <ul class="list-elements space-y-2" style="overflow-y: auto;">
+          <ul class="list-elements space-y-2 pb-1 pe-1" style="overflow-y: auto;">
             {#each personal_files as file}
               <li>
                 <FileCard
