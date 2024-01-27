@@ -20,7 +20,7 @@ export async function POST({
 
     
 let { data:result1, error: _error } = await supabase
-.rpc('get_single_filedata_fileid', {
+.rpc('get_single_filemetadata_fileid', {
   given_fileid, 
   given_userid
 })
