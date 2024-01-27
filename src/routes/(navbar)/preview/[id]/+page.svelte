@@ -64,6 +64,14 @@
              file_download_link = response_obj.file_link_download;
              download_anchor.download = file_download_link;
         });
+
+        common_fetch("/api/files/getfilesigns", request_obj,
+        async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+
+            console.log(response_obj);
+        });
     });
 </script>
 

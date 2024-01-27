@@ -646,10 +646,6 @@
   .list-title {
     position: absolute;
     height: 2.5rem;
-    /* top: 0;
-    bottom: 93%;
-    left: 0;
-    right: 0; */
   }
   .list-elements {
     position: absolute;
