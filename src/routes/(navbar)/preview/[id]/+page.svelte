@@ -215,7 +215,7 @@
                     </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex -space-x-2 rtl:space-x-reverse items-center">
                         <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
@@ -225,15 +225,15 @@
                         <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
                     </div>
                     <div class="flex flex-col justify-center">
-                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
-                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex items-center">
-                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex items-center">
                         <p class="text-xs font-medium text-gray-900 dark:text-white">Thread 2 @ Team 4</p>
