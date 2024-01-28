@@ -65,7 +65,7 @@
             </a>
             <Dropdown placement="bottom" triggeredBy="#avatar-menu">
                 <DropdownHeader>
-                <span class="block text-sm">{$username}</span>
+                <span class="block font-semibold text-lg">{$username}</span>
                 <span class="block truncate text-sm font-medium">{$useremail}</span>
                 </DropdownHeader>
                 <a href="/dashboard">
