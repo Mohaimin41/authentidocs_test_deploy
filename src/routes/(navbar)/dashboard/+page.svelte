@@ -9,7 +9,7 @@
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import { db, type PriveKey } from "$lib/db";
-  import { priv_key, uid } from "../../../stores";
+  import { logged_in_store, priv_key, uid, useremail } from "../../../stores";
 
   /**
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"
@@ -156,54 +156,58 @@
   }
 
   onMount((): void => {
-    if ($page.data.session) {
-      get_personal_files()
-      let request_obj: any = {
-        userid: $page.data.session?.user?.name,
-      };
+    if ($page.data.session === null) {
+        goto("/");
+    } else {
+        logged_in_store.set(true);
+        uid.set($page.data.session?.user?.name as string)
+        useremail.set($page.data.session?.user?.email as string)
+    }
 
-      common_fetch(
-        "/api/user/details",
-        request_obj,
-        async (response: Response): Promise<void> => {
-          let response_obj: any = await response.json();
-          // console.log(response_obj);
-          username = response_obj.username;
-          email = response_obj.email;
-          // console.log(typeof response_obj.publickey);
-          pubkey = [
-            ...new Uint8Array(
-              new TextEncoder().encode(JSON.stringify(response_obj.publickey))
-            ),
-          ]
-            .map((x) => x.toString(16).padStart(2, "0"))
-            .join("");
-          // console.log(pubkey);
-          if ($page.data.session) {
-            let temp_priv_key = await db.priv_key.get(
-              $page.data.session.user?.name as string
+    get_personal_files();
+    let request_obj: any = {
+      userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/details",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+        // console.log(response_obj);
+        username = response_obj.username;
+        email = response_obj.email;
+        // console.log(typeof response_obj.publickey);
+        pubkey = [
+          ...new Uint8Array(
+            new TextEncoder().encode(JSON.stringify(response_obj.publickey))
+          ),
+        ]
+          .map((x) => x.toString(16).padStart(2, "0"))
+          .join("");
+        // console.log(pubkey);
+        if ($page.data.session) {
+          let temp_priv_key = await db.priv_key.get(
+            $page.data.session.user?.name as string
+          );
+          if (temp_priv_key) {
+            let subtle_crypto: SubtleCrypto = window.crypto.subtle;
+            let private_key = await subtle_crypto.exportKey(
+              "jwk",
+              temp_priv_key.key
             );
-            if (temp_priv_key) {
-              let subtle_crypto: SubtleCrypto = window.crypto.subtle;
-              let private_key = await subtle_crypto.exportKey(
-                "jwk",
-                temp_priv_key.key
-              );
-              // console.log(private_key);
-              privkey = [
-                ...new Uint8Array(
-                  new TextEncoder().encode(JSON.stringify(private_key))
-                ),
-              ]
-                .map((x) => x.toString(16).padStart(2, "0"))
-                .join("");
-            }
+            // console.log(private_key);
+            privkey = [
+              ...new Uint8Array(
+                new TextEncoder().encode(JSON.stringify(private_key))
+              ),
+            ]
+              .map((x) => x.toString(16).padStart(2, "0"))
+              .join("");
           }
         }
-      );
-    } else {
-      goto("/");
-    }
+      }
+    );
   });
 </script>
 
