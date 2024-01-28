@@ -1,15 +1,18 @@
-import { json, error } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
 import { supabase } from "$lib/server/supabase_client.server";
 
 export async function POST({
   request,
-  cookies,
   locals,
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    throw error(401, "You must sign in to add file signatures.");
+    return new Response(JSON.stringify("you must be logged in to add files"), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      status: 401,
+    });
   }
   // console.log(session);
 
@@ -21,17 +24,25 @@ export async function POST({
     given_signing_key = file_signature_info.key,
     given_signing_userid = file_signature_info.userid;
 
-  let { data: result } = await supabase.rpc("add_personal_file_signature", {
+  let { data: result, error:_error } = await supabase.rpc("add_personal_file_signature", {
     given_fileid,
     given_signature,
     given_signing_key,
     given_signing_userid,
   });
+  console.log("error @33: ", _error)
+  if (_error) {
+    return new Response(JSON.stringify("internal server error while adding signature: "+_error), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      status: 500,
+    });
+  }
 
-  //  console.log("signing"+result);
+   console.log("signing @42: "+result);
 
-  let ret_text = result;
-  let response: Response = new Response(JSON.stringify(ret_text), {
+  let response: Response = new Response(JSON.stringify(result), {
     headers: {
       "Content-Type": "application/json",
     },

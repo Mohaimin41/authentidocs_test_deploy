@@ -118,9 +118,10 @@
 </script>
 
 <div class="preview-root flex flex-col">
-    <div class="preview-body block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
-        {#if file_type === 0}
-            <div></div>
+    <div class="preview-body flex-grow block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
+        {#if file_type === 3}
+            <!-- <div class="inline-block align-middle" ><center><h1>No preview available for this file type.</h1> </center></div> -->
+            <img class="img-preview rounded" src={"/no_preview.jpg"} alt="No preview available for this file type." />
         {:else if file_type === 1}
             <img class="img-preview rounded" src={file_view_link} alt="img-placeholder" />
         {:else if file_type === 2}
