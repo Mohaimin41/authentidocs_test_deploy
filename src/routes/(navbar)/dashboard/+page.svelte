@@ -158,6 +158,8 @@
   onMount((): void => {
     if ($page.data.session === null) {
         goto("/");
+
+        return;
     } else {
         logged_in_store.set(true);
         uid.set($page.data.session?.user?.name as string)
