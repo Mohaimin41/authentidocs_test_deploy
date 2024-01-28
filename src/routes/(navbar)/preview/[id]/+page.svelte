@@ -21,6 +21,7 @@
     let modal_elem: HTMLDivElement;
     let modal_show: boolean = false;
     let modal_obj: Modal;
+    let file_loaded: boolean = false;
 
     function hide_modal(): void
     {
@@ -41,6 +42,8 @@
 
     onMount(async (): Promise<void> =>
     {
+        file_loaded = false;
+
         modal_obj = new Modal(modal_elem,
         {
             onHide: (): void =>
@@ -91,6 +94,7 @@
              file_view_link =response_obj.file_link_preview;
              file_download_link = response_obj.file_link_download;
              download_anchor.download = file_download_link;
+             file_loaded = true;
         });
 
         common_fetch("/api/files/getfilesigns", request_obj,
@@ -114,7 +118,7 @@
 </script>
 
 <div class="preview-root flex flex-col">
-    <div class="preview-body flex-grow block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
+    <div class="preview-body block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
         {#if file_type === 0}
             <div></div>
         {:else if file_type === 1}
@@ -136,54 +140,107 @@
         {/if}
     </div>
     <div class="flex flex-col justify-between block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <div class="meta-data">
-            <p class="text-2xl font-medium text-gray-900 dark:text-white mb-2">{file_name}</p>
-            <div class="grid grid-cols-6 gap-1 me-6">
-                <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Signed By</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploaded On</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Custody</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current State</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Work Thread</p>
-                </div>
-                <div class="flex items-center">
-                    <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
-                </div>
-                <div class="flex -space-x-2 rtl:space-x-reverse items-center">
-                    <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                    <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                    <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                    <!-- svelte-ignore a11y-invalid-attribute -->
-                    <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
-                </div>
-                <div class="flex flex-col justify-center">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_date}</p>
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_time}</p>
-                </div>
-                <div class="flex items-center">
-                    <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
-                </div>
-                <div class="flex items-center">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">{current_state}</p>
-                </div>
-                <div class="flex items-center">
-                    <p class="text-xs font-medium text-gray-900 dark:text-white">Thread 2 @ Team 4</p>
+        {#if file_loaded}
+            <div class="meta-data">
+                <p class="text-2xl font-medium text-gray-900 dark:text-white mb-2">{file_name}</p>
+                <div class="grid grid-cols-6 gap-1 me-6">
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Signed By</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploaded On</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Custody</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current State</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Work Thread</p>
+                    </div>
+                    <div class="flex items-center">
+                        <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
+                    </div>
+                    <div class="flex -space-x-2 rtl:space-x-reverse items-center">
+                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
+                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
+                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
+                        <!-- svelte-ignore a11y-invalid-attribute -->
+                        <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_date}</p>
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_time}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{current_state}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">Thread 2 @ Team 4</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        {:else}
+            <div class="meta-data">
+                <div role="status" class="max-w-sm animate-pulse">
+                    <div class="h-8 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-2"></div>
+                </div>
+                <div class="grid grid-cols-6 gap-1 me-6">
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Signed By</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploaded On</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Custody</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current State</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Work Thread</p>
+                    </div>
+                    <div class="flex items-center">
+                        <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                    </div>
+                    <div class="flex -space-x-2 rtl:space-x-reverse items-center">
+                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
+                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
+                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
+                        <!-- svelte-ignore a11y-invalid-attribute -->
+                        <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                    </div>
+                    <div class="flex items-center">
+                        <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                    </div>
+                    <div class="flex items-center">
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">Thread 2 @ Team 4</p>
+                    </div>
+                </div>
+            </div>
+        {/if}
         <div class="flex justify-end mt-3">
             <!-- certificate button -->
             <button on:click={show_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">View Certificate</button>
@@ -252,7 +309,7 @@
     }
     .preview-body
     {
-        max-height: 70%;
+        height: 70%;
     }
     .img-preview
     {
