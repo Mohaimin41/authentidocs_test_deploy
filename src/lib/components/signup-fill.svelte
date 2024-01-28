@@ -39,7 +39,7 @@
         async (response: Response): Promise<void> => {
           let response_obj: any = await response.json();
 
-          console.log(response_obj);
+          // console.log(response_obj);
 
           if (response_obj !== -1) {
             // new_key.set(true);

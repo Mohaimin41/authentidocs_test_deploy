@@ -30,6 +30,7 @@ export async function POST({
     given_signing_key,
     given_signing_userid,
   });
+  console.log("error @33: ", _error)
   if (_error) {
     return new Response(JSON.stringify("internal server error while adding signature: "+_error), {
       headers: {
@@ -39,7 +40,7 @@ export async function POST({
     });
   }
 
-  //  console.log("signing"+result);
+   console.log("signing @42: "+result);
 
   let response: Response = new Response(JSON.stringify(result), {
     headers: {

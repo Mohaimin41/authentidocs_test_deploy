@@ -167,10 +167,10 @@
         request_obj,
         async (response: Response): Promise<void> => {
           let response_obj: any = await response.json();
-          console.log(response_obj);
+          // console.log(response_obj);
           username = response_obj.username;
           email = response_obj.email;
-          console.log(typeof response_obj.publickey);
+          // console.log(typeof response_obj.publickey);
           pubkey = [
             ...new Uint8Array(
               new TextEncoder().encode(JSON.stringify(response_obj.publickey))
@@ -178,7 +178,7 @@
           ]
             .map((x) => x.toString(16).padStart(2, "0"))
             .join("");
-          console.log(pubkey);
+          // console.log(pubkey);
           if ($page.data.session) {
             let temp_priv_key = await db.priv_key.get(
               $page.data.session.user?.name as string
@@ -189,7 +189,7 @@
                 "jwk",
                 temp_priv_key.key
               );
-              console.log(private_key);
+              // console.log(private_key);
               privkey = [
                 ...new Uint8Array(
                   new TextEncoder().encode(JSON.stringify(private_key))
