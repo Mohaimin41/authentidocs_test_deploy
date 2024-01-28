@@ -439,7 +439,7 @@
       </p> -->
       <!-- Each option of tab_index show each type of tab -->
       {#if tab_index === 0}
-      <ul class="tab-content-list space-y-2 mb-6 mx-6 pb-2"
+      <ul class="tab-content-list space-y-2 mt-2 mb-6 mx-6 pe-1 pb-1"
       style="overflow-y: auto;">
         {#each personal_files as file}
           <li>
@@ -566,13 +566,13 @@
   .tab-list {
     position: absolute;
     top: 0;
-    bottom: 93%;
+    height: 3rem;
     left: 0;
     right: 0;
   }
   .tab-content {
     position: absolute;
-    top: 7%;
+    top: 3rem;
     bottom: 0;
     left: 0;
     right: 0;
@@ -586,7 +586,7 @@
   }
   .tab-content-list {
     position: absolute;
-    top: 10%;
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
