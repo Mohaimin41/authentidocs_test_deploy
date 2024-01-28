@@ -17,7 +17,7 @@ export async function POST({
   }
   // console.log(session);
   const key_info = await request.json();
-
+  console.log("inside add key",key_info);
   let given_publickey = key_info.key;
   let given_userid = key_info.user_id;
 
@@ -28,7 +28,7 @@ export async function POST({
       given_userid,
     }
   );
-  // console.log(result)
+  console.log("add key rps result",result)
   if (_error) {
     return new Response(JSON.stringify("internal server error while adding user key: " + _error), {
       headers: {

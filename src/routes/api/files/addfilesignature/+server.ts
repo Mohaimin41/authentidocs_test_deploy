@@ -17,7 +17,7 @@ export async function POST({
   // console.log(session);
 
   const file_signature_info = await request.json();
-  // console.log(file_signature_info);
+   console.log("inside file signature api: ",file_signature_info);
 
   let given_fileid = file_signature_info.fileid,
     given_signature = file_signature_info.signature,

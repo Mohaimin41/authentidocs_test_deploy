@@ -44,6 +44,7 @@
                 request_obj,
                 async (response: Response): Promise<void> => {
                 // new_key.set(false);
+                console.log("layout add key response:",response)
                 localStorage.setItem("new_key", "0");
                 localStorage.setItem("pub_key", JSON.stringify(public_key));
                 });

@@ -166,7 +166,7 @@
 
     uploading = true;
     let success: boolean = true;
-    let file_success_response_obj: any = { fileid: "" };
+    let file_success_response_obj: any = {};
 
     for (let i: number = 0; i < file_buffer.byteLength; i += 1048576) {
       let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
