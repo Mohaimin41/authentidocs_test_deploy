@@ -298,7 +298,7 @@
     class="pg-left block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
   >
     <!-- svelte-ignore a11y-invalid-attribute -->
-    <ul class="space-y-2 mx-6 mt-6 mb-6 pb-2" style="overflow-y: auto;">
+    <ul class="tab-options space-y-2 mx-6 mt-6 mb-6 pe-1 pb-1">
       <!-- My personal files -->
       <li>
         <a
@@ -633,6 +633,15 @@
     bottom: 0;
     left: 30%;
     right: 0;
+  }
+  .tab-options
+  {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
   }
   .list-container {
     position: absolute;
