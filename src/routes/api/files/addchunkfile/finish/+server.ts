@@ -1,5 +1,5 @@
 import { filemap } from "$lib/server/stores";
-import { error, json, type RequestEvent } from "@sveltejs/kit";
+import { json, type RequestEvent } from "@sveltejs/kit";
 import { get } from "svelte/store";
 import { supabase } from "$lib/server/supabase_client.server";
 import { fileTypeFromBuffer } from "file-type";
@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST({
   request,
-  cookies,
   locals,
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
@@ -23,12 +22,20 @@ export async function POST({
   let filename: string | null = url.searchParams.get("filename");
 
   if (filename === null) {
+    console.log(
+      "ERROR @api/files/addchunkfile/finish:25: map filemap returned as undefined"
+    );
+    get(filemap).clear();
     return json({ success: false });
   }
 
   let file_array: number[] | undefined = get(filemap).get(filename);
 
   if (file_array === undefined) {
+    console.log(
+      "ERROR @api/files/addchunkfile/finish:36: array filearray returned as undefined from filemap"
+    );
+    get(filemap).clear();
     return json({ success: false });
   }
 
@@ -67,12 +74,23 @@ export async function POST({
     .upload(filePath, blob);
   // console.log("supabaseupload" + data);
   if (storage_call_response.error) {
-    return new Response(JSON.stringify("internal server error while uploading to file server"+storage_call_response.error), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      status: 500,
-    });
+    console.log(
+      "ERROR @api/files/addchunkfile/finish:77: supabase storage upload error\n",
+      storage_call_response.error
+    );
+    get(filemap).clear();
+    return new Response(
+      JSON.stringify(
+        "internal server error while uploading to file server" +
+          storage_call_response.error
+      ),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        status: 500,
+      }
+    );
   }
   let given_file_extension = fileExt,
     given_file_ownerid = session?.user.name,
@@ -80,15 +98,23 @@ export async function POST({
     given_filename = filename,
     given_file_mimetype = ret_mime;
 
-  let {data:result, error:_error} = await supabase.rpc("add_personal_file", {
-    given_file_extension,
-    given_file_mimetype,
-    given_file_ownerid,
-    given_file_url,
-    given_filename,
-  });
-  if (_error){
-    return new Response(JSON.stringify("internal server error: "+_error), {
+  let { data: result, error: _error } = await supabase.rpc(
+    "add_personal_file",
+    {
+      given_file_extension,
+      given_file_mimetype,
+      given_file_ownerid,
+      given_file_url,
+      given_filename,
+    }
+  );
+  if (_error) {
+    get(filemap).clear();
+    console.log(
+      "ERROR @api/files/addchunkfile/finish:114: supabase file data insert into database error\n",
+      _error
+    );
+    return new Response(JSON.stringify("internal server error: " + _error), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -100,7 +126,7 @@ export async function POST({
 
   // flush
   //get(filemap).set(filename, []);
-  get(filemap).clear()
+  get(filemap).clear();
   //fs.writeFileSync("/home/siam11651/" + filename, file_uint8);
 
   return json({ fileid: result, sucess: true });

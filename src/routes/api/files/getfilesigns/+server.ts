@@ -29,6 +29,7 @@ export async function POST({
   // if (error) console.log("getfilesigns 24: ",error.toString());
   // console.log("getfilesigns 25: ", result);
   if (_error) {
+    console.log("ERROR @api/files/getfilesigns:32: supabase get file signatuers error\n", _error)
     return new Response(
       JSON.stringify(
         "internal server error while getting file signatures: " + _error

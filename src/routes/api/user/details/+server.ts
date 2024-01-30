@@ -7,7 +7,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new Response(JSON.stringify("you must be logged in to add files"), {
+    return new Response(JSON.stringify("you must be logged in to view user details"), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -26,6 +26,7 @@ export async function POST({
     }
   );
   if (_error) {
+    console.log("ERROR @api/user/details:29: supabase getting user data error\n", _error)
     return new Response(JSON.stringify("internal server error while getting user details: " + _error), {
       headers: {
         "Content-Type": "application/json",

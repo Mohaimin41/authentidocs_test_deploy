@@ -25,6 +25,7 @@ export async function POST({
     }
   );
   if (_error) {
+    console.log("ERROR @api/user/getkey:28: supabase getting user key error\n", _error)
     return new Response(JSON.stringify("internal server error: " + _error), {
       headers: {
         "Content-Type": "application/json",

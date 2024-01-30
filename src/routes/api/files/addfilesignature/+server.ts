@@ -7,7 +7,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new Response(JSON.stringify("you must be logged in to add files"), {
+    return new Response(JSON.stringify("you must be logged in to add file signatures"), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -17,7 +17,7 @@ export async function POST({
   // console.log(session);
 
   const file_signature_info = await request.json();
-   console.log("inside file signature api: ",file_signature_info);
+  //  console.log("inside file signature api: ",file_signature_info);
 
   let given_fileid = file_signature_info.fileid,
     given_signature = file_signature_info.signature,
@@ -30,8 +30,9 @@ export async function POST({
     given_signing_key,
     given_signing_userid,
   });
-  console.log("error @33: ", _error)
+  // console.log("error @33: ", _error)
   if (_error) {
+    console.log("ERROR @api/files/addfilesignature:35: supabase file signatuer insert error\n", _error)
     return new Response(JSON.stringify("internal server error while adding signature: "+_error), {
       headers: {
         "Content-Type": "application/json",
@@ -40,7 +41,7 @@ export async function POST({
     });
   }
 
-   console.log("signing @42: "+result);
+  //  console.log("signing @42: "+result);
 
   let response: Response = new Response(JSON.stringify(result), {
     headers: {
