@@ -160,16 +160,7 @@
     if (file === null) {
       return;
     }
-    let tempFormData: FormData = new FormData();
-    tempFormData.append("file", file);
-    tempFormData.append("userid", $page.data.session?.user?.name as string);
-    let testResponse: Response = await fetch("/api/files/addpersonalfile", {
-      method: "POST",
-      
-      body: tempFormData,
-    });
-    console.log("test fetch @171", testResponse);
-
+  
     let file_buffer: ArrayBuffer = await file.arrayBuffer();
     file_input_elem.value = "";
 
