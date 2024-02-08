@@ -8,7 +8,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    
+
     return new Response(JSON.stringify("you must be logged in to view notifications), {
       headers: {
         "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export async function POST({
   // console.log(session);
   const team_info = await request.json();
   // console.log("inside add key",key_info);
-  let given_threadid = team_info.given_userid;
+  let given_userid = team_info.given_userid;
 
 
   let { data:result, error:_error } = await supabase
