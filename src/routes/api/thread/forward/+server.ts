@@ -56,10 +56,12 @@ export async function POST({
       if(i!=(result1.length-1))
       {
         given_target_userid=result1[i+1].f_userid;
+        break;
       }
     }
   }
-
+  console.log(given_target_userid);
+  console.log(given_src_userid);
   let { data: result, error: _error } = await supabase.rpc("forward_thread", {
     given_src_userid,
     given_target_userid,
