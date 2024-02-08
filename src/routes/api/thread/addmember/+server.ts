@@ -32,33 +32,26 @@ export async function POST({
     let given_userid = uid_list[i];
     let current_userid = session.user.name;
 
-    let { data, error :_error} = await supabase.rpc("add_thread_member", {
-      current_userid,
-      given_signing_serial,
-      given_threadid,
-      given_user_role,
-      given_userid,
+    let { data:result, error:_error } = await supabase
+    .rpc('add_thread_member', {
+      given_signing_serial, 
+      given_threadid, 
+      given_user_role, 
+      given_userid
+    })
+
+
+  // console.log("add key rps result",result)
+  if (_error) {
+    console.log("ERROR @api/user/addkey:33: supabase add user publickey error\n", _error)
+    return new Response(JSON.stringify("internal server error while adding user key: " + _error), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      status: 500,
     });
-    
-    // console.log("add key rps result",result)
-    if (_error) {
-      console.log(
-        "ERROR @api/user/addkey:33: supabase add user publickey error\n",
-        _error
-      );
-      return new Response(
-        JSON.stringify(
-          "internal server error while adding user key: " + _error
-        ),
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          status: 500,
-        }
-      );
-    }
   }
+}
 
   let response: Response = new Response(JSON.stringify(sign_serial), {
     headers: {
