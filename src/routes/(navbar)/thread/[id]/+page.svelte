@@ -1,7 +1,7 @@
 <script lang="ts">
     import FileCard from "$lib/components/thread/file-card.svelte";
-import MemberCard from "$lib/components/thread/member-card.svelte";
-import { onMount } from "svelte";
+    import MemberCard from "$lib/components/thread/member-card.svelte";
+    import { onMount } from "svelte";
 
     let tab_active: boolean[] = [true, false, false];
 

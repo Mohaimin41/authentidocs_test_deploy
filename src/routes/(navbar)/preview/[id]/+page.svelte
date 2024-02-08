@@ -2,7 +2,7 @@
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { common_fetch } from "$lib/fetch_func";
-    import { Modal } from "flowbite";
+    import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
     import { logged_in_store, uid, useremail } from "../../../../stores";
     import { jsPDF } from "jspdf";
@@ -21,20 +21,8 @@
     let download_anchor: HTMLAnchorElement;
     let file_view_link: string;
     let file_download_link: string;
-    let modal_elem: HTMLDivElement;
-    let modal_show: boolean = false;
-    let modal_obj: Modal;
     let file_loaded: boolean = false;
 
-    function hide_modal(): void
-    {
-        modal_obj.hide();
-    }
-
-    function show_modal(): void
-    {
-        modal_obj.show();
-    }
     let response_obj:any={};
     let username:string;
     let current_custody:string;
@@ -45,6 +33,8 @@
 
     onMount(async (): Promise<void> =>
     {
+        initModals();
+
         file_loaded = false;
 
         if ($page.data.session === null) {
@@ -56,18 +46,6 @@
             uid.set($page.data.session?.user?.name as string)
             useremail.set($page.data.session?.user?.email as string)
         }
-
-        modal_obj = new Modal(modal_elem,
-        {
-            onHide: (): void =>
-            {
-                modal_show = false;
-            },
-            onShow: (): void =>
-            {
-                modal_show = false;
-            }
-        });
 
         let request_obj: any =
         {
@@ -312,16 +290,18 @@
             </div>
         {/if}
         <div class="flex justify-end mt-3">
+            <!-- File History -->
+            <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
             <!-- certificate button -->
-            <button on:click={show_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">View Certificate</button>
+            <button data-modal-target="cert-modal" data-modal-toggle="cert-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Certificate</button>
             <!-- download button -->
-            <a download={file_name} href={file_download_link} bind:this={download_anchor} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2">Download</a>
+            <a download={file_name} href={file_download_link} bind:this={download_anchor} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Download</a>
         </div>
     </div>
 </div>
 
 <div
-  bind:this={modal_elem}
+  id="cert-modal"
   tabindex="-1"
   aria-hidden="true"
   class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
@@ -334,7 +314,7 @@
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
           File Certificate
         </h3>
-        <button on:click={hide_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="static-modal">
+        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="cert-modal">
           <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
           </svg>
@@ -359,16 +339,41 @@
                 </div>
             </div>
         {/each}
-                    <!-- download button -->
-                    <button on:click={generateCertificate} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Download</button>
+        <!-- download button -->
+        <button on:click={generateCertificate} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Download</button>
       </div>
     </div>
   </div>
 </div>
 
-{#if modal_show}
-  <div class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40" />
-{/if}
+<div
+  id="history-modal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
+    <!-- Modal content -->
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <!-- Modal header -->
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+          File History
+        </h3>
+        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="history-modal">
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+      <!-- Modal body -->
+      <div class="p-4 md:p-5 space-y-4">
+        
+      </div>
+    </div>
+  </div>
+</div>
 
 <style>
     .preview-root
