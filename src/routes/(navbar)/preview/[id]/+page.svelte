@@ -11,7 +11,8 @@
     class Signature
     {
         public by: string = "";
-        public on: string = "";
+        public on_date: string = "";
+        public on_time: string = "";
         public signature: string = "";
         public pubkey: string = "";
     };
@@ -28,13 +29,18 @@
     let response_obj:any={};
     let username:string;
     let current_custody:string;
-    let upload_timestamp:string;
+    let upload_timestamp: Date;
     let current_state:string;
-    let upload_date:string|undefined;
-    let upload_time:string|undefined;
+    let upload_date:string;
+    let upload_time:string;
     let file_signed: boolean;
+    let uploader:string;
+    let ownerid:string;
+    let current_custodianid:string;
 
     $: file_signed = file_status === "signed_viewed_by_custodian";
+    $: upload_date = upload_timestamp?.toLocaleDateString();
+    $: upload_time = upload_timestamp?.toLocaleTimeString();
 
     function sign_file(): void
     {
@@ -113,16 +119,10 @@
              file_type = response_obj.file_data.file_mimetype;
              file_status = response_obj.file_data.current_state;
              username=response_obj.file_data.username;
-             upload_timestamp=response_obj.file_data.created_at;
+             ownerid=response_obj.file_data.file_ownerid;
+             current_custodianid=response_obj.file_data.current_custodianid;
+             upload_timestamp= new Date(response_obj.file_data.created_at);
              current_state=response_obj.file_data.current_state;
-             if(upload_timestamp!== undefined)
-             {
-             upload_date=upload_timestamp.split("T").reverse().pop();
-             let temp_time:string|undefined;
-             temp_time=upload_timestamp.split("T").pop();
-             if(temp_time!=undefined)
-             upload_time=temp_time.split(".").reverse().pop();
-             }
 
             let mime_text: string = "Application/octet-stream";
 
@@ -135,10 +135,40 @@
                 mime_text = "Application/pdf";
             }
             
-             file_view_link =response_obj.file_link_preview;
-             file_download_link = response_obj.file_link_download;
-             download_anchor.download = file_download_link;
-             file_loaded = true;
+            file_view_link =response_obj.file_link_preview;
+            file_download_link = response_obj.file_link_download;
+            download_anchor.download = file_download_link;
+
+            let name_response: Response = await fetch("/api/user/details",
+            {
+                method: "POST",
+                headers:
+                {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(
+                {
+                    userid: ownerid
+                })
+            });
+
+            uploader = (await name_response.json()).username;
+            name_response = await fetch("/api/user/details",
+            {
+                method: "POST",
+                headers:
+                {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(
+                {
+                    userid: current_custodianid
+                })
+            });
+
+            current_custody = (await name_response.json()).username;
+
+            file_loaded = true;
         });
 
         common_fetch("/api/files/getfilesigns", request_obj,
@@ -151,7 +181,9 @@
             {
                 let new_certificate: Signature = new Signature();
                 new_certificate.by = response_obj[i].f_signing_username;
-                new_certificate.on = response_obj[i].f_created_at;
+                let on: Date = new Date(response_obj[i].f_created_at);
+                new_certificate.on_date = on.toLocaleDateString();
+                new_certificate.on_time = on.toLocaleTimeString();
                 new_certificate.signature = response_obj[i].f_signature;
                 new_certificate.pubkey = [...new Uint8Array(new TextEncoder().encode(JSON.stringify(response_obj[i].f_signing_key)))].map((x) => x.toString(16).padStart(2, "0")).join("");
 
@@ -168,17 +200,18 @@
   // Create a new jsPDF object
   const doc = new jsPDF({ orientation: 'landscape' });
 
-  // Add a background image (optional)
-  doc.addImage('/certificate.jpg', 'JPEG', 0, 0, 297, 210);
 
   // Add text content
   
   for (let i=0;i<certificates.length;i++)
   {
+
+  // Add a background image (optional)
+    doc.addImage('/certificate.jpg', 'JPEG', 0, 0, 297, 210);
     doc.text(String(i+1),275,10);
     doc.text('Certificate of File Signature', 100, 25); // Title
     doc.text("Signed By: "+certificates[i].by,25,50);
-    doc.text("Signed On: "+certificates[i].on,25,60);
+    doc.text("Signed On: "+certificates[i].on_date +" "+certificates[i].on_time,25,60);
     doc.text("Signature: ",25,70);
     let sign_parts = certificates[i].signature.match(/.{1,74}/g)
     if(sign_parts?.length)
@@ -210,7 +243,6 @@
 }
 </script>
 
-{file_signed}
 <div class="preview-root flex flex-col">
     <div class="preview-body flex-grow block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
         {#if file_loaded}
@@ -271,7 +303,7 @@
                     </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{uploader}</p>
                     </div>
                     <div class="flex -space-x-2 rtl:space-x-reverse items-center">
                         <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
@@ -286,7 +318,7 @@
                     </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{current_custody}</p>
                     </div>
                     <div class="flex items-center">
                         <p class="text-xs font-medium text-gray-900 dark:text-white">{current_state}</p>
@@ -353,7 +385,7 @@
                 <!-- Add Note -->
                 <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Add Note</button>
                 <!-- Mark as Viewed -->
-                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={true}>Mark as Viewed</button>
+                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={file_signed}>Mark as Viewed</button>
                 <!-- File History -->
                 <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
             {/if}
@@ -393,7 +425,10 @@
                 <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed By</p>
                 <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{certificate.by}</p>
                 <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed On</p>
-                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{certificate.on}</p>
+                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    <span>{certificate.on_date}</span>
+                    <span>{certificate.on_time}</span>
+                </p>
                 <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signature</p>
                 <div class="mb-2" style="max-width: 100%; overflow-x: auto">
                     <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">{certificate.signature}</p>

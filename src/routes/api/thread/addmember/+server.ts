@@ -31,8 +31,8 @@ export async function POST({
     }
   );
 
-  for (let i = 0; i < uid_list.len(); i++) {
-    let given_signing_serial = sign_serial++;
+  for (let i = 0; i < uid_list.length; i++) {
+    let given_signing_serial = ++sign_serial;
     let given_user_role = "member";
     let given_userid = uid_list[i];
     let current_userid = session.user.name;

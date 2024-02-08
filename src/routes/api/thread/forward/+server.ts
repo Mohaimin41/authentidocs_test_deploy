@@ -22,10 +22,46 @@ export async function POST({
   const file_info = await request.json();
   // console.log("inside add key",key_info);
 
-  let given_src_userid = file_info.srcuserid;
-  let given_target_userid = file_info.targetuserid;
+  let given_src_userid=session.user.name;
+  let given_target_userid; 
   let given_threadid = file_info.threadid;
+  let { data: result1, error: _error1 } = await supabase.rpc(
+    "get_thread_member_list",
+    {
+      given_threadid,
+    }
+  );
 
+  // console.log("add key rps result",result)
+  if (_error1) {
+    console.log(
+      "ERROR @api/thread/getmembers:33: supabase get thread user list error\n",
+      _error1
+    );
+    return new Response(
+      JSON.stringify("internal server error while getting thread member list: " + _error1),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        status: 500,
+      }
+    );
+  }
+  console.log(result1);
+  for(let i=0;i<result1.length;i++)
+  {
+    if(result1[i].f_userid == given_src_userid )
+    {
+      if(i!=(result1.length-1))
+      {
+        given_target_userid=result1[i+1].f_userid;
+        break;
+      }
+    }
+  }
+  console.log(given_target_userid);
+  console.log(given_src_userid);
   let { data: result, error: _error } = await supabase.rpc("forward_thread", {
     given_src_userid,
     given_target_userid,
