@@ -1,12 +1,22 @@
 <script lang="ts">
+    import { page } from "$app/stores";
     import FileCard from "$lib/components/thread/file-card.svelte";
     import MemberCard from "$lib/components/thread/member-card.svelte";
     import { onMount } from "svelte";
 
+    let id: string;
     let thread_name: string;
+    let team_name: string;
+    let description: string;
     let moderator: string;
     let current_custodian: string;
+    let started_at: Date;
+    let date_text: string;
+    let time_text: string;
     let tab_active: boolean[] = [true, false, false];
+
+    $: date_text = started_at?.toLocaleDateString();
+    $: time_text = started_at?.toLocaleTimeString();
 
     function reset_tabs(): void
     {
@@ -39,7 +49,29 @@
     
     onMount((): void =>
     {
-        
+        id = $page.params.id;
+
+        fetch("/api/thread/getdetails",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                threadid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            thread_name = response_obj.thread_detail.threadname;
+            team_name = response_obj.thread_detail.team_name;
+            started_at = new Date(response_obj.thread_detail.created_at);
+            moderator = response_obj.thread_mod_detail.f_username;
+            current_custodian = response_obj.thread_current_custodian_detail.f_username;
+            description = response_obj.thread_detail.description;
+        });
     });
 </script>
 
@@ -71,16 +103,16 @@
         </ul>
         <div class="tab-item-data mx-6 mb-6">
             {#if tab_active[0]}
-                <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Thread 1</p>
+                <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{thread_name}</p>
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Moderator</p>
                 <div class="flex items-center mb-4">
                     <img class="w-8 h-8 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                    <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">Mustafa Siam Ur Rafique</p>
+                    <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">{moderator}</p>
                 </div>
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Current Custodian</p>
                 <div class="flex items-center mb-4">
                     <img class="w-8 h-8 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                    <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">Abdoollah Al Mohaemen</p>
+                    <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">{current_custodian}</p>
                 </div>
                 <div class="grid grid-cols-4 mb-4">
                     <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
@@ -98,13 +130,15 @@
                         <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
                         </svg>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">Team 1</p>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{team_name}</p>
                     </div>
                     <div class="flex items-center">
                         <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
                         </svg>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">01 February 2024</p>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                            <span>{date_text}</span>
+                        </p>
                     </div>
                     <div class="flex items-center">
                         <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -114,6 +148,7 @@
                     </div>
                 </div>
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
+                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{description}</p>
             {:else if tab_active[1]}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Files</p>
                 <ul class="list-elements space-y-2 mt-2 pb-1">
