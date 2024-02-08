@@ -58,7 +58,7 @@
 
         id = $page.params.id;
 
-        fetch("/api/team/getmembers",
+        fetch("/api/thread/getaddablemembers",
         {
             method: "POST",
             headers:
@@ -262,8 +262,8 @@
         position: absolute;
         top: 5.25rem;
         bottom: 1rem;
-        left: 10%;
-        right: 10%;
+        left: 20%;
+        right: 20%;
     }
     .team-info
     {
