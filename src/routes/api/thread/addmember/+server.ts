@@ -21,12 +21,12 @@ export async function POST({
   let uid_list = member_info.uid_list;
   let sign_serial=2;
   let given_threadid=member_info.threadid;
-  for(let i=0;i<uid_list.len();i++)
+  for(let i=0;i<uid_list.length;i++)
   {
     let given_signing_serial=sign_serial++;
     let given_user_role="member";
     let given_userid=uid_list[i];
-  
+
     let { data:result, error:_error } = await supabase
     .rpc('add_thread_member', {
       given_signing_serial, 
