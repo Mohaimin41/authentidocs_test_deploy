@@ -8,24 +8,28 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-
-    return new Response(JSON.stringify("you must be logged in to view notifications), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      status: 401,
-    });
+    return new Response(
+      JSON.stringify("you must be logged in to view notifications"),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        status: 401,
+      }
+    );
   }
+
   // console.log(session);
   const team_info = await request.json();
   // console.log("inside add key",key_info);
   let given_userid = team_info.given_userid;
 
-
-  let { data:result, error:_error } = await supabase
-  .rpc('are_there_notifications', {
-    given_userid
-  })
+  let { data: result, error: _error } = await supabase.rpc(
+    "are_there_notifications",
+    {
+      given_userid,
+    }
+  );
 
   // console.log("add key rps result",result)
   if (_error) {
@@ -34,7 +38,9 @@ export async function POST({
       _error
     );
     return new Response(
-      JSON.stringify("internal server error while polling notification list: " + _error),
+      JSON.stringify(
+        "internal server error while polling notification list: " + _error
+      ),
       {
         headers: {
           "Content-Type": "application/json",
