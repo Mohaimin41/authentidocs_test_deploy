@@ -12,6 +12,16 @@
         public status: string = "";
     }
 
+    class MemberObj
+    {
+        public id: string = "";
+        public name: string = "";
+        public role: string = "";
+        public serial: number = -1;
+        public pubkey: string = "";
+        public joined: Date = new Date();
+    }
+
     let id: string;
     let thread_name: string;
     let team_name: string;
@@ -23,6 +33,7 @@
     let time_text: string;
     let tab_active: boolean[] = [true, false, false];
     let files: FileObj[] = [];
+    let members: MemberObj[] = [];
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -106,7 +117,35 @@
                 files[i].type = response_obj[i].f_file_extension;
                 files[i].status = response_obj[i].f_current_state;
             }
-            
+        });
+
+        fetch("/api/thread/getmembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_threadid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            members = new Array(response_obj.length);
+
+            for(let i: number = 0; i < members.length; ++i)
+            {
+                members[i] = new MemberObj();
+                members[i].id = response_obj[i].f_userid;
+                members[i].name = response_obj[i].f_username;
+                members[i].role = response_obj[i].f_user_role;
+                members[i].serial = response_obj[i].f_signing_serial;
+                members[i].pubkey = response_obj[i].f_publickey;
+                members[i].joined = new Date(response_obj[i].f_joined_at);
+            }
+
             console.log(response_obj);
         });
     });
@@ -198,16 +237,24 @@
             {:else if tab_active[2]}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Members</p>
                 <ul class="list-elements space-y-2 mt-2 pb-1">
-                    <li>
-                        <MemberCard />
-                    </li>
+                    {#each members as member}
+                        <li>
+                            <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial} pubkey={member.pubkey} joined={member.joined} />
+                        </li>
+                    {/each}
                 </ul>
             {/if}
         </div>
     </div>
 
     <div class="thread-extra-button flex justify-end items-end">
-        <button type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Close Thread</button>
+        {#if tab_active[0]}
+            <button type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Close Thread</button>
+        {:else if tab_active[1]}
+            <span></span>
+        {:else if tab_active[2]}
+            <button type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
+        {/if}
     </div>
 </div>
 

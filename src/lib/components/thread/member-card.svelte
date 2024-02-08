@@ -2,15 +2,26 @@
     import { initModals } from "flowbite";
     import { onMount } from "svelte";
 
-    let id: number;
-    let name: string = "Member 1";
-    let type: string = "Member"
-    let serial: number = 69;
-    let pubkey: string = "0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa";
+    export let id: string;
+    export let name: string;
+    export let type: string;
+    export let serial: number;
+    export let joined: Date;
+    export let pubkey: string;
+    let joined_date_text: string;
+    let joined_time_text: string;
+
+    $: joined_date_text = joined?.toLocaleDateString();
+    $: joined_time_text = joined?.toLocaleTimeString();
 
     onMount((): void =>
     {
         initModals();
+
+        if('a'.charCodeAt(0) <= type.charCodeAt(0) && type.charCodeAt(0) <= 'z'.charCodeAt(0))
+        {
+            type = String.fromCharCode(type.charCodeAt(0) - 'a'.charCodeAt(0) + 'A'.charCodeAt(0)) + type.substring(1);
+        }
     })
 </script>
 
@@ -42,17 +53,21 @@
                 </div>
                 <div class="flex flex-col items-center">
                     <img class="w-24 h-24 rounded-full mb-4" src="/pochita.webp" alt="Rounded avatar">
-                    <p class="text-2xl font-semibold text-gray-700">স্বদীপ Ahmed</p>
-                    <p class="text-xl font-medium text-gray-500">Member</p>
-                    <p class="text-lg font-medium text-gray-500">Added on: 24 Jan, 2024</p>
+                    <p class="text-2xl font-semibold text-gray-700">{name}</p>
+                    <p class="text-xl font-medium text-gray-500">{type}</p>
+                    <p class="text-lg font-medium text-gray-500">Added on: {joined_date_text}</p>
                     <p class="text-lg font-medium text-gray-500">Viewed 4 out of 5 files, Signed 2 out of 5 files</p>
                 </div>
                 <div class="flex justify-end">
                     <div class="flex items-center">
                         <p class="text-gray-600 me-1">Siging Serial</p>
-                        <input type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 me-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" style="max-width: 5em;">
+                        <input bind:value={serial} type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 me-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" style="max-width: 5em;">
                     </div>
-                    <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Make Moderator</button>
+                    <!-- Make Moderator -->
+                    {#if type === "Member"}
+                        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Make Moderator</button>
+                    {/if}
+                    <!-- Remove -->
                     <button type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Remove</button>
                 </div>
             </div>
