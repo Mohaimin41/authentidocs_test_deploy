@@ -19,34 +19,41 @@ export async function POST({
   const member_info = await request.json();
   // console.log("inside add key",key_info);
   let uid_list = member_info.uid_list;
-  let sign_serial=2;
-  let given_threadid=member_info.threadid;
-  for(let i=0;i<uid_list.len();i++)
-  {
-    let given_signing_serial=sign_serial++;
-    let given_user_role="member";
-    let given_userid=uid_list[i];
-  
-    let { data:result, error:_error } = await supabase
-    .rpc('add_thread_member', {
-      given_signing_serial, 
-      given_threadid, 
-      given_user_role, 
-      given_userid
-    })
+  let sign_serial = 2;
+  let given_threadid = member_info.threadid;
+  for (let i = 0; i < uid_list.len(); i++) {
+    let given_signing_serial = sign_serial++;
+    let given_user_role = "member";
+    let given_userid = uid_list[i];
+    let current_userid = session.user.name;
 
-
-  // console.log("add key rps result",result)
-  if (_error) {
-    console.log("ERROR @api/user/addkey:33: supabase add user publickey error\n", _error)
-    return new Response(JSON.stringify("internal server error while adding user key: " + _error), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      status: 500,
+    let { data, error :_error} = await supabase.rpc("add_thread_member", {
+      current_userid,
+      given_signing_serial,
+      given_threadid,
+      given_user_role,
+      given_userid,
     });
+    
+    // console.log("add key rps result",result)
+    if (_error) {
+      console.log(
+        "ERROR @api/user/addkey:33: supabase add user publickey error\n",
+        _error
+      );
+      return new Response(
+        JSON.stringify(
+          "internal server error while adding user key: " + _error
+        ),
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          status: 500,
+        }
+      );
+    }
   }
-}
 
   let response: Response = new Response(JSON.stringify(sign_serial), {
     headers: {
