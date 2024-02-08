@@ -19,19 +19,19 @@ export async function POST({
   const file_info = await request.json();
   // console.log("inside add key",key_info);
 
-  let given_fileid = file_info.fileid;
   let given_src_userid = file_info.srcuserid;
   let given_target_userid = file_info.targetuserid;
   let given_threadid = file_info.threadid;
 
 
-  let { data:result , error:_error } = await supabase
-  .rpc('forward_thread_file', {
-    given_fileid, 
+
+  let { data:result, error:_error } = await supabase
+  .rpc('forward_thread', {
     given_src_userid, 
     given_target_userid, 
     given_threadid
   })
+
 
 
 
