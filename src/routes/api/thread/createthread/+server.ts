@@ -72,6 +72,7 @@ export async function POST({
         status: 500,
       });
   }
+}
 
   let response: Response = new Response(JSON.stringify(result), {
     headers: {
