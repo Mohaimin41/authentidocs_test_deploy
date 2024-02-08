@@ -135,10 +135,40 @@
                 mime_text = "Application/pdf";
             }
             
-             file_view_link =response_obj.file_link_preview;
-             file_download_link = response_obj.file_link_download;
-             download_anchor.download = file_download_link;
-             file_loaded = true;
+            file_view_link =response_obj.file_link_preview;
+            file_download_link = response_obj.file_link_download;
+            download_anchor.download = file_download_link;
+
+            let name_response: Response = await fetch("/api/user/details",
+            {
+                method: "POST",
+                headers:
+                {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(
+                {
+                    userid: ownerid
+                })
+            });
+
+            uploader = (await name_response.json()).username;
+            name_response = await fetch("/api/user/details",
+            {
+                method: "POST",
+                headers:
+                {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(
+                {
+                    userid: current_custodianid
+                })
+            });
+
+            current_custody = (await name_response.json()).username;
+
+            file_loaded = true;
         });
 
         common_fetch("/api/files/getfilesigns", request_obj,
@@ -273,7 +303,7 @@
                     </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{uploader}</p>
                     </div>
                     <div class="flex -space-x-2 rtl:space-x-reverse items-center">
                         <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
