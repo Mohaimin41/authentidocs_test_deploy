@@ -165,17 +165,18 @@
   // Create a new jsPDF object
   const doc = new jsPDF({ orientation: 'landscape' });
 
-  // Add a background image (optional)
-  doc.addImage('/certificate.jpg', 'JPEG', 0, 0, 297, 210);
 
   // Add text content
   
   for (let i=0;i<certificates.length;i++)
   {
+
+  // Add a background image (optional)
+    doc.addImage('/certificate.jpg', 'JPEG', 0, 0, 297, 210);
     doc.text(String(i+1),275,10);
     doc.text('Certificate of File Signature', 100, 25); // Title
     doc.text("Signed By: "+certificates[i].by,25,50);
-    doc.text("Signed On: "+certificates[i].on,25,60);
+    doc.text("Signed On: "+certificates[i].on_date +" "+certificates[i].on_time,25,60);
     doc.text("Signature: ",25,70);
     let sign_parts = certificates[i].signature.match(/.{1,74}/g)
     if(sign_parts?.length)
