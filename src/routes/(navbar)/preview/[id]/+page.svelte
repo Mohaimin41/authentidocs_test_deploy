@@ -2,7 +2,7 @@
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { common_fetch } from "$lib/fetch_func";
-    import { Modal, initModals } from "flowbite";
+    import { initModals } from "flowbite";
     import { onMount } from "svelte";
     import { logged_in_store, uid, useremail } from "../../../../stores";
     import { jsPDF } from "jspdf";
@@ -18,6 +18,7 @@
     let certificates: Signature[] = [];
     let file_name: string = "";
     let file_type: number = 0;
+    let file_status: string = "";
     let download_anchor: HTMLAnchorElement;
     let file_view_link: string;
     let file_download_link: string;
@@ -59,6 +60,7 @@
              response_obj = await response.json();
              file_name = response_obj.file_data.filename;
              file_type = response_obj.file_data.file_mimetype;
+             file_status = response_obj.file_data.current_state;
              username=response_obj.file_data.username;
              upload_timestamp=response_obj.file_data.created_at;
              current_state=response_obj.file_data.current_state;
@@ -290,8 +292,14 @@
             </div>
         {/if}
         <div class="flex justify-end mt-3">
-            <!-- File History -->
-            <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
+            {#if file_status !== "personal"}
+                <!-- Add Note -->
+                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Add Note</button>
+                <!-- Mark as Viewed -->
+                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Mark as Viewed</button>
+                <!-- File History -->
+                <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
+            {/if}
             <!-- certificate button -->
             <button data-modal-target="cert-modal" data-modal-toggle="cert-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Certificate</button>
             <!-- download button -->

@@ -64,11 +64,12 @@ export async function POST({
   }
   let result_mod;
   let result_custodian;
-  for (let i = 0; i < result_2.len(); i++) {
+  for (let i = 0; i < result_2.length; i++) {
     let element = result_2[i];
     if (element.f_current_custodian) {
       result_custodian = element;
     }
+
     if (element.f_role === "admin") {
       result_mod = element;
     }
@@ -79,6 +80,7 @@ export async function POST({
     thread_mod_detail: result_mod,
     thread_current_custodian_detail: result_custodian,
   };
+
   let response: Response = new Response(JSON.stringify(result_3), {
     headers: {
       "Content-Type": "application/json",
