@@ -3,7 +3,6 @@ import type { RequestEvent } from "./$types";
 
 export async function POST({
   request,
-  cookies,
   locals,
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
@@ -15,30 +14,22 @@ export async function POST({
       status: 401,
     });
   }
-  // console.log(session);
-  const file_info = await request.json();
-  // console.log("inside add key",key_info);
+  const noti_info = await request.json();
 
-  let given_fileid = file_info.fileid;
-  let given_src_userid = file_info.srcuserid;
-  let given_target_userid = file_info.targetuserid;
-  let given_threadid = file_info.threadid;
+  let given_userid = noti_info.user_id;
+  let given_notificationid = noti_info.notificationid;
 
 
-  let { data:result , error:_error } = await supabase
-  .rpc('forward_thread_file', {
-    given_fileid, 
-    given_src_userid, 
-    given_target_userid, 
-    given_threadid
+  let { data:result , error :_error } = await supabase
+  .rpc('set_user_notification_seen', {
+    given_notificationid, 
+    given_userid
   })
 
 
-
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log("ERROR @api/user/addkey:33: supabase add user publickey error\n", _error)
-    return new Response(JSON.stringify("internal server error while adding user key: " + _error), {
+    console.log("ERROR @api/user/getkey:28: supabase getting user key error\n", _error)
+    return new Response(JSON.stringify("internal server error: " + _error), {
       headers: {
         "Content-Type": "application/json",
       },

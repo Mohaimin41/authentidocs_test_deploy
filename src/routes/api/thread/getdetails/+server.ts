@@ -20,27 +20,68 @@ export async function POST({
   // console.log("inside add key",key_info);
   let given_threadid = thread_info.threadid;
 
-
-  let { data:result , error:_error } = await supabase
-  .rpc('get_thread_details', {
-    given_threadid
-  })
-
-
-
+  let { data: result, error: _error } = await supabase.rpc(
+    "get_thread_details",
+    {
+      given_threadid,
+    }
+  );
 
   // console.log("add key rps result",result)
   if (_error) {
-    console.log("ERROR @api/user/addkey:33: supabase add user publickey error\n", _error)
-    return new Response(JSON.stringify("internal server error while adding user key: " + _error), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      status: 500,
-    });
+    console.log(
+      "ERROR @api/user/addkey:33: supabase add user publickey error\n",
+      _error
+    );
+    return new Response(
+      JSON.stringify("internal server error while adding user key: " + _error),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        status: 500,
+      }
+    );
+  }
+  //   let result_2 :
+  let { data: result_2, error: error_2 } = await supabase.rpc(
+    "get_thread_mods_details",
+    {
+      given_threadid,
+    }
+  );
+  if (error_2) {
+    // console.log("ERROR @api/user/addkey:33: supabase add user publickey error\n", _error)
+    return new Response(
+      JSON.stringify("internal server error while adding user key: " + error_2),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        status: 500,
+      }
+    );
+  }
+  let result_mod;
+  let result_custodian;
+  for (let i = 0; i < result_2.length; i++) {
+    let element = result_2[i];
+    if (element.f_current_custodian) {
+      result_custodian = element;
+    }
+
+    if (element.f_role === "admin") {
+      result_mod = element;
+    }
   }
 
-  let response: Response = new Response(JSON.stringify(result), {
+  let result_3 = {
+    thread_detail: result,
+    thread_mod_detail: result_mod,
+    thread_current_custodian_detail: result_custodian,
+  };
+
+  let response: Response = new Response(JSON.stringify(result_3), {
     headers: {
       "Content-Type": "application/json",
     },

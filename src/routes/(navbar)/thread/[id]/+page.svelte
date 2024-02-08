@@ -1,9 +1,50 @@
 <script lang="ts">
+    import { page } from "$app/stores";
     import FileCard from "$lib/components/thread/file-card.svelte";
     import MemberCard from "$lib/components/thread/member-card.svelte";
     import { onMount } from "svelte";
 
+    class FileObj
+    {
+        public id: string = "";
+        public name: string = "";
+        public type: string = "";
+        public status: string = "";
+    }
+
+    class MemberObj
+    {
+        public id: string = "";
+        public name: string = "";
+        public role: string = "";
+        public serial: number = -1;
+        public pubkey: string = "";
+        public joined: Date = new Date();
+    }
+
+    class AddableMemberObj
+    {
+        public id: string = "";
+        public name: string = "";
+        public checked: boolean = false;
+    }
+
+    let id: string;
+    let thread_name: string;
+    let team_name: string;
+    let description: string;
+    let moderator: string;
+    let current_custodian: string;
+    let started_at: Date;
+    let date_text: string;
+    let time_text: string;
     let tab_active: boolean[] = [true, false, false];
+    let files: FileObj[] = [];
+    let members: MemberObj[] = [];
+    let addable_members: AddableMemberObj[] = [];
+
+    $: date_text = started_at?.toLocaleDateString();
+    $: time_text = started_at?.toLocaleTimeString();
 
     function reset_tabs(): void
     {
@@ -33,121 +74,309 @@
 
         tab_active[2] = true;
     }
+
+    function get_members(): void
+    {
+        fetch("/api/thread/getmembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_threadid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            members = new Array(response_obj.length);
+
+            for(let i: number = 0; i < members.length; ++i)
+            {
+                members[i] = new MemberObj();
+                members[i].id = response_obj[i].f_userid;
+                members[i].name = response_obj[i].f_username;
+                members[i].role = response_obj[i].f_user_role;
+                members[i].serial = response_obj[i].f_signing_serial;
+                members[i].pubkey = response_obj[i].f_publickey;
+                members[i].joined = new Date(response_obj[i].f_joined_at);
+            }
+        });
+    }
+
+    function get_addable_members(): void
+    {
+        fetch("/api/thread/getaddablemembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_threadid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            addable_members = new Array(response_obj.length);
+
+            for(let i: number = 0; i < addable_members.length; ++i)
+            {
+                addable_members[i] = new AddableMemberObj();
+                addable_members[i].id = response_obj[i].f_userid;
+                addable_members[i].name = response_obj[i].f_username;
+            }
+        });
+    }
+
+    function add_members(): void
+    {
+        let addable_member_ids: string[] = [];
+
+        for(let i: number = 0; i < addable_members.length; ++i)
+        {
+            if(addable_members[i].checked)
+            {
+                addable_member_ids.push(addable_members[i].id);
+            }
+        }
+
+        fetch("/api/thread/addmember",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                threadid: id,
+                uid_list: addable_member_ids
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+
+            console.log(response_obj);
+            get_members();
+            get_addable_members();
+        });
+
+        console.log(addable_member_ids);
+    }
     
     onMount((): void =>
     {
-        
+        id = $page.params.id;
+
+        fetch("/api/thread/getdetails",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                threadid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            thread_name = response_obj.thread_detail.threadname;
+            team_name = response_obj.thread_detail.team_name;
+            started_at = new Date(response_obj.thread_detail.created_at);
+            moderator = response_obj.thread_mod_detail.f_username;
+            current_custodian = response_obj.thread_current_custodian_detail.f_username;
+            description = response_obj.thread_detail.description;
+        });
+
+        fetch("/api/thread/getfiles",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                thread_id: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            files = new Array(response_obj.length);
+
+            for(let i: number = 0; i < files.length; ++i)
+            {
+                files[i] = new FileObj();
+                files[i].id = response_obj[i].f_fileid;
+                files[i].name = response_obj[i].f_filename;
+                files[i].type = response_obj[i].f_file_extension;
+                files[i].status = response_obj[i].f_current_state;
+            }
+        });
+
+        get_members();
+        get_addable_members();
     });
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
-<div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-    <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
-        <li class="me-2">
+<div class="pg-center flex justify-between">
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+            <li class="me-2">
+                {#if tab_active[0]}
+                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Details</a>
+                {:else}
+                    <a on:click={show_tab1} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Details</a>
+                {/if}
+            </li>
+            <li class="me-2">
+                {#if tab_active[1]}
+                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Files</a>
+                {:else}
+                    <a on:click={show_tab2} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Files</a>
+                {/if}
+            </li>
+            <li class="me-2">
+                {#if tab_active[2]}
+                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Members</a>
+                {:else}
+                    <a on:click={show_tab3} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Members</a>
+                {/if}
+            </li>
+        </ul>
+        <div class="tab-item-data mx-6 mb-6">
             {#if tab_active[0]}
-                <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Details</a>
-            {:else}
-                <a on:click={show_tab1} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Details</a>
+                <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{thread_name}</p>
+                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Moderator</p>
+                <div class="flex items-center mb-4">
+                    <img class="w-8 h-8 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                    <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">{moderator}</p>
+                </div>
+                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Current Custodian</p>
+                <div class="flex items-center mb-4">
+                    <img class="w-8 h-8 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                    <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">{current_custodian}</p>
+                </div>
+                <div class="grid grid-cols-4 mb-4">
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Team</p>
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Started At</p>
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">9</p>
+                        <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{team_name}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                            <span>{date_text}</span>
+                        </p>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">69</p>
+                    </div>
+                </div>
+                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
+                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{description}</p>
+            {:else if tab_active[1]}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Files</p>
+                <ul class="list-elements space-y-2 mt-2 pb-1">
+                    {#each files as file}
+                        <li>
+                            <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
+                        </li>
+                    {/each}
+                </ul>
+            {:else if tab_active[2]}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Members</p>
+                <ul class="list-elements space-y-2 mt-2 pb-1">
+                    {#each members as member}
+                        <li>
+                            <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial} pubkey={member.pubkey} joined={member.joined} />
+                        </li>
+                    {/each}
+                </ul>
             {/if}
-        </li>
-        <li class="me-2">
-            {#if tab_active[1]}
-                <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Files</a>
-            {:else}
-                <a on:click={show_tab2} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Files</a>
-            {/if}
-        </li>
-        <li class="me-2">
-            {#if tab_active[2]}
-                <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Members</a>
-            {:else}
-                <a on:click={show_tab3} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Members</a>
-            {/if}
-        </li>
-    </ul>
-    <div class="tab-item-data mx-6 mb-6">
+        </div>
+    </div>
+
+    <div class="thread-extra-button flex justify-end items-end">
         {#if tab_active[0]}
-            <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Thread 1</p>
-            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Moderator</p>
-            <div class="flex items-center mb-4">
-                <img class="w-8 h-8 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">Mustafa Siam Ur Rafique</p>
-            </div>
-            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Current Custodian</p>
-            <div class="flex items-center mb-4">
-                <img class="w-8 h-8 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">Abdoollah Al Mohaemen</p>
-            </div>
-            <div class="grid grid-cols-4 mb-4">
-                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
-                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Team</p>
-                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Started At</p>
-                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
-                    </svg>
-                    <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">9</p>
-                    <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p>
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
-                    </svg>
-                    <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">Team 1</p>
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
-                    </svg>
-                    <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">01 February 2024</p>
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                    </svg>
-                    <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">69</p>
-                </div>
-            </div>
-            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
+            <button type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Close Thread</button>
         {:else if tab_active[1]}
-            <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Files</p>
-            <ul class="list-elements space-y-2 mt-2 pb-1">
-                <li>
-                    <FileCard file_name={"Shundor File"} file_type={"pdf"} file_status={1}/>
-                </li>
-                <li>
-                    <FileCard file_name={"Shundor File"} file_type={"png"} file_status={1}/>
-                </li>
-                <li>
-                    <FileCard file_name={"Shundor File"} file_type={"png"} file_status={1}/>
-                </li>
-                <li>
-                    <FileCard file_name={"Shundor File"} file_type={"pdf"} file_status={1}/>
-                </li>
-                <li>
-                    <FileCard file_name={"Shundor File"} file_type={"png"} file_status={1}/>
-                </li>
-                <li>
-                    <FileCard file_name={"Shundor File"} file_type={"pdf"} file_status={1}/>
-                </li>
-            </ul>
+            <span></span>
         {:else if tab_active[2]}
-            <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Members</p>
-            <ul class="list-elements space-y-2 mt-2 pb-1">
-                <li>
-                    <MemberCard />
-                </li>
-            </ul>
+            <!-- Add Members -->
+            <button data-modal-target="addable-members-modal" data-modal-toggle="addable-members-modal" type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
         {/if}
     </div>
 </div>
 
-<div class="thread-extra-button flex justify-end">
-    <button type="button" class="text-white self-end bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Close Thread</button>
+<div id="addable-members-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Select Thread Members
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="addable-members-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 space-y-4">
+                <form on:submit={add_members} class="mx-auto">
+                    {#each addable_members as member}
+                        <div class="flex items-center mb-4">
+                            <input bind:checked={member.checked} id="checkbox-{member.id}" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
+                            <label for="checkbox-1" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
+                        </div>
+                    {/each}
+                    <div class="flex justify-end">
+                        <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
+    .pg-center
+    {
+        position: absolute;
+        top: 5.25rem;
+        bottom: 1rem;
+        left: 20%;
+        right: 20%;
+    }
     .thread-info
     {
         position: absolute;

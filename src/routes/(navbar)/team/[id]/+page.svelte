@@ -4,8 +4,6 @@
     import { initModals } from "flowbite";
     import { page } from "$app/stores";
 
-    // bc072d10-6aaf-40cb-8962-63c6a5edb549
-
     class TeamMember
     {
         public uid: string = "";
@@ -56,7 +54,7 @@
 
     function add_member(): void
     {
-        // bc072d10-6aaf-40cb-8962-63c6a5edb549
+        
     }
 
     onMount((): void =>
