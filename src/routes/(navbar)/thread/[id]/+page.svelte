@@ -2,6 +2,8 @@
     import { page } from "$app/stores";
     import FileCard from "$lib/components/thread/file-card.svelte";
     import MemberCard from "$lib/components/thread/member-card.svelte";
+    import { common_fetch } from "$lib/fetch_func";
+    import { initModals } from "flowbite";
     import { onMount } from "svelte";
 
     class FileObj
@@ -165,14 +167,78 @@
             get_members();
             get_addable_members();
         });
+    }
 
-        console.log(addable_member_ids);
+    function add_file(): void
+    {
+        let file_input_elem: HTMLInputElement = document.createElement("input");
+        file_input_elem.type = "file";
+
+        file_input_elem.onchange = async (event: Event): Promise<void> =>
+        {
+            let file: File | null | undefined = file_input_elem.files?.item(0);
+
+            if(file === null || file === undefined)
+            {
+                return;
+            }
+
+            let file_buffer: ArrayBuffer = await file.arrayBuffer();
+            let success: boolean = true;
+            let file_success_response_obj: any = {};
+
+            for (let i: number = 0; i < file_buffer.byteLength; i += 1048576) {
+                let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
+                let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
+                let response: Response = await fetch(
+                    "/api/thread/addthreadchunkfile/continue?filename=" + file.name,
+                    {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        data: small_array,
+                    }),
+                    }
+                );
+
+                let response_obj: any = await response.json();
+
+                console.log(response_obj);
+
+                if (response_obj.success === false) {
+                    console.error("dhuru");
+
+                    success = false;
+
+                    break;
+                }
+            }
+
+            if (success) {
+                await fetch("/api/thread/addthreadchunkfile/finish?filename=" + file.name + "&threadid=" + id, {
+                    method: "POST",
+                    headers: {
+                    "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({}),
+                }).then(async (response: Response): Promise<void> => {
+                    file_success_response_obj = await response.json();
+
+                    console.log("file upload shesh:line223",file_success_response_obj);
+                });
+            }
+        };
+
+        file_input_elem.click();
     }
     
     onMount((): void =>
     {
         id = $page.params.id;
 
+        initModals();
         fetch("/api/thread/getdetails",
         {
             method: "POST",
@@ -326,7 +392,8 @@
         {#if tab_active[0]}
             <button type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Close Thread</button>
         {:else if tab_active[1]}
-            <span></span>
+            <!-- Add File -->
+            <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add File</button>
         {:else if tab_active[2]}
             <!-- Add Members -->
             <button data-modal-target="addable-members-modal" data-modal-toggle="addable-members-modal" type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
