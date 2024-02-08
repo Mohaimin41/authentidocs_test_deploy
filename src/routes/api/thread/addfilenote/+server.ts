@@ -16,14 +16,24 @@ export async function POST({
     });
   }
   // console.log(session);
-  const thread_info = await request.json();
+  const file_info = await request.json();
   // console.log("inside add key",key_info);
 
-  let given_threadid=thread_info.thread_id;
+  let given_content=file_info.content;
+  let given_fileid=file_info.fileid;
+  let given_signature=file_info.sign;
+  let given_signing_key=file_info.signing_key;
+  let given_signing_userid=file_info.given_signing_userid;
+
+
 
   let { data:result, error:_error } = await supabase
-  .rpc('get_thread_file_list', {
-    given_threadid
+  .rpc('add_file_note', {
+    given_content, 
+    given_fileid, 
+    given_signature, 
+    given_signing_key, 
+    given_signing_userid
   })
 
 
