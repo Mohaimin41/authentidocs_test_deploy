@@ -19,15 +19,13 @@ export async function POST({
   const thread_info = await request.json();
   // console.log("inside add key",key_info);
   let given_threadid = thread_info.given_threadid;
-  let given_teamid = thread_info.given_teamid;
 
 
 
 
 
   let { data, error } = await supabase
-  .rpc('get_thread_addable_member_list', {
-    given_teamid, 
+  .rpc('get_thread_addable_member_list', { 
     given_threadid
   })
 if (error) console.error(error)
