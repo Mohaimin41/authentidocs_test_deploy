@@ -2,7 +2,7 @@
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { common_fetch } from "$lib/fetch_func";
-    import { Modal, initModals } from "flowbite";
+    import { initModals } from "flowbite";
     import { onMount } from "svelte";
     import { logged_in_store, uid, useremail } from "../../../../stores";
     import { jsPDF } from "jspdf";

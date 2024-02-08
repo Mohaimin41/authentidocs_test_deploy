@@ -1,9 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
+    export let file_id: string;
     export let file_name: string;
     export let file_type: string;
-    export let file_status: number;
+    export let file_status: string;
     const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
     let file_status_color: string;
@@ -13,17 +14,17 @@
     {
         color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
 
-        if(file_status === 0)
+        if(file_status === "not_viewed_by_custodian")
         {
             file_status_color = "red";
             file_status_text = "Not Viewed and Not Signed";
         }
-        else if(file_status === 1)
+        else if(file_status === "viewed_by_custodian")
         {
             file_status_color = "blue";
             file_status_text = "Viewed and Not Signed";
         }
-        else if(file_status === 2)
+        else if(file_status === "signed_viewed_by_custodian" || file_status === "personal")
         {
             file_status_color = "green";
             file_status_text = "Viewed and Signed";
@@ -32,7 +33,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<a href="javascript:" class="block p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
+<a href="/preview/{file_id}" class="block p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
     <div class="flex">
         <div class="pe-2">
             {#if file_type === "png" || file_type === "jpeg" || file_type === "jpeg"}

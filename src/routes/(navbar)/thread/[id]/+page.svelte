@@ -4,6 +4,14 @@
     import MemberCard from "$lib/components/thread/member-card.svelte";
     import { onMount } from "svelte";
 
+    class FileObj
+    {
+        public id: string = "";
+        public name: string = "";
+        public type: string = "";
+        public status: string = "";
+    }
+
     let id: string;
     let thread_name: string;
     let team_name: string;
@@ -14,6 +22,7 @@
     let date_text: string;
     let time_text: string;
     let tab_active: boolean[] = [true, false, false];
+    let files: FileObj[] = [];
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -71,6 +80,34 @@
             moderator = response_obj.thread_mod_detail.f_username;
             current_custodian = response_obj.thread_current_custodian_detail.f_username;
             description = response_obj.thread_detail.description;
+        });
+
+        fetch("/api/thread/getfiles",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                thread_id: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            files = new Array(response_obj.length);
+
+            for(let i: number = 0; i < files.length; ++i)
+            {
+                files[i] = new FileObj();
+                files[i].id = response_obj[i].f_fileid;
+                files[i].name = response_obj[i].f_filename;
+                files[i].type = response_obj[i].f_file_extension;
+                files[i].status = response_obj[i].f_current_state;
+            }
+            
+            console.log(response_obj);
         });
     });
 </script>
@@ -152,24 +189,11 @@
             {:else if tab_active[1]}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Files</p>
                 <ul class="list-elements space-y-2 mt-2 pb-1">
-                    <li>
-                        <FileCard file_name={"Shundor File"} file_type={"pdf"} file_status={1}/>
-                    </li>
-                    <li>
-                        <FileCard file_name={"Shundor File"} file_type={"png"} file_status={1}/>
-                    </li>
-                    <li>
-                        <FileCard file_name={"Shundor File"} file_type={"png"} file_status={1}/>
-                    </li>
-                    <li>
-                        <FileCard file_name={"Shundor File"} file_type={"pdf"} file_status={1}/>
-                    </li>
-                    <li>
-                        <FileCard file_name={"Shundor File"} file_type={"png"} file_status={1}/>
-                    </li>
-                    <li>
-                        <FileCard file_name={"Shundor File"} file_type={"pdf"} file_status={1}/>
-                    </li>
+                    {#each files as file}
+                        <li>
+                            <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
+                        </li>
+                    {/each}
                 </ul>
             {:else if tab_active[2]}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Members</p>
