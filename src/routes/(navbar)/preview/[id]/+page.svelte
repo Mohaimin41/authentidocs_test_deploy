@@ -34,6 +34,9 @@
     let upload_date:string;
     let upload_time:string;
     let file_signed: boolean;
+    let uploader:string;
+    let ownerid:string;
+    let current_custodianid:string;
 
     $: file_signed = file_status === "signed_viewed_by_custodian";
     $: upload_date = upload_timestamp?.toLocaleDateString();
@@ -116,6 +119,8 @@
              file_type = response_obj.file_data.file_mimetype;
              file_status = response_obj.file_data.current_state;
              username=response_obj.file_data.username;
+             ownerid=response_obj.file_data.file_ownerid;
+             current_custodianid=response_obj.file_data.current_custodianid;
              upload_timestamp= new Date(response_obj.file_data.created_at);
              current_state=response_obj.file_data.current_state;
 
@@ -283,7 +288,7 @@
                     </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{username}</p>
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">{current_custody}</p>
                     </div>
                     <div class="flex items-center">
                         <p class="text-xs font-medium text-gray-900 dark:text-white">{current_state}</p>
