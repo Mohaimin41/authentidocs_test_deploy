@@ -7,7 +7,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new Response(JSON.stringify("you must be logged in to add files"), {
+    return new Response(JSON.stringify("you must be logged in to view files"), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -27,6 +27,7 @@ export async function POST({
     }
   );
   if (_error1) {
+    console.log("ERROR @api/files/getfilelink:30: supabase getting file data error\n", _error1)
     return new Response(
       JSON.stringify(
         "internal server error while getting file metadata: " + _error1
@@ -44,6 +45,8 @@ export async function POST({
     .createSignedUrl(result1.file_url, 24 * 60 * 60);
 
   if (_error2) {
+    
+    console.log("ERROR @api/files/getfilelink:49: supabase file link access error\n", _error2)
     return new Response(
       JSON.stringify(
         "internal server error while getting preview link: " + _error2
@@ -64,6 +67,7 @@ export async function POST({
     });
 
   if (_error3) {
+    console.log("ERROR @api/files/getfilelink:70: supabase file link access error\n", _error3)
     return new Response(
       JSON.stringify(
         "internal server error while getting downloadable link: " + _error3

@@ -5,6 +5,7 @@
     import { Modal } from "flowbite";
     import { onMount } from "svelte";
     import { logged_in_store, uid, useremail } from "../../../../stores";
+    import { jsPDF } from "jspdf";
 
     class Signature
     {
@@ -127,6 +128,50 @@
             }
         });
     });
+    function generateCertificate() {
+  // Create a new jsPDF object
+  const doc = new jsPDF({ orientation: 'landscape' });
+
+  // Add a background image (optional)
+  doc.addImage('/certificate.jpg', 'JPEG', 0, 0, 297, 210);
+
+  // Add text content
+  
+  for (let i=0;i<certificates.length;i++)
+  {
+    doc.text(String(i+1),275,10);
+    doc.text('Certificate of File Signature', 100, 25); // Title
+    doc.text("Signed By: "+certificates[i].by,25,50);
+    doc.text("Signed On: "+certificates[i].on,25,60);
+    doc.text("Signature: ",25,70);
+    let sign_parts = certificates[i].signature.match(/.{1,74}/g)
+    if(sign_parts?.length)
+    {
+        for(let j=0;j<sign_parts.length;j++)
+    {
+        console.log(sign_parts)
+        doc.text(sign_parts[j],52,70+j*10);
+    }
+    doc.text("Public Key:",25,70+sign_parts?.length*10);
+    let key_parts = certificates[i].pubkey.match(/.{1,70}/g)
+    if(key_parts?.length)
+    {
+        for(let j=0;j<key_parts.length;j++)
+    {
+        console.log(key_parts)
+        doc.text(key_parts[j],55,70+sign_parts?.length*10+j*10);
+    }   
+    }
+    }
+    if(i!=certificates.length-1)
+    {
+        doc.addPage();
+    }
+  }
+
+  // Save the PDF
+   doc.save(file_name.split(".").reverse().pop()+"_certificate.pdf");
+}
 </script>
 
 <div class="preview-root flex flex-col">
@@ -314,6 +359,8 @@
                 </div>
             </div>
         {/each}
+                    <!-- download button -->
+                    <button on:click={generateCertificate} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Download</button>
       </div>
     </div>
   </div>

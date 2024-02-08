@@ -160,7 +160,7 @@
     if (file === null) {
       return;
     }
-
+  
     let file_buffer: ArrayBuffer = await file.arrayBuffer();
     file_input_elem.value = "";
 
