@@ -111,36 +111,4 @@
         left: 32.5%;
         right: 0;
     }
-    .thread-info
-    {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 70%;
-    }
-    .thread-files
-    {
-        position: absolute;
-        top: 32.5%;
-        left: 0;
-        right: 0;
-        bottom: 7.5%;
-    }
-    .thread-files-title
-    {
-        position: absolute;
-        top: 0;
-        bottom: 92vh;
-        left: 0;
-        right: 0;
-    }
-    .thread-files-list
-    {
-        position: absolute;
-        top: 8vh;
-        bottom: 0;
-        left: 0;
-        right: 0;
-    }
 </style>
