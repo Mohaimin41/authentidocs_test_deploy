@@ -27,8 +27,6 @@ export async function POST({
     }
   );
 
-  console.log(result1);
-
   if (_error1) {
     console.log(
       "ERROR @api/files/getfilelink:30: supabase getting file data error\n",
