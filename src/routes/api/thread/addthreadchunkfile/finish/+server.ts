@@ -24,7 +24,7 @@ export async function POST({
 
   if (filename === null) {
     console.log(
-      "ERROR @api/files/addchunkfile/finish:25: map filemap returned as undefined"
+      "ERROR @api/thread/addthreadchunkfile/finish:27: map filemap returned as undefined"
     );
     get(filemap).clear();
     return json({ success: false });
@@ -34,7 +34,7 @@ export async function POST({
 
   if (file_array === undefined) {
     console.log(
-      "ERROR @api/files/addchunkfile/finish:36: array filearray returned as undefined from filemap"
+      "ERROR @api/thread/addthreadchunkfile/finish:37: array filearray returned as undefined from filemap"
     );
     get(filemap).clear();
     return json({ success: false });
@@ -76,7 +76,7 @@ export async function POST({
   // console.log("supabaseupload" + data);
   if (storage_call_response.error) {
     console.log(
-      "ERROR @api/files/addchunkfile/finish:77: supabase storage upload error\n",
+      "ERROR @api/thread/addthreadchunkfile/finish:78: supabase storage upload error\n",
       storage_call_response.error
     );
     get(filemap).clear();
@@ -112,7 +112,7 @@ export async function POST({
   if (_error) {
     get(filemap).clear();
     console.log(
-      "ERROR @api/files/addchunkfile/finish:114: supabase file data insert into database error\n",
+      "ERROR @api/thread/addthreadchunkfile/finish:114: supabase file data insert into database error\n",
       _error
     );
     return new Response(JSON.stringify("internal server error: " + _error), {
