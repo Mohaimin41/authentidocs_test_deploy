@@ -45,6 +45,8 @@
     let members: MemberObj[] = [];
     let addable_members: AddableMemberObj[] = [];
     let can_forward: boolean;
+    let member_count: number;
+    let file_count: number;
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -106,6 +108,8 @@
                 members[i].pubkey = response_obj[i].f_publickey;
                 members[i].joined = new Date(response_obj[i].f_joined_at);
             }
+
+            member_count = members.length;
         });
     }
 
@@ -307,6 +311,8 @@
                 files[i].type = response_obj[i].f_file_extension;
                 files[i].status = response_obj[i].f_current_state;
             }
+
+            file_count = files.length;
         });
 
         fetch("/api/thread/canforward",
@@ -379,8 +385,8 @@
                         <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
                         </svg>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">9</p>
-                        <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
+                        <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
                     </div>
                     <div class="flex items-center">
                         <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -400,7 +406,7 @@
                         <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                         </svg>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">69</p>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
                     </div>
                 </div>
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
