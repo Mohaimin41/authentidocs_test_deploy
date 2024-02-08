@@ -24,12 +24,10 @@ export async function POST({
 
 
 
-  let { data, error } = await supabase
+  let { data:result, error:_error } = await supabase
   .rpc('get_thread_addable_member_list', { 
     given_threadid
   })
-if (error) console.error(error)
-else console.log(data)
 
 
 

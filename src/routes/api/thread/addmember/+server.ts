@@ -19,7 +19,7 @@ export async function POST({
   const member_info = await request.json();
   // console.log("inside add key",key_info);
   let uid_list = member_info.uid_list;
-  let sign_serial=0;
+  let sign_serial=2;
   let given_threadid=member_info.threadid;
   for(let i=0;i<uid_list.len();i++)
   {
