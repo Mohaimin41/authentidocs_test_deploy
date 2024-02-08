@@ -17,28 +17,33 @@ export async function POST({
   const user_info = await request.json();
 
   let given_userid = user_info.user_id;
+  let notifications_list : any[] = [];
 
-  let { data: result, error: _error } = await supabase.rpc(
-    "get_user_live_notifications",
-    {
-      given_userid,
-    }
-  );
-
-  if (_error) {
-    console.log(
-      "ERROR @api/user/getnotifications:30: supabase getting user notification error\n",
-      _error
+  do {
+    let { data: result, error: _error } = await supabase.rpc(
+      "get_user_live_notifications",
+      {
+        given_userid,
+      }
     );
-    return new Response(JSON.stringify("internal server error: " + _error), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      status: 500,
-    });
-  }
+  
+    if (_error) {
+      console.log(
+        "ERROR @api/user/getnotifications:32: supabase getting user notification error\n",
+        _error
+      );
+      return new Response(JSON.stringify("internal server error: " + _error), {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        status: 500,
+      });
+    }
+    notifications_list = result;  
+  } while (notifications_list?.length === 0);
+  
 
-  let response: Response = new Response(JSON.stringify(result), {
+  let response: Response = new Response(JSON.stringify(notifications_list), {
     headers: {
       "Content-Type": "application/json",
     },
