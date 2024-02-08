@@ -59,8 +59,8 @@
     .pg-center
     {
         position: absolute;
-        top: 12vh;
-        bottom: 4vh;
+        top: 5.25rem;
+        bottom: 1rem;
         left: 10%;
         right: 10%;
     }
@@ -78,20 +78,20 @@
         top: 0;
         left: 0;
         right: 0;
-        bottom: 7.5%;
+        bottom: 3.5rem
     }
     .thread-list-title
     {
         position: absolute;
         top: 0;
-        bottom: 92vh;
+        height: 2rem;
         left: 0;
         right: 0;
     }
     .thread-list
     {
         position: absolute;
-        top: 8vh;
+        top: 4rem;
         bottom: 0;
         left: 0;
         right: 0;
