@@ -8,7 +8,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new Response(JSON.stringify("you must be logged in to add files"), {
+    return new Response(JSON.stringify("you must be logged in to view thread members"), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -20,25 +20,28 @@ export async function POST({
   // console.log("inside add key",key_info);
   let given_threadid = team_info.given_threadid;
 
-
-
-
-
-  let { data:result, error :_error } = await supabase
-  .rpc('get_thread_member_list', {
-    given_threadid
-  })
-
+  let { data: result, error: _error } = await supabase.rpc(
+    "get_thread_member_list",
+    {
+      given_threadid,
+    }
+  );
 
   // console.log("add key rps result",result)
   if (_error) {
-    console.log("ERROR @api/user/addkey:33: supabase add user publickey error\n", _error)
-    return new Response(JSON.stringify("internal server error while adding user key: " + _error), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      status: 500,
-    });
+    console.log(
+      "ERROR @api/thread/getmembers:33: supabase get thread user list error\n",
+      _error
+    );
+    return new Response(
+      JSON.stringify("internal server error while getting thread member list: " + _error),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        status: 500,
+      }
+    );
   }
 
   let response: Response = new Response(JSON.stringify(result), {
