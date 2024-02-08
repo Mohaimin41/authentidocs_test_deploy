@@ -51,11 +51,11 @@ export async function POST({
   console.log(result1);
   for(let i=0;i<result1.length;i++)
   {
-    if(result1[i].userid == given_src_userid )
+    if(result1[i].f_userid == given_src_userid )
     {
       if(i!=(result1.length-1))
       {
-        given_target_userid=result1[i+1].signing_serial;
+        given_target_userid=result1[i+1].f_signing_serial;
       }
     }
   }
