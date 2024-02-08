@@ -1,4 +1,4 @@
-import { SvelteKitAuth } from "@auth/sveltekit"
+import { SvelteKitAuth,type User } from "@auth/sveltekit"
 import Credentials from '@auth/core/providers/credentials'
 import { supabase } from "$lib/server/supabase_client.server";
 async function getUserFromDb(email:string,password:string)
@@ -6,22 +6,29 @@ async function getUserFromDb(email:string,password:string)
   let given_email=email
   let given_pwd_hash=password
 
-    let { data:result, error } = await supabase
-    .rpc('can_log_in_user', {
-      given_email, 
-      given_pwd_hash
-    })
-    if (error) console.error(error)
-    else console.log(result)
-  if(result.userid == null)
+  let { data:result, error } = await supabase
+  .rpc('can_log_in_user_errorcode', {
+    given_email, 
+    given_pwd_hash
+  })
+  // if (error) console.error(error)
+  // else console.log("dbresult:"+result)
+  if(result !=0)
   {
-    return {errors:'fked up'};
+    return {user:{error:result}, success:false};
   }
   else
   {
-    return {uid:result.userid,name:result.username,email:result.email,image:result.pfp_url}
+    
+    let { data:result, error } = await supabase
+    .rpc('get_user_details_email', {
+      given_email
+    })
+
+
+    return {user:{name:result.userid,email:result.email,image:result.pfp_url},success:true}
   }
-  }
+}
    
 export const handle = SvelteKitAuth({
   providers: [
@@ -34,19 +41,19 @@ export const handle = SvelteKitAuth({
       },
       authorize: async (credentials) => {
         let user = null
-        console.log(credentials)
+        //console.log(credentials)
         // logic to salt and hash password
         const pwHash = credentials.password
         // logic to verify if user exists
-        user = await <User>getUserFromDb(<string>credentials.email,<string>credentials.password)
+        let response_from_db = await getUserFromDb(<string>credentials.email,<string>credentials.password)
         
-        if(!user.errors)
+        if(response_from_db.success)
         {
-          return user;
+          return <User>response_from_db.user;
         }
         else
         {
-          throw new Error(JSON.stringify({errors:user.error,status:false}))
+          throw new Error(response_from_db.user.error)
         }
 
         // return json object with the user data
@@ -55,6 +62,7 @@ export const handle = SvelteKitAuth({
     })
   ],
   pages:{
-    error: '/login?errorcode=1', // Error code passed in query string as ?error=
-  }
+    error: '/login', // Error code passed in query string as ?error=
+  },
+  trustHost:true,
 })

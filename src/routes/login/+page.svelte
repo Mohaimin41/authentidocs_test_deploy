@@ -1,6 +1,8 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
+    import { page } from "$app/stores";
     import LogginFill from "$lib/components/loggin-fill.svelte";
-import Signing from "$lib/components/signing.svelte";
+    import Signing from "$lib/components/signing.svelte";
     import { onMount } from "svelte";
 
     const IMAGE_COUNT: number = 2;
@@ -52,6 +54,16 @@ import Signing from "$lib/components/signing.svelte";
 
     onMount((): void =>
     {
+        if($page.data.session !== null)
+        {
+            goto("/home");
+        }
+
+        // if($page.url.searchParams.has("error"))
+        // {
+        //     new_key.set(false);
+        // }
+
         let image_idx = Math.round(Math.random() * (IMAGE_COUNT - 1));
         let chapa_idx = Math.round(Math.random() * (CHAPA_COLLECTION.length - 1));
         let image_src = "signin/" + image_idx + ".webp";
@@ -67,7 +79,7 @@ import Signing from "$lib/components/signing.svelte";
         
         setTimeout((): void =>
         {
-            let chapa_interval: number = setInterval((): void =>
+            let chapa_interval: NodeJS.Timeout = setInterval((): void =>
             {
                 ++current_length;
 
