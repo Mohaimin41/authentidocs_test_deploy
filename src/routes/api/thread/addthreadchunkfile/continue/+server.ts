@@ -22,7 +22,7 @@ export async function POST({
   let filename: string | null = url.searchParams.get("filename");
 
   if (filename === null) {
-    console.log("ERROR @api/files/addchunkfile/continue:25: url parameter filename returned null")
+    console.log("ERROR @api/thread/addthreadchunkfile/continue:25: url parameter filename returned null")
     get(filemap).clear();
     return json({ success: false });
   }
@@ -34,7 +34,7 @@ export async function POST({
     request_obj.data === null ||
     request_obj.data === undefined
   ) {
-    console.log("ERROR @api/files/addchunkfile/continue:37: request json null||undefined or has incorrect body")
+    console.log("ERROR @api/thread/addthreadchunkfile/continue:37: request json null||undefined or has incorrect body")
     get(filemap).clear();
     return json({ success: false });
   }
