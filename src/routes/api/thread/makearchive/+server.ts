@@ -21,15 +21,20 @@ export async function POST({
 
 let given_closing_comment = file_info.closing_comment;
 let given_threadid = file_info.threadid;
+let given_current_userid = session.user.name;
 
 
 
 
-  let { data:result, error:_error } = await supabase
+
+let { data:result, error:_error } = await supabase
   .rpc('make_thread_archived', {
     given_closing_comment, 
+    given_current_userid, 
     given_threadid
   })
+
+
 
 
 
