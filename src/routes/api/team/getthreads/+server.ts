@@ -16,24 +16,15 @@ export async function POST({
     });
   }
   // console.log(session);
-  const member_info = await request.json();
+  const team_info = await request.json();
   // console.log("inside add key",key_info);
-  let uid_list = member_info.uid_list;
-  let sign_serial=2;
-  let given_threadid=member_info.threadid;
-  for(let i=0;i<uid_list.len();i++)
-  {
-    let given_signing_serial=sign_serial++;
-    let given_user_role="member";
-    let given_userid=uid_list[i];
-  
-    let { data:result, error:_error } = await supabase
-    .rpc('add_thread_member', {
-      given_signing_serial, 
-      given_threadid, 
-      given_user_role, 
-      given_userid
-    })
+  let given_teamid = team_info.teamid;
+
+  let { data:result, error:_error } = await supabase
+  .rpc('get_team_thread_list', {
+    given_teamid
+  })
+
 
 
   // console.log("add key rps result",result)
@@ -46,9 +37,8 @@ export async function POST({
       status: 500,
     });
   }
-}
 
-  let response: Response = new Response(JSON.stringify(sign_serial), {
+  let response: Response = new Response(JSON.stringify(result), {
     headers: {
       "Content-Type": "application/json",
     },
