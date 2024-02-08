@@ -13,7 +13,14 @@
         public checked: boolean = false;
     }
 
+    class Thread
+    {
+        public uid: string = "";
+        public name: string = "";
+    }
+
     let team_members: TeamMember[] = [];
+    let threads: Thread[] = [];
     
     let id: string;
     let thread_name_input: string;
@@ -58,7 +65,7 @@
 
         id = $page.params.id;
 
-        fetch("/api/thread/getaddablemembers",
+        fetch("/api/team/getthreads",
         {
             method: "POST",
             headers:
@@ -67,20 +74,46 @@
             },
             body: JSON.stringify(
             {
-                given_threadid: id
+                teamid: id
             })
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            team_members = new Array(response_obj.length);
+            threads = new Array(response_obj.length);
 
-            for(let i: number = 0; i < team_members.length; ++i)
+            for(let i: number = 0; i < threads.length; ++i)
             {
-                team_members[i] = new TeamMember();
-                team_members[i].uid = response_obj[i].f_userid;
-                team_members[i].name = response_obj[i].f_username;
+                threads[i] = new Thread();
+                threads[i].uid = response_obj[i].f_threadid;
+                threads[i].name = response_obj[i].f_threadname;
             }
+
+            console.log(threads);
         });
+
+        // fetch("/api/thread/getaddablemembers",
+        // {
+        //     method: "POST",
+        //     headers:
+        //     {
+        //         "content-type": "application/json"
+        //     },
+        //     body: JSON.stringify(
+        //     {
+        //         given_threadid: id
+        //     })
+        // }).then(async (response: Response): Promise<void> =>
+        // {
+        //     let response_obj: any = await response.json();
+        //     team_members = new Array(response_obj.length);
+
+        //     for(let i: number = 0; i < team_members.length; ++i)
+        //     {
+        //         team_members[i] = new TeamMember();
+        //         team_members[i].uid = response_obj[i].f_userid;
+        //         team_members[i].name = response_obj[i].f_username;
+        //     }
+        // });
     });
 </script>
 
@@ -145,42 +178,11 @@
     <div class="thread-list-card block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mt-2">
         <p class="thread-list-title text-2xl font-semibold text-gray-700 mx-6 mt-6">Threads</p>
         <ul class="thread-elements space-y-2 mt-2 pb-1 mx-6 mb-6">
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
-            <li>
-                <ThreadCard thread_name={"Thread 1"} />
-            </li>
+            {#each threads as thread}
+                <li>
+                    <ThreadCard thread_id={thread.uid} thread_name={thread.name} />
+                </li>
+            {/each}
         </ul>
     </div>
     <div class="thread-button flex justify-end items-end">
