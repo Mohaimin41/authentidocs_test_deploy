@@ -11,7 +11,8 @@
     class Signature
     {
         public by: string = "";
-        public on: string = "";
+        public on_date: string = "";
+        public on_time: string = "";
         public signature: string = "";
         public pubkey: string = "";
     };
@@ -28,13 +29,15 @@
     let response_obj:any={};
     let username:string;
     let current_custody:string;
-    let upload_timestamp:string;
+    let upload_timestamp: Date;
     let current_state:string;
-    let upload_date:string|undefined;
-    let upload_time:string|undefined;
+    let upload_date:string;
+    let upload_time:string;
     let file_signed: boolean;
 
     $: file_signed = file_status === "signed_viewed_by_custodian";
+    $: upload_date = upload_timestamp?.toLocaleDateString();
+    $: upload_time = upload_timestamp?.toLocaleTimeString();
 
     function sign_file(): void
     {
@@ -113,16 +116,8 @@
              file_type = response_obj.file_data.file_mimetype;
              file_status = response_obj.file_data.current_state;
              username=response_obj.file_data.username;
-             upload_timestamp=response_obj.file_data.created_at;
+             upload_timestamp= new Date(response_obj.file_data.created_at);
              current_state=response_obj.file_data.current_state;
-             if(upload_timestamp!== undefined)
-             {
-             upload_date=upload_timestamp.split("T").reverse().pop();
-             let temp_time:string|undefined;
-             temp_time=upload_timestamp.split("T").pop();
-             if(temp_time!=undefined)
-             upload_time=temp_time.split(".").reverse().pop();
-             }
 
             let mime_text: string = "Application/octet-stream";
 
@@ -151,7 +146,9 @@
             {
                 let new_certificate: Signature = new Signature();
                 new_certificate.by = response_obj[i].f_signing_username;
-                new_certificate.on = response_obj[i].f_created_at;
+                let on: Date = new Date(response_obj[i].f_created_at);
+                new_certificate.on_date = on.toLocaleDateString();
+                new_certificate.on_time = on.toLocaleTimeString();
                 new_certificate.signature = response_obj[i].f_signature;
                 new_certificate.pubkey = [...new Uint8Array(new TextEncoder().encode(JSON.stringify(response_obj[i].f_signing_key)))].map((x) => x.toString(16).padStart(2, "0")).join("");
 
@@ -210,7 +207,6 @@
 }
 </script>
 
-{file_signed}
 <div class="preview-root flex flex-col">
     <div class="preview-body flex-grow block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
         {#if file_loaded}
@@ -353,7 +349,7 @@
                 <!-- Add Note -->
                 <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Add Note</button>
                 <!-- Mark as Viewed -->
-                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={true}>Mark as Viewed</button>
+                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={file_signed}>Mark as Viewed</button>
                 <!-- File History -->
                 <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
             {/if}
@@ -393,7 +389,10 @@
                 <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed By</p>
                 <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{certificate.by}</p>
                 <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed On</p>
-                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{certificate.on}</p>
+                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    <span>{certificate.on_date}</span>
+                    <span>{certificate.on_time}</span>
+                </p>
                 <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signature</p>
                 <div class="mb-2" style="max-width: 100%; overflow-x: auto">
                     <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">{certificate.signature}</p>
