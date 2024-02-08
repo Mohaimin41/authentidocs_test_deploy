@@ -18,19 +18,22 @@ export async function POST({
   // console.log(session);
   const member_info = await request.json();
   // console.log("inside add key",key_info);
-
-  let given_signing_serial=member_info.signing_serial;
-  let given_threadid=member_info.thread_id;
-  let given_user_role=member_info.user_role;
-  let given_userid=member_info.user_id;
-
-  let { data:result, error:_error } = await supabase
-  .rpc('add_thread_member', {
-    given_signing_serial, 
-    given_threadid, 
-    given_user_role, 
-    given_userid
-  })
+  let uid_list = member_info.uid_list;
+  let sign_serial=0;
+  let given_threadid=member_info.threadid;
+  for(let i=0;i<uid_list.len();i++)
+  {
+    let given_signing_serial=sign_serial++;
+    let given_user_role="member";
+    let given_userid=uid_list[i];
+  
+    let { data:result, error:_error } = await supabase
+    .rpc('add_thread_member', {
+      given_signing_serial, 
+      given_threadid, 
+      given_user_role, 
+      given_userid
+    })
 
 
   // console.log("add key rps result",result)
@@ -43,8 +46,9 @@ export async function POST({
       status: 500,
     });
   }
+}
 
-  let response: Response = new Response(JSON.stringify(result), {
+  let response: Response = new Response(JSON.stringify(sign_serial), {
     headers: {
       "Content-Type": "application/json",
     },
