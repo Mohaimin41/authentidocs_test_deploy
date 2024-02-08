@@ -7,7 +7,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new Response(JSON.stringify("you must be logged in to add files"), {
+    return new Response(JSON.stringify("you must be logged in to view notifications"), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -18,13 +18,18 @@ export async function POST({
 
   let given_userid = user_info.user_id;
 
-  let { data:result , error:_error } = await supabase
-  .rpc('get_user_live_notifications', {
-    given_userid
-  })
+  let { data: result, error: _error } = await supabase.rpc(
+    "get_user_live_notifications",
+    {
+      given_userid,
+    }
+  );
 
   if (_error) {
-    console.log("ERROR @api/user/getkey:28: supabase getting user key error\n", _error)
+    console.log(
+      "ERROR @api/user/getnotifications:30: supabase getting user notification error\n",
+      _error
+    );
     return new Response(JSON.stringify("internal server error: " + _error), {
       headers: {
         "Content-Type": "application/json",
