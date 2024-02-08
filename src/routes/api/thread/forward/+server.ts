@@ -55,7 +55,7 @@ export async function POST({
     {
       if(i!=(result1.length-1))
       {
-        given_target_userid=result1[i+1].f_signing_serial;
+        given_target_userid=result1[i+1].f_userid;
       }
     }
   }
