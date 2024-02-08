@@ -67,7 +67,7 @@
             },
             body: JSON.stringify(
             {
-                teamid: id
+                given_threadid: id
             })
         }).then(async (response: Response): Promise<void> =>
         {
