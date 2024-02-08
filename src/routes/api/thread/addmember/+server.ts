@@ -15,12 +15,17 @@ export async function POST({
       status: 401,
     });
   }
+  
   // console.log(session);
   const member_info = await request.json();
   // console.log("inside add key",key_info);
   let uid_list = member_info.uid_list;
-  let sign_serial = 2;
   let given_threadid = member_info.threadid;
+  let { data:sign_serial, error } = await supabase
+  .rpc('get_current_signing_serial', {
+    given_threadid
+  })
+  
   for (let i = 0; i < uid_list.len(); i++) {
     let given_signing_serial = sign_serial++;
     let given_user_role = "member";
