@@ -228,7 +228,6 @@
           .map((x) => x.toString(16).padStart(2, "0"))
           .join("");
         let pubkey_json: string | null = localStorage.getItem("pub_key");
-        console.log("add file", pubkey_json);
         if (pubkey_json) {
           let request_obj: any = {
             fileid: file_success_response_obj.fileid,

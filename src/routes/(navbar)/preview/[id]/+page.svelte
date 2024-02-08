@@ -4,8 +4,9 @@
     import { common_fetch } from "$lib/fetch_func";
     import { initModals } from "flowbite";
     import { onMount } from "svelte";
-    import { logged_in_store, uid, useremail } from "../../../../stores";
+    import { logged_in_store, priv_key, uid, useremail } from "../../../../stores";
     import { jsPDF } from "jspdf";
+    import { get } from "svelte/store";
 
     class Signature
     {
@@ -18,7 +19,7 @@
     let certificates: Signature[] = [];
     let file_name: string = "";
     let file_type: number = 0;
-    let file_status: string = "";
+    let file_status: string = "personal";
     let download_anchor: HTMLAnchorElement;
     let file_view_link: string;
     let file_download_link: string;
@@ -31,6 +32,55 @@
     let current_state:string;
     let upload_date:string|undefined;
     let upload_time:string|undefined;
+
+    function sign_file(): void
+    {
+        fetch(file_view_link,
+        {
+            method: "GET"
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let file_blob: Blob = await response.blob();
+            let file_buffer: ArrayBuffer = await file_blob.arrayBuffer();
+            let subtle_crypto: SubtleCrypto = window.crypto.subtle;
+            let temp_priv_key = get(priv_key);
+
+            if (temp_priv_key) {
+                let signature: ArrayBuffer = await subtle_crypto.sign(
+                {
+                    name: "ECDSA",
+                    hash: { name: "SHA-384" },
+                },
+                temp_priv_key,
+                file_buffer);
+
+                let signature_hex: string = [...new Uint8Array(signature)].map((x) => x.toString(16).padStart(2, "0")).join("");
+                let pubkey_json: string | null = localStorage.getItem("pub_key");
+
+                if (pubkey_json) {
+                    let request_obj: any = {
+                        fileid: $page.params.id,
+                        signature: signature_hex,
+                        key: pubkey_json,
+                        userid: $page.data.session?.user?.name,
+                    };
+
+                    common_fetch(
+                        "/api/thread/addthreadfilesignature",
+                        request_obj,
+                        async (response: Response): Promise<void> => {
+                            let response_obj: any = await response.json();
+
+                            console.log(response_obj);
+                        }
+                    );
+                }
+            }
+            
+
+            console.log(file_buffer);
+        });
+    }
 
     onMount(async (): Promise<void> =>
     {
@@ -296,7 +346,7 @@
                 <!-- Add Note -->
                 <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Add Note</button>
                 <!-- Mark as Viewed -->
-                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Mark as Viewed</button>
+                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Mark as Viewed</button>
                 <!-- File History -->
                 <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
             {/if}
