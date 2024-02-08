@@ -32,6 +32,9 @@
     let current_state:string;
     let upload_date:string|undefined;
     let upload_time:string|undefined;
+    let file_signed: boolean;
+
+    $: file_signed = file_status === "signed_viewed_by_custodian";
 
     function sign_file(): void
     {
@@ -71,6 +74,7 @@
                         async (response: Response): Promise<void> => {
                             let response_obj: any = await response.json();
 
+                            init();
                             console.log(response_obj);
                         }
                     );
@@ -79,7 +83,7 @@
         });
     }
 
-    onMount(async (): Promise<void> =>
+    function init(): void
     {
         initModals();
 
@@ -154,6 +158,11 @@
                 certificates.push(new_certificate);
             }
         });
+    }
+
+    onMount(async (): Promise<void> =>
+    {
+        init();
     });
     function generateCertificate() {
   // Create a new jsPDF object
@@ -201,6 +210,7 @@
 }
 </script>
 
+{file_signed}
 <div class="preview-root flex flex-col">
     <div class="preview-body flex-grow block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
         {#if file_loaded}
@@ -343,7 +353,7 @@
                 <!-- Add Note -->
                 <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Add Note</button>
                 <!-- Mark as Viewed -->
-                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Mark as Viewed</button>
+                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={true}>Mark as Viewed</button>
                 <!-- File History -->
                 <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
             {/if}
