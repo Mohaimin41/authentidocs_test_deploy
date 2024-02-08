@@ -8,7 +8,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new Response(JSON.stringify("you must be logged in to add files"), {
+    return new Response(JSON.stringify("you must be logged in to add file notes"), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -40,8 +40,8 @@ export async function POST({
 
   // console.log("add key rps result",result)
   if (_error) {
-    console.log("ERROR @api/user/addkey:33: supabase add user publickey error\n", _error)
-    return new Response(JSON.stringify("internal server error while adding user key: " + _error), {
+    console.log("ERROR @api/thread/addfilenote:43: supabase add file note error\n", _error)
+    return new Response(JSON.stringify("internal server error while adding file note: " + _error), {
       headers: {
         "Content-Type": "application/json",
       },

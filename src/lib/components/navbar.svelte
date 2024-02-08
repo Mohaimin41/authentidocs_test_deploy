@@ -6,7 +6,8 @@
     import { db } from '$lib/db';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
-  import { common_fetch } from '$lib/fetch_func';
+    import { common_fetch } from '$lib/fetch_func';
+    import NotificationDropdown from './notification-dropdown.svelte';
 
     let logged_in_state: boolean = false;
 
@@ -46,6 +47,7 @@
     });
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <Navbar fluid={false}>
     <NavBrand href="/">
         <img src="/logo.webp" class="rounded-lg me-3 h-6 sm:h-9" alt="App Logo" /> <!-- apatoto -->
@@ -60,7 +62,8 @@
     </NavUl>
     {#if logged_in_state}
         <div class="flex items-center md:order-2">
-            <a id="avatar-menu" role="button" data-dropdown-toggle="dropdown" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            <NotificationDropdown />
+            <a id="avatar-menu" role="button" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 <Avatar src="/pochita.webp" />
             </a>
             <Dropdown placement="bottom" triggeredBy="#avatar-menu">
@@ -69,7 +72,7 @@
                 <span class="block truncate text-sm font-medium">{$useremail}</span>
                 </DropdownHeader>
                 <a href="/dashboard">
-                <DropdownItem>Settings</DropdownItem>
+                    <DropdownItem>Settings</DropdownItem>
                 </a>
                 <DropdownItem on:click={logout}>Logout</DropdownItem>
             </Dropdown>

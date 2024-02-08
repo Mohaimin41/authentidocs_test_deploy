@@ -8,12 +8,15 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new Response(JSON.stringify("you must be logged in to add files"), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      status: 401,
-    });
+    return new Response(
+      JSON.stringify("you must be logged in to view thread details"),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        status: 401,
+      }
+    );
   }
   // console.log(session);
   const thread_info = await request.json();
@@ -30,11 +33,13 @@ export async function POST({
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/user/addkey:33: supabase add user publickey error\n",
+      "ERROR @api/thread/getdetails:33: supabase getting thread details error\n",
       _error
     );
     return new Response(
-      JSON.stringify("internal server error while adding user key: " + _error),
+      JSON.stringify(
+        "internal server error while getting thread details: " + _error
+      ),
       {
         headers: {
           "Content-Type": "application/json",
@@ -51,9 +56,14 @@ export async function POST({
     }
   );
   if (error_2) {
-    // console.log("ERROR @api/user/addkey:33: supabase add user publickey error\n", _error)
+    console.log(
+      "ERROR @api/thread/getdetails:54: supabase getting thread mod details error\n",
+      _error
+    );
     return new Response(
-      JSON.stringify("internal server error while adding user key: " + error_2),
+      JSON.stringify(
+        "internal server error while getting thread mod details: " + error_2
+      ),
       {
         headers: {
           "Content-Type": "application/json",
