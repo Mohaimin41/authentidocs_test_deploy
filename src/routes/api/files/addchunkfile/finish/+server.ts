@@ -18,7 +18,7 @@ export async function POST({
 
   if (filename === null) {
     console.log(
-      "ERROR @api/files/addchunkfile/finish:21: map filemap returned as undefined"
+      "ERROR @api/files/addchunkfile/finish:21: url param filename returned as undefined"
     );
     get(filemap).clear();
     return json({ success: false });

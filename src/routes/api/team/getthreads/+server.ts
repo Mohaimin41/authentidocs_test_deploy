@@ -4,14 +4,13 @@ import type { RequestEvent } from "./$types";
 
 export async function POST({
   request,
-  cookies,
   locals,
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
     return new (error as any)(
       401,
-      "You must be logged in to view team members."
+      "You must be logged in to view team threads."
     );
   }
   // console.log(session);
@@ -21,7 +20,7 @@ export async function POST({
 
   if (given_teamid === undefined || given_teamid === null) {
     console.log(
-      "ERROR @api/team/getthreads:24: invalid user input error:\n",
+      "ERROR @api/team/getthreads:23: invalid user input error:\n",
       team_info
     );
     return new (error as any)(
@@ -40,7 +39,7 @@ export async function POST({
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/team/getthreads:43: supabase get team threads error\n",
+      "ERROR @api/team/getthreads:42: supabase get team threads error\n",
       _error
     );
     return new (error as any)(

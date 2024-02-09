@@ -39,7 +39,10 @@ export async function POST({
       "ERROR @api/files/getfilesigns:39: supabase get file signatuers error\n",
       _error
     );
-    return  new (error as any)(500, "Internal Server Error, while getting file signature.");
+    return new (error as any)(
+      500,
+      "Internal Server Error, while getting file signature."
+    );
   }
 
   let response: Response = new Response(JSON.stringify(result), {
