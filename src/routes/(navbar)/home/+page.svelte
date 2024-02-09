@@ -318,7 +318,7 @@
               d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"
             />
           </svg>
-          <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+          <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
             My Personal Files
           </p>
         </a>
@@ -344,7 +344,7 @@
               d="M5 19h10v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2ZM5 7a5.008 5.008 0 0 1 4-4.9 3.988 3.988 0 1 0-3.9 5.859A4.974 4.974 0 0 1 5 7Zm5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm5-1h-.424a5.016 5.016 0 0 1-1.942 2.232A6.007 6.007 0 0 1 17 17h2a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5ZM5.424 9H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h2a6.007 6.007 0 0 1 4.366-5.768A5.016 5.016 0 0 1 5.424 9Z"
             />
           </svg>
-          <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+          <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
             My Teams
           </p>
         </a>
@@ -370,7 +370,7 @@
               d="M1 6v8a5 5 0 1 0 10 0V4.5a3.5 3.5 0 1 0-7 0V13a2 2 0 0 0 4 0V6"
             />
           </svg>
-          <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+          <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
             Active Threads ({act_threads.length})
           </p>
         </a>
@@ -393,7 +393,7 @@
               d="M18 5H0v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5Zm-7.258-2L9.092.8a2.009 2.009 0 0 0-1.6-.8H2.049a2 2 0 0 0-2 2v1h10.693Z"
             />
           </svg>
-          <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+          <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
             Archived Threads
           </p>
         </a>
@@ -429,7 +429,7 @@
     {#if tab_index === 0}
       <div class="list-container m-6">
         <p
-          class="list-title text-2xl font-bold text-gray-900 dark:text-white ps-1"
+          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 ps-1"
         >
           My Personal Files
         </p>
@@ -476,7 +476,7 @@
     {:else if tab_index === 1}
       <div class="list-container m-6">
         <p
-          class="list-title text-2xl font-bold text-gray-900 dark:text-white pb-3 ps-1"
+          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
         >
           My Teams
         </p>
@@ -491,7 +491,7 @@
     {:else if tab_index === 2}
       <div class="list-container m-6">
         <p
-          class="list-title text-2xl font-bold text-gray-900 dark:text-white pb-3 ps-1"
+          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
         >
           Active Threads
         </p>
@@ -506,7 +506,7 @@
     {:else if tab_index === 3}
       <div class="list-container m-6">
         <p
-          class="list-title text-2xl font-bold text-gray-900 dark:text-white pb-3 ps-1"
+          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
         >
           Archived Threads
         </p>
