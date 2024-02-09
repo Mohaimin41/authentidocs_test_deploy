@@ -325,6 +325,9 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+
+            console.log(response_obj);
+
             thread_name = response_obj.thread_detail.threadname;
             team_name = response_obj.thread_detail.team_name;
             started_at = new Date(response_obj.thread_detail.created_at);
@@ -337,35 +340,44 @@
 
             description = response_obj.thread_detail.description;
             closing_comment = response_obj.thread_detail.closing_comment;
-            is_active = response_obj.thread_detail.is_active && closing_comment.length > 0;
-        });
+            is_active = response_obj.thread_detail.is_active;
+            let thread_current_custodian_detail: any = response_obj.thread_current_custodian_detail;
 
-        fetch("/api/thread/getfiles",
-        {
-            method: "POST",
-            headers:
+            fetch("/api/thread/getfiles",
             {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify(
+                method: "POST",
+                headers:
+                {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(
+                {
+                    thread_id: id
+                })
+            }).then(async (response: Response): Promise<void> =>
             {
-                thread_id: id
-            })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
-            files = new Array(response_obj.length);
+                let response_obj: any = await response.json();
+                files = new Array(response_obj.length);
 
-            for(let i: number = 0; i < files.length; ++i)
-            {
-                files[i] = new FileObj();
-                files[i].id = response_obj[i].f_fileid;
-                files[i].name = response_obj[i].f_filename;
-                files[i].type = response_obj[i].f_file_extension;
-                files[i].status = response_obj[i].f_current_state;
-            }
+                for(let i: number = 0; i < files.length; ++i)
+                {
+                    files[i] = new FileObj();
+                    files[i].id = response_obj[i].f_fileid;
+                    files[i].name = response_obj[i].f_filename;
+                    files[i].type = response_obj[i].f_file_extension;
 
-            file_count = files.length;
+                    if(thread_current_custodian_detail === undefined || thread_current_custodian_detail.f_userid !== $page.data.session?.user?.name)
+                    {
+                        files[i].status = "3";
+                    }
+                    else
+                    {
+                        files[i].status = response_obj[i].f_current_state;
+                    }
+                }
+
+                file_count = files.length;
+            });
         });
 
         fetch("/api/thread/canforward",
@@ -442,7 +454,7 @@
                     <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">{moderator}</p>
                 </div>
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Current Custodian</p>
-                {#if can_close}
+                {#if is_active}
                     <div class="flex items-center mb-4">
                         <img class="w-8 h-8 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
                         <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">{current_custodian}</p>
