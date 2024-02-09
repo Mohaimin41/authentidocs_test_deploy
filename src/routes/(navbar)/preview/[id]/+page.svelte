@@ -25,9 +25,17 @@
         public content: string = "";
     }
 
+    class History
+    {
+        public custodian: string = "";
+        public date: string = "";
+        public time: string = "";
+    }
+
     let id: string;
     let certificates: Signature[] = [];
     let notes: Note[] = [];
+    let history: History[] = [];
     let file_name: string = "";
     let file_type: number = 0;
     let file_status: string = "personal";
@@ -52,8 +60,10 @@
     let signable: boolean;
     let add_note_modal_elem: HTMLDivElement;
     let view_notes_modal_elem: HTMLDivElement;
+    let history_modal_elem: HTMLDivElement;
     let add_note_modal: Modal;
     let view_notes_modal: Modal;
+    let history_modal: Modal;
 
     $: file_signed = file_status === "signed_viewed_by_custodian";
     $: upload_date = upload_timestamp?.toLocaleDateString();
@@ -125,6 +135,16 @@
         view_notes_modal.hide();
     }
 
+    function show_history_modal(): void
+    {
+        history_modal.show();
+    }
+
+    function hide_history_modal(): void
+    {
+        history_modal.hide();
+    }
+
     function sign_file(): void
     {
         fetch(file_view_link,
@@ -181,6 +201,7 @@
         file_loaded = false;
         add_note_modal = new Modal(add_note_modal_elem);
         view_notes_modal = new Modal(view_notes_modal_elem);
+        history_modal = new Modal(history_modal_elem);
 
         if ($page.data.session === null) {
             goto("/");
@@ -287,9 +308,6 @@
         }, async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-
-            console.log(response_obj);
-
             notes = new Array(response_obj.length);
 
             for(let i: number = 0; i < notes.length; ++i)
@@ -300,6 +318,24 @@
                 notes[i].date = timestamp.toLocaleDateString();
                 notes[i].time = timestamp.toLocaleTimeString();
                 notes[i].content = response_obj[i].f_content;
+            }
+        });
+
+        common_fetch("/api/thread/getfilehistory",
+        {
+            fileid: id
+        }, async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            history = new Array(response_obj.length);
+
+            for(let i: number = 0; i < history.length; ++i)
+            {
+                history[i] = new History();
+                history[i].custodian = response_obj[i].f_username;
+                let timestamp: Date = new Date(response_obj[i].f_start_at);
+                history[i].date = timestamp.toLocaleDateString();
+                history[i].time = timestamp.toLocaleTimeString();
             }
         });
     }
@@ -501,7 +537,7 @@
                 <!-- Mark as Viewed -->
                 <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Mark as Viewed</button>
                 <!-- File History -->
-                <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
+                <button on:click={show_history_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
             {/if}
             <!-- certificate button -->
             <button data-modal-target="cert-modal" data-modal-toggle="cert-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Certificate</button>
@@ -560,21 +596,16 @@
   </div>
 </div>
 
-<div
-  id="history-modal"
-  tabindex="-1"
-  aria-hidden="true"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
->
+<div bind:this={history_modal_elem} tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative p-4 w-full max-w-2xl max-h-full">
     <!-- Modal content -->
     <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <!-- Modal header -->
       <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-          File History
+          Custody History
         </h3>
-        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="history-modal">
+        <button on:click={hide_history_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
           <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
           </svg>
@@ -583,7 +614,18 @@
       </div>
       <!-- Modal body -->
       <div class="p-4 md:p-5 space-y-4">
-        
+        <ol class="relative border-s border-gray-200 dark:border-gray-700">                  
+            {#each history as elem}
+                <li class="mb-10 ms-4">
+                    <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
+                    <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
+                        <span>{elem.date}</span>
+                        <span>{elem.time}</span>
+                    </time>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{elem.custodian}</h3>
+                </li>
+            {/each}
+        </ol>
       </div>
     </div>
   </div>
