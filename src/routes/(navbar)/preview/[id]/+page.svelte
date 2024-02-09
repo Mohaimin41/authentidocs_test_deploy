@@ -2,7 +2,7 @@
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { common_fetch } from "$lib/fetch_func";
-    import { initModals } from "flowbite";
+    import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
     import { logged_in_store, priv_key, uid, useremail } from "../../../../stores";
     import { jsPDF } from "jspdf";
@@ -33,14 +33,75 @@
     let current_state:string;
     let upload_date:string;
     let upload_time:string;
+    let add_note_text: string;
     let file_signed: boolean;
     let uploader:string;
     let ownerid:string;
     let current_custodianid:string;
+    let viewer_custodian: boolean;
+    let signable: boolean;
+    let add_note_modal_elem: HTMLDivElement;
+    let add_note_modal: Modal;
 
     $: file_signed = file_status === "signed_viewed_by_custodian";
     $: upload_date = upload_timestamp?.toLocaleDateString();
     $: upload_time = upload_timestamp?.toLocaleTimeString();
+    $: signable = viewer_custodian && !file_signed;
+
+    function show_add_note_modal(): void
+    {
+        add_note_modal.show();
+    }
+
+    function hide_add_note_modal(): void
+    {
+        add_note_modal.hide();
+    }
+
+    async function add_note(): void
+    {
+        let subtle_crypto: SubtleCrypto = window.crypto.subtle;
+        let note_buffer: ArrayBuffer = new TextEncoder().encode(add_note_text).buffer;
+        let temp_priv_key = get(priv_key);
+
+        if (temp_priv_key) {
+            let signature: ArrayBuffer = await subtle_crypto.sign(
+            {
+                name: "ECDSA",
+                hash: { name: "SHA-384" },
+            },
+            temp_priv_key,
+            note_buffer);
+
+            let signature_hex: string = [...new Uint8Array(signature)].map((x) => x.toString(16).padStart(2, "0")).join("");
+            let pubkey_json: string | null = localStorage.getItem("pub_key");
+
+            if (pubkey_json) {
+                let request_obj: any = {
+                    fileid: $page.params.id,
+                    content: add_note_text,
+                    sign: signature_hex,
+                    signing_key: pubkey_json,
+                    given_signing_userid: $page.data.session?.user?.name
+                };
+
+                common_fetch(
+                    "/api/thread/addfilenote",
+                    request_obj,
+                    async (response: Response): Promise<void> => {
+                        let response_obj: any = await response.json();
+
+                        add_note_text = "";
+
+                        add_note_modal.hide();
+                        init();
+                    }
+                );
+            }
+        }
+
+        add_note_modal.hide();
+    }
 
     function sign_file(): void
     {
@@ -94,6 +155,7 @@
         initModals();
 
         file_loaded = false;
+        add_note_modal = new Modal(add_note_modal_elem);
 
         if ($page.data.session === null) {
             goto("/");
@@ -121,6 +183,9 @@
              username=response_obj.file_data.username;
              ownerid=response_obj.file_data.file_ownerid;
              current_custodianid=response_obj.file_data.current_custodianid;
+
+            viewer_custodian = current_custodianid === $page.data.session?.user?.name;
+
              upload_timestamp= new Date(response_obj.file_data.created_at);
              current_state=response_obj.file_data.current_state;
 
@@ -383,9 +448,9 @@
         <div class="flex justify-end mt-3">
             {#if file_status !== "personal"}
                 <!-- Add Note -->
-                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Add Note</button>
+                <button on:click={show_add_note_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Add Note</button>
                 <!-- Mark as Viewed -->
-                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={file_signed}>Mark as Viewed</button>
+                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Mark as Viewed</button>
                 <!-- File History -->
                 <button data-modal-target="history-modal" data-modal-toggle="history-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
             {/if}
@@ -473,6 +538,36 @@
       </div>
     </div>
   </div>
+</div>
+
+<div bind:this={add_note_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Add Note
+                </h3>
+                <button on:click={hide_add_note_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 space-y-4">
+                <form class="mx-auto">
+                    <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your message</label>
+                    <textarea bind:value={add_note_text} id="message" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Leave a note..."></textarea>
+                    <div class="flex justify-end">
+                        <button on:click={add_note} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>

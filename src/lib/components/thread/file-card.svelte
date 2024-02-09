@@ -29,6 +29,11 @@
             file_status_color = "green";
             file_status_text = "Viewed and Signed";
         }
+        else if(file_status === "3")
+        {
+            file_status_color = "yellow";
+            file_status_text = "Not in Custody";
+        }
     });
 </script>
 
