@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { common_fetch } from '$lib/fetch_func';
     import { onMount } from "svelte";
     import ThreadCard from "$lib/components/team/thread-card.svelte";
-    import { initModals } from "flowbite";
+    import { Modal, initModals } from "flowbite";
     import { page } from "$app/stores";
 
     class TeamMember
@@ -19,10 +20,14 @@
 
     let team_members: TeamMember[] = [];
     let threads: Thread[] = [];
-    
     let id: string;
     let thread_name_input: string;
     let thread_description_input: string;
+    let create_thread_modal_elem: HTMLDivElement;
+    let create_thread_modal: Modal;
+    let team_info: any;
+    let team_name:string;
+    let team_leader:string;
 
     function create_thread(): void
     {
@@ -49,6 +54,9 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+
+            create_thread_modal.hide();
+            get_threads();
         });
     }
 
@@ -57,12 +65,18 @@
         
     }
 
-    onMount((): void =>
+    function show_create_thread_modal(): void
     {
-        initModals();
+        create_thread_modal.show();
+    }
 
-        id = $page.params.id;
+    function hide_create_thread_modal(): void
+    {
+        create_thread_modal.hide();
+    }
 
+    function get_threads(): void
+    {
         fetch("/api/team/getthreads",
         {
             method: "POST",
@@ -85,9 +99,43 @@
                 threads[i].uid = response_obj[i].f_threadid;
                 threads[i].name = response_obj[i].f_threadname;
             }
-
-            console.log(threads);
         });
+    }
+    function get_team_details(): void {
+    let request_obj: any = {
+      teamid: id,
+    };
+
+    common_fetch(
+      "/api/team/getdetails",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        if (response_obj === null) {
+          return;
+        }
+
+        team_info=response_obj;
+        console.log(team_info);
+        team_name=team_info.team_detail.team_name;
+        team_leader=team_info.team_mod_detail.f_username;
+      }
+    );
+  }
+    onMount((): void =>
+    {
+
+        create_thread_modal = new Modal(create_thread_modal_elem);
+
+        initModals();
+
+        id = $page.params.id;
+
+        get_threads();
+        get_team_details();
+
+        
     });
 </script>
 
@@ -96,7 +144,7 @@
     <div class="team-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <div class="flex m-6">
             <div class="grow">
-                <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Team 1</p>
+                <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-2">{team_name}</p>
                 <div class="grid grid-cols-4 gap-4">
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Leader</p>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Members</p>
@@ -104,7 +152,7 @@
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Files</p>
                     <div class="flex flex-wrap items-center">
                         <img class="w-6 h-6 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-sm font-medium text-gray-700">Mustafa Siam</p>
+                        <p class="text-sm font-medium text-gray-700">{team_leader}</p>
                     </div>
                     <div class="flex -space-x-4 rtl:space-x-reverse">
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
@@ -160,11 +208,11 @@
         </ul>
     </div>
     <div class="thread-button flex justify-end items-end">
-        <button data-modal-target="create-thread-modal" data-modal-toggle="create-thread-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Create Thread</button>
+        <button on:click={show_create_thread_modal} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Create Thread</button>
     </div>
 </div>
 
-<div id="create-thread-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div bind:this={create_thread_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
         <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -173,7 +221,7 @@
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                     Create Thread
                 </h3>
-                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="create-thread-modal">
+                <button on:click={hide_create_thread_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                     </svg>
@@ -261,7 +309,7 @@
     {
         position: absolute;
         top: 0;
-        bottom: 0;
+        height: 2rem;
         left: 0;
         right: 0;
     }
@@ -276,7 +324,7 @@
     .thread-elements
     {
         position: absolute;
-        top: 3rem;
+        top: 3.5rem;
         bottom: 0;
         left: 0;
         right: 0;

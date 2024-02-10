@@ -78,12 +78,7 @@ export async function POST({
     }
   }
 
-  if (
-    result_mod === undefined ||
-    result_custodian === undefined ||
-    result_mod === null ||
-    result_mod === null
-  ) {
+  if (result_mod === undefined || result_mod === null) {
     console.log(
       "ERROR @api/thread/getdetails:88: invalid user input error:\n",
       result_mod, "\n", result_custodian

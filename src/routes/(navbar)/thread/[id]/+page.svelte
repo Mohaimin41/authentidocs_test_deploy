@@ -49,8 +49,13 @@
     let closing_comment: string;
     let member_count: number;
     let file_count: number;
-    let close_thread_modal: Modal;
     let close_thread_modal_elem: HTMLDivElement;
+    let add_member_modal_elem: HTMLDivElement;
+    let file_uploading_modal_elem: HTMLDivElement;
+    let file_upload_progress: HTMLDivElement;
+    let close_thread_modal: Modal;
+    let add_member_modal: Modal;
+    let file_uploading_modal: Modal;
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -173,6 +178,7 @@
             let response_obj: any = await response.json();
 
             console.log(response_obj);
+            add_member_modal.hide();
             get_members();
             get_addable_members();
         });
@@ -185,6 +191,8 @@
 
         file_input_elem.onchange = async (event: Event): Promise<void> =>
         {
+            file_uploading_modal.show();
+
             let file: File | null | undefined = file_input_elem.files?.item(0);
 
             if(file === null || file === undefined)
@@ -197,18 +205,19 @@
             let file_success_response_obj: any = {};
 
             for (let i: number = 0; i < file_buffer.byteLength; i += 1048576) {
+                file_upload_progress.style.width = Math.round(i * 100 / file_buffer.byteLength) + "%";
                 let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
                 let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
                 let response: Response = await fetch(
                     "/api/thread/addthreadchunkfile/continue?filename=" + file.name,
                     {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        data: small_array,
-                    }),
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            data: small_array,
+                        })
                     }
                 );
 
@@ -226,6 +235,8 @@
             }
 
             if (success) {
+                file_upload_progress.style.width = "100%";
+
                 await fetch("/api/thread/addthreadchunkfile/finish?filename=" + file.name + "&threadid=" + id, {
                     method: "POST",
                     headers: {
@@ -235,8 +246,12 @@
                 }).then(async (response: Response): Promise<void> => {
                     file_success_response_obj = await response.json();
 
-                    console.log("file upload shesh:line223",file_success_response_obj);
+                    file_uploading_modal.hide();
                 });
+            }
+            else
+            {
+                file_uploading_modal.hide();
             }
         };
 
@@ -272,6 +287,16 @@
     function hide_close_thread_modal(): void
     {
         close_thread_modal.hide();
+    }
+
+    function show_add_member_modal(): void
+    {
+        add_member_modal.show();
+    }
+
+    function hide_add_member_modal(): void
+    {
+        add_member_modal.hide();
     }
 
     function close_thread(): void
@@ -310,6 +335,8 @@
 
         id = $page.params.id;
         close_thread_modal = new Modal(close_thread_modal_elem);
+        add_member_modal = new Modal(add_member_modal_elem);
+        file_uploading_modal = new Modal(file_uploading_modal_elem);
 
         fetch("/api/thread/getdetails",
         {
@@ -325,9 +352,6 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-
-            console.log(response_obj);
-
             thread_name = response_obj.thread_detail.threadname;
             team_name = response_obj.thread_detail.team_name;
             started_at = new Date(response_obj.thread_detail.created_at);
@@ -532,12 +556,12 @@
             <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add File</button>
         {:else if tab_active[2]}
             <!-- Add Members -->
-            <button data-modal-target="addable-members-modal" data-modal-toggle="addable-members-modal" type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
+            <button on:click={show_add_member_modal} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
         {/if}
     </div>
 </div>
 
-<div id="addable-members-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div bind:this={add_member_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
         <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -546,7 +570,7 @@
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                     Select Thread Members
                 </h3>
-                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" on:click={hide_close_thread_modal}>
+                <button on:click={hide_add_member_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                     </svg>
@@ -596,6 +620,23 @@
                         <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bind:this={file_uploading_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Uploading...
+                </h3>
+            </div>
+            <div class="p-4 md:p-5 space-y-4">        
+                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div bind:this={file_upload_progress} class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>  
             </div>
         </div>
     </div>

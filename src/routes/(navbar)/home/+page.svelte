@@ -87,6 +87,7 @@
    */
   class Team {
     public name!: string;
+    public id!: string;
   }
 
   let teams: Team[] = new Array(5);
@@ -94,6 +95,7 @@
   for (let i: number = 0; i < teams.length; ++i) {
     teams[i] = new Team();
     teams[i].name = "Team " + (i + 1).toString();
+    teams[i].id = String(i);
   }
 
   /**
@@ -101,10 +103,11 @@
    */
   class Thread {
     public name!: string;
+    public id!: string;
   }
 
-  let act_threads: Thread[] = new Array(69);
-  let arch_threads: Thread[] = new Array(12);
+  let act_threads: Thread[] = new Array(10);
+  let arch_threads: Thread[] = new Array(10);
 
   function show_modal(): void {
     modal_obj.show();
@@ -140,6 +143,83 @@
         }
 
         personal_files_loading = false;
+      }
+    );
+  }
+  function get_user_teams(): void {
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getteams",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        teams = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        
+        for (let i: number = 0; i < response_obj.length; ++i) {
+            teams[i] = new Team();
+            teams[i].name = response_obj[i].f_team_name;
+            teams[i].id = response_obj[i].f_teamid;
+            }
+      }
+    );
+  }
+  function get_user_active_threads(): void {
+
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getactivethreads",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        act_threads = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        
+        for (let i: number = 0; i < response_obj.length; ++i) {
+            act_threads[i] = new Thread();
+            act_threads[i].name = response_obj[i].f_threadname;
+            act_threads[i].id = response_obj[i].f_threadid;
+            }
+      }
+    );
+  }
+  function get_user_archive_threads(): void {
+
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getarchivethreads",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        arch_threads = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        
+        for (let i: number = 0; i < response_obj.length; ++i) {
+            arch_threads[i] = new Thread();
+            arch_threads[i].name = response_obj[i].f_threadname;
+            arch_threads[i].id = response_obj[i].f_threadid;
+            }
       }
     );
   }
@@ -199,6 +279,8 @@
       upload_progress_elem.style.width = Math.round(i * 100 / file_buffer.byteLength) + "%";
     }
     if (success) {
+      upload_progress_elem.style.width = "100%";
+
       await fetch("/api/files/addchunkfile/finish?filename=" + file.name, {
         method: "POST",
         headers: {
@@ -255,6 +337,7 @@
     }
   };
 
+  
   onMount((): void => {
     personal_files_loading = true;
 
@@ -269,6 +352,9 @@
     }
 
     get_personal_files();
+    get_user_teams();
+    get_user_active_threads();
+    get_user_archive_threads();
 
     modal_obj = new Modal(modal_elem, {
       onHide: (): void => {
@@ -280,17 +366,10 @@
     });
 
     tabs[0].callback();
-
-    for (let i: number = 0; i < act_threads.length; ++i) {
-      act_threads[i] = new Thread();
-      act_threads[i].name = "Thread " + (i + 1).toString();
-    }
-
-    for (let i: number = 0; i < arch_threads.length; ++i) {
-      arch_threads[i] = new Thread();
-      arch_threads[i].name = "Thread " + (i + 1).toString();
-    }
   });
+
+
+  
 </script>
 
 <div class="pg-center flex">
@@ -307,16 +386,8 @@
           class="flex {color[0]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
           on:click={tabs[0].callback}
         >
-          <svg
-            class="w-8 h-8 text-blue-500 dark:text-blue-400 pe-2"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"
-            />
+          <svg class="w-8 h-8 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 12 8-8 8 8M6 10.5V19c0 .6.4 1 1 1h3v-3c0-.6.4-1 1-1h2c.6 0 1 .4 1 1v3h3c.6 0 1-.4 1-1v-8.5"/>
           </svg>
           <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
             My Personal Files
@@ -330,19 +401,8 @@
           class="flex {color[1]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
           on:click={tabs[1].callback}
         >
-          <svg
-            class="w-8 h-8 text-green-500 dark:text-green-400 pe-2"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 19"
-          >
-            <path
-              d="M14.5 0A3.987 3.987 0 0 0 11 2.1a4.977 4.977 0 0 1 3.9 5.858A3.989 3.989 0 0 0 14.5 0ZM9 13h2a4 4 0 0 1 4 4v2H5v-2a4 4 0 0 1 4-4Z"
-            />
-            <path
-              d="M5 19h10v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2ZM5 7a5.008 5.008 0 0 1 4-4.9 3.988 3.988 0 1 0-3.9 5.859A4.974 4.974 0 0 1 5 7Zm5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm5-1h-.424a5.016 5.016 0 0 1-1.942 2.232A6.007 6.007 0 0 1 17 17h2a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5ZM5.424 9H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h2a6.007 6.007 0 0 1 4.366-5.768A5.016 5.016 0 0 1 5.424 9Z"
-            />
+          <svg class="w-8 h-8 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
           </svg>
           <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
             My Teams
@@ -356,19 +416,8 @@
           class="flex {color[2]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
           on:click={tabs[2].callback}
         >
-          <svg
-            class="w-8 h-8 text-red-500 dark:text-red-400 pe-2"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 12 20"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M1 6v8a5 5 0 1 0 10 0V4.5a3.5 3.5 0 1 0-7 0V13a2 2 0 0 0 4 0V6"
-            />
+          <svg class="w-8 h-8 text-indigo-500 dark:text-indigo-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8"/>
           </svg>
           <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
             Active Threads ({act_threads.length})
@@ -382,16 +431,8 @@
           class="flex {color[3]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
           on:click={tabs[3].callback}
         >
-          <svg
-            class="w-8 h-8 text-yellow-500 dark:text-yellow-400 pe-2"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 18 18"
-          >
-            <path
-              d="M18 5H0v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5Zm-7.258-2L9.092.8a2.009 2.009 0 0 0-1.6-.8H2.049a2 2 0 0 0-2 2v1h10.693Z"
-            />
+          <svg class="w-8 h-8 text-yellow-500 dark:text-yellow-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 8H4m0-2v13c0 .6.4 1 1 1h14c.6 0 1-.4 1-1V9c0-.6-.4-1-1-1h-5a1 1 0 0 1-.8-.4l-1.9-2.2a1 1 0 0 0-.8-.4H5a1 1 0 0 0-1 1Z"/>
           </svg>
           <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
             Archived Threads
@@ -405,16 +446,8 @@
           class="flex {color[4]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
           on:click={tabs[4].callback}
         >
-          <svg
-            class="w-8 h-8 text-red-500 dark:text-red-400 pe-2"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 14 20"
-          >
-            <path
-              d="M12.133 10.632v-1.8A5.406 5.406 0 0 0 7.979 3.57.946.946 0 0 0 8 3.464V1.1a1 1 0 0 0-2 0v2.364a.946.946 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C1.867 13.018 0 13.614 0 14.807 0 15.4 0 16 .538 16h12.924C14 16 14 15.4 14 14.807c0-1.193-1.867-1.789-1.867-4.175ZM3.823 17a3.453 3.453 0 0 0 6.354 0H3.823Z"
-            />
+          <svg class="w-8 h-8 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5.4V3m0 2.4a5.3 5.3 0 0 1 5.1 5.3v1.8c0 2.4 1.9 3 1.9 4.2 0 .6 0 1.3-.5 1.3h-13c-.5 0-.5-.7-.5-1.3 0-1.2 1.9-1.8 1.9-4.2v-1.8A5.3 5.3 0 0 1 12 5.4ZM8.7 18c.1.9.3 1.5 1 2.1a3.5 3.5 0 0 0 4.6 0c.7-.6 1.3-1.2 1.4-2.1h-7Z"/>
           </svg>
           <p class="text-2xl font-semibold text-gray-900 dark:text-white">
             Notices
@@ -483,7 +516,10 @@
         <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
           {#each teams as team}
             <li>
-              <TeamCard team_name={team.name} />
+              <TeamCard 
+              team_name={team.name}
+              team_id={team.id}
+              />
             </li>
           {/each}
         </ul>
@@ -498,7 +534,8 @@
         <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
           {#each act_threads as thread}
             <li>
-              <ThreadCard thread_name={thread.name} />
+              <ThreadCard thread_name={thread.name}
+              thread_id={thread.id} />
             </li>
           {/each}
         </ul>
@@ -513,7 +550,8 @@
         <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
           {#each arch_threads as thread}
             <li>
-              <ThreadCard thread_name={thread.name} />
+              <ThreadCard thread_name={thread.name}
+              thread_id={thread.id}  />
             </li>
           {/each}
         </ul>
@@ -535,31 +573,37 @@
         class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
       >
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-          File Upload
+          {#if uploading}
+            Uploading...
+          {:else}
+            File Upload
+          {/if}
         </h3>
-        <button
-          on:click={hide_modal}
-          type="button"
-          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-          data-modal-hide="static-modal"
-        >
-          <svg
-            class="w-3 h-3"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 14 14"
+        {#if !uploading}
+          <button
+            on:click={hide_modal}
+            type="button"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            data-modal-hide="static-modal"
           >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-            />
-          </svg>
-          <span class="sr-only">Close modal</span>
-        </button>
+            <svg
+              class="w-3 h-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+              />
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        {/if}
       </div>
       <!-- Modal body -->
       <div class="p-4 md:p-5 space-y-4">

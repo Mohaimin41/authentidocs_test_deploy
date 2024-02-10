@@ -155,6 +155,80 @@
     );
   }
 
+  class Team {
+    public name!: string;
+    public id!: string;
+  }
+
+  let teams: Team[] = new Array(5);
+
+  for (let i: number = 0; i < teams.length; ++i) {
+    teams[i] = new Team();
+    teams[i].name = "Team " + (i + 1).toString();
+    teams[i].id = String(i);
+  }
+
+  /**
+   * thread list item
+   */
+  class Thread {
+    public name!: string;
+    public id!: string;
+  }
+
+  let threads: Thread[] = new Array(10);
+  function get_user_teams(): void {
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getteams",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        teams = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        console.log(response_obj);
+        for (let i: number = 0; i < response_obj.length; ++i) {
+            teams[i] = new Team();
+            teams[i].name = response_obj[i].f_team_name;
+            teams[i].id = response_obj[i].f_teamid;
+            }
+      }
+    );
+  }
+  function get_user_all_threads(): void {
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getallthreads",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        threads = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        console.log(response_obj);
+        for (let i: number = 0; i < response_obj.length; ++i) {
+            threads[i] = new Thread();
+            threads[i].name = response_obj[i].f_threadname;
+            threads[i].id = response_obj[i].f_threadid;
+            }
+      }
+    );
+  }
+  
+
   onMount((): void => {
     if ($page.data.session === null) {
         goto("/");
@@ -167,6 +241,8 @@
     }
 
     get_personal_files();
+    get_user_teams();
+    get_user_all_threads();
     let request_obj: any = {
       userid: $page.data.session?.user?.name,
     };
@@ -265,7 +341,7 @@
         required
       />
     {:else}
-      <p class="text-2xl font-medium text-gray-900 dark:text-white mt-2 mb-6">
+      <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mt-2 mb-6">
         {username}
       </p>
     {/if}
@@ -281,7 +357,7 @@
         required
       />
     {:else}
-      <p class="text-xl font-medium text-gray-900 dark:text-white mb-4">
+      <p class="text-xl font-medium text-gray-700 dark:text-gray-200 mb-4">
         {email}
       </p>
     {/if}
@@ -305,7 +381,7 @@
     </p>
     <div class="flex items-start mb-2" style="max-width: 100%;">
       <p
-        class="text-xl font-medium text-gray-900 {pubkey_truncate_status} dark:text-white mt-auto mb-auto"
+        class="text-xl font-medium text-gray-700 dark:text-gray-200 {pubkey_truncate_status} mt-auto mb-auto"
         style="width: 80%; word-wrap: break-word;"
         bind:this={pubkey_p}
       >
@@ -356,7 +432,7 @@
     </p>
     <div class="flex items-start mb-4" style="max-width: 100%;">
       <p
-        class="text-xl font-medium text-gray-900 dark:text-white mt-auto mb-auto"
+        class="text-xl font-medium text-gray-700 dark:text-gray-200 mt-auto mb-auto"
         style="width: 80%; word-wrap: break-word;"
         bind:this={privkey_p}
       >
@@ -516,30 +592,26 @@
           class="tab-content-list space-y-2 mb-6 mx-6 pb-2"
           style="overflow-y: auto;"
         >
-          <li>
-            <TeamCard team_name={"Team 1"} />
-          </li>
-          <li>
-            <TeamCard team_name={"Team 2"} />
-          </li>
-          <li>
-            <TeamCard team_name={"Team 3"} />
-          </li>
+        {#each teams as team}
+        <li>
+          <TeamCard 
+          team_name={team.name}
+          team_id={team.id}
+          />
+        </li>
+      {/each}
         </ul>
       {:else if tab_index === 4}
         <ul
           class="tab-content-list space-y-2 mb-6 mx-6 pb-2"
           style="overflow-y: auto;"
         >
-          <li>
-            <ThreadCard thread_name={"Thread 1"} />
-          </li>
-          <li>
-            <ThreadCard thread_name={"Thread 2"} />
-          </li>
-          <li>
-            <ThreadCard thread_name={"Thread 3"} />
-          </li>
+        {#each threads as thread}
+        <li>
+          <ThreadCard thread_name={thread.name}
+          thread_id={thread.id} />
+        </li>
+      {/each}
         </ul>
       {/if}
     </div>
