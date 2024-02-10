@@ -49,8 +49,10 @@
     let closing_comment: string;
     let member_count: number;
     let file_count: number;
-    let close_thread_modal: Modal;
     let close_thread_modal_elem: HTMLDivElement;
+    let add_member_modal_elem: HTMLDivElement;
+    let close_thread_modal: Modal;
+    let add_member_modal: Modal;
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -173,6 +175,7 @@
             let response_obj: any = await response.json();
 
             console.log(response_obj);
+            add_member_modal.hide();
             get_members();
             get_addable_members();
         });
@@ -274,6 +277,16 @@
         close_thread_modal.hide();
     }
 
+    function show_add_member_modal(): void
+    {
+        add_member_modal.show();
+    }
+
+    function hide_add_member_modal(): void
+    {
+        add_member_modal.hide();
+    }
+
     function close_thread(): void
     {
         let temp_comment: string = closing_comment;
@@ -310,6 +323,7 @@
 
         id = $page.params.id;
         close_thread_modal = new Modal(close_thread_modal_elem);
+        add_member_modal = new Modal(add_member_modal_elem);
 
         fetch("/api/thread/getdetails",
         {
@@ -532,12 +546,12 @@
             <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add File</button>
         {:else if tab_active[2]}
             <!-- Add Members -->
-            <button data-modal-target="addable-members-modal" data-modal-toggle="addable-members-modal" type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
+            <button on:click={show_add_member_modal} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
         {/if}
     </div>
 </div>
 
-<div id="addable-members-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div bind:this={add_member_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
         <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -546,7 +560,7 @@
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                     Select Thread Members
                 </h3>
-                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" on:click={hide_close_thread_modal}>
+                <button on:click={hide_add_member_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                     </svg>
