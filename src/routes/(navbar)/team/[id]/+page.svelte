@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { common_fetch } from '$lib/fetch_func';
     import { onMount } from "svelte";
     import ThreadCard from "$lib/components/team/thread-card.svelte";
     import { Modal, initModals } from "flowbite";
@@ -24,6 +25,9 @@
     let thread_description_input: string;
     let create_thread_modal_elem: HTMLDivElement;
     let create_thread_modal: Modal;
+    let team_info: any;
+    let team_name:string;
+    let team_leader:string;
 
     function create_thread(): void
     {
@@ -97,9 +101,31 @@
             }
         });
     }
+    function get_team_details(): void {
+    let request_obj: any = {
+      teamid: id,
+    };
 
+    common_fetch(
+      "/api/team/getdetails",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        if (response_obj === null) {
+          return;
+        }
+
+        team_info=response_obj;
+        console.log(team_info);
+        team_name=team_info.team_detail.team_name;
+        team_leader=team_info.team_mod_detail.f_username;
+      }
+    );
+  }
     onMount((): void =>
     {
+
         create_thread_modal = new Modal(create_thread_modal_elem);
 
         initModals();
@@ -107,6 +133,9 @@
         id = $page.params.id;
 
         get_threads();
+        get_team_details();
+
+        
     });
 </script>
 
@@ -115,7 +144,7 @@
     <div class="team-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <div class="flex m-6">
             <div class="grow">
-                <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Team 1</p>
+                <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-2">{team_name}</p>
                 <div class="grid grid-cols-4 gap-4">
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Leader</p>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Members</p>
@@ -123,7 +152,7 @@
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Files</p>
                     <div class="flex flex-wrap items-center">
                         <img class="w-6 h-6 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-sm font-medium text-gray-700">Mustafa Siam</p>
+                        <p class="text-sm font-medium text-gray-700">{team_leader}</p>
                     </div>
                     <div class="flex -space-x-4 rtl:space-x-reverse">
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
