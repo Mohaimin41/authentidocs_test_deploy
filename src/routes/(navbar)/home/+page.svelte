@@ -147,7 +147,6 @@
     );
   }
   function get_user_teams(): void {
-    personal_files_loading = true;
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
     };
@@ -173,7 +172,7 @@
     );
   }
   function get_user_active_threads(): void {
-    personal_files_loading = true;
+
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
     };
@@ -199,7 +198,7 @@
     );
   }
   function get_user_archive_threads(): void {
-    personal_files_loading = true;
+
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
     };
