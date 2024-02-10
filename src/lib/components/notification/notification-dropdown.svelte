@@ -45,6 +45,24 @@
             }
         });
     });
+    async function read_all()
+    {
+        fetch("/api/user/readallnotifications",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                user_id: $page.data.session?.user?.name
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+        });
+    }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -67,7 +85,7 @@
     {#if available}
         <div class="flex justify-end">
             <!-- svelte-ignore a11y-invalid-attribute -->
-            <a href="javascript:" class="font-medium text-blue-600 dark:text-blue-500 hover:underline my-2 mx-4">Mark All Read</a>
+            <a on:click={read_all} href="javascript:" class="font-medium text-blue-600 dark:text-blue-500 hover:underline my-2 mx-4">Mark All Read</a>
         </div>
     {/if}
 </div>
