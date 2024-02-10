@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { json } from '@sveltejs/kit';
     import { Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
     import { username } from '../../stores';
     import { onMount } from 'svelte';
@@ -16,6 +17,8 @@
     let verify_result: number = 0;
     let verify_success_text: string = "File Verified";
     let verify_failure_text: string = "File Verification Failed";
+    let verify_key_failure_text: string = "Invalid Key or Signature";
+    let verified_username:string = "Unknown User";
 
     function show_verify_modal(): void
     {
@@ -44,13 +47,37 @@
         if(parse)
         {
             let json: string = new TextDecoder().decode(uint8_array);
-
             return JSON.parse(JSON.parse(json));
         }
         else
         {
             return uint8_array.buffer;
         }
+    }
+    function check_key_validity(hash: string): any
+    {
+        let number_array: number[] = [];
+
+        for(let i: number = 0; i < hash.length; i += 2)
+        {
+            let hex_str: string = hash.substring(i, i + 2);
+            let byte_number: number = parseInt(hex_str, 16);
+
+            number_array.push(byte_number);
+        }
+
+        let uint8_array: Uint8Array = new Uint8Array(number_array);
+
+            let json: string = new TextDecoder().decode(uint8_array);
+            let temp_json;
+            try {
+                temp_json = JSON.parse(json);
+                return true;
+            } catch (error) {
+                return false;
+            }
+      
+        
     }
 
     function upload(): void
@@ -59,6 +86,12 @@
         input_elem.type = "file";
         input_elem.onchange = async (ev: Event): Promise<void> =>
         {
+            if(!check_key_validity(pubkey_value))
+            {
+                console.log("Error e dhuklam")
+                verify_result=2;
+                return;
+            }
             let pubkey_jwk: JsonWebKey = objectify_hash(pubkey_value, true) as JsonWebKey;
             let pubkey: CryptoKey = await window.crypto.subtle.importKey("jwk", pubkey_jwk,
             {
@@ -89,11 +122,31 @@
 
             if(result === true)
             {
+
                 verify_result = 1;
+                let pub_key=objectify_hash(pubkey_value, true)
+                let request_obj: any = {
+                key: JSON.stringify(pub_key),
+                };
+
+                common_fetch(
+                "/api/user/verifykey",
+                request_obj,
+                async (response: Response): Promise<void> => {
+                    let response_obj: any = await response.json();
+
+                    if (response_obj === null) {
+                    return;
+                    }
+                    console.log(response_obj);
+                    verified_username = response_obj.username;
+                    
+                }
+                );
             }
             else
             {
-                verify_result = 2;
+                verify_result = 3;
             }
         }
 
@@ -188,6 +241,11 @@
                     {:else if verify_result === 1}
                         <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
                             {verify_success_text}
+                            Signed By : {verified_username}
+                        </div>
+                    {:else if verify_result === 2}
+                        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+                            {verify_key_failure_text}
                         </div>
                     {:else}
                         <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
