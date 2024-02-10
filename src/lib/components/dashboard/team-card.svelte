@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
 
     export let team_name: string;
+    export let team_id: string;
     const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
 
@@ -12,7 +13,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<a href="javascript:" class="block p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
+<a href="/team/{team_id}" class="block p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
     <div class="flex">
         <svg class="w-8 h-8 text-{color}-500 dark:text-{color}-400 pe-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 19">
             <path d="M14.5 0A3.987 3.987 0 0 0 11 2.1a4.977 4.977 0 0 1 3.9 5.858A3.989 3.989 0 0 0 14.5 0ZM9 13h2a4 4 0 0 1 4 4v2H5v-2a4 4 0 0 1 4-4Z"/>
