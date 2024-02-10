@@ -1,45 +1,45 @@
 import { supabase } from "$lib/server/supabase_client.server";
+import { error } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
 
 export async function POST({
   request,
-  cookies,
   locals,
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new Response(JSON.stringify("you must be logged in to view thread members"), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      status: 401,
-    });
+    return new (error as any)(
+      401,
+      "You must be logged in to view thread condition"
+    );
   }
   // console.log(session);
-  const team_info = await request.json();
+  const thread_info = await request.json();
   // console.log("inside add key",key_info);
-  let given_threadid = team_info.given_threadid;
-
-
-  let { data:result, error:_error } = await supabase
-  .rpc('can_close_thread', {
-    given_threadid
-  })
+  let given_threadid = thread_info.given_threadid;
+  if (given_threadid === undefined || given_threadid === null) {
+    console.log(
+      "ERROR @api/thread/canclose:22: invalid user input error:\n",
+      thread_info
+    );
+    return new (error as any)(
+      422,
+      "Invalid inputs, while checking thread closing status."
+    );
+  }
+  let { data: result, error: _error } = await supabase.rpc("can_close_thread", {
+    given_threadid,
+  });
 
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/thread/canclose:33: supabase checking can close thread error\n",
+      "ERROR @api/thread/canclose:37: supabase checking can close thread error\n",
       _error
     );
-    return new Response(
-      JSON.stringify("internal server error while checking if thread can be closed: " + _error),
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        status: 500,
-      }
+    return new (error as any)(
+      500,
+      "Internal Server Error, while checking thread closing status."
     );
   }
 

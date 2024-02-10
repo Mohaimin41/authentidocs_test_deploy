@@ -4,7 +4,6 @@ import type { RequestEvent } from "./$types";
 
 export async function POST({
   request,
-  cookies,
   locals,
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
@@ -22,7 +21,7 @@ export async function POST({
 
   if (given_teamid === undefined || given_teamid === null) {
     console.log(
-      "ERROR @api/team/getmembers:25: invalid user input error:\n",
+      "ERROR @api/team/getmembers:24: invalid user input error:\n",
       team_info
     );
     return new (error as any)(
@@ -41,7 +40,7 @@ export async function POST({
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/team/getmembers:44: supabase get team members error\n",
+      "ERROR @api/team/getmembers:43: supabase get team members error\n",
       _error
     );
     return new (error as any)(

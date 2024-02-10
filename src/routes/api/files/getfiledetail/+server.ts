@@ -28,10 +28,7 @@ export async function POST({
       "ERROR @api/files/getfiledetail:28: invalid user input error:\n",
       file_info
     );
-    return new (error as any)(
-      422,
-      "Invalid inputs, while getting file data."
-    );
+    return new (error as any)(422, "Invalid inputs, while getting file data.");
   }
 
   let { data: result1, error: _error1 } = await supabase.rpc(

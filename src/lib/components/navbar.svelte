@@ -8,16 +8,9 @@
     import { page } from '$app/stores';
     import { common_fetch } from '$lib/fetch_func';
     import NotificationDropdown from './notification-dropdown.svelte';
+    import Pfp from './pfp.svelte';
 
     let logged_in_state: boolean = false;
-
-    async function logout(): Promise<void>
-    {
-        await db.priv_key.delete(get(uid));
-        await db.delete();
-
-        signOut({callbackUrl: "/"});
-    }
 
     onMount((): void =>
     {
@@ -63,19 +56,7 @@
     {#if logged_in_state}
         <div class="flex items-center md:order-2">
             <NotificationDropdown />
-            <a id="avatar-menu" role="button" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                <Avatar src="/pochita.webp" />
-            </a>
-            <Dropdown placement="bottom" triggeredBy="#avatar-menu">
-                <DropdownHeader>
-                <span class="block font-semibold text-lg">{$username}</span>
-                <span class="block truncate text-sm font-medium">{$useremail}</span>
-                </DropdownHeader>
-                <a href="/dashboard">
-                    <DropdownItem>Settings</DropdownItem>
-                </a>
-                <DropdownItem on:click={logout}>Logout</DropdownItem>
-            </Dropdown>
+            <Pfp />
         </div>
     {:else}
         <div class="flex">

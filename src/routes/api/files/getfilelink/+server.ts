@@ -50,7 +50,7 @@ export async function POST({
   let result4, result5;
   if (result1.current_state === undefined || result1.current_state === null) {
     console.log(
-      "ERROR @api/files/getfilelink:51: supabase returning incorrect result\n",
+      "ERROR @api/files/getfilelink:53: supabase returning incorrect result\n",
       result1
     );
     return new (error as any)(
@@ -66,7 +66,7 @@ export async function POST({
 
     if (_error2) {
       console.log(
-        "ERROR @api/files/getfilelink:64: supabase file link access error\n",
+        "ERROR @api/files/getfilelink:69: supabase file link access error\n",
         _error2
       );
       return new (error as any)(
@@ -84,7 +84,7 @@ export async function POST({
 
     if (_error3) {
       console.log(
-        "ERROR @api/files/getfilelink:79: supabase file link access error\n",
+        "ERROR @api/files/getfilelink:87: supabase file link access error\n",
         _error3
       );
       return new (error as any)(

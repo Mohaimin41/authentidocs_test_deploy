@@ -4,7 +4,6 @@ import type { RequestEvent } from "./$types";
 
 export async function POST({
   request,
-  cookies,
   locals,
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
@@ -34,10 +33,10 @@ export async function POST({
     given_signing_userid === null
   ) {
     console.log(
-      "ERROR @api/thread/addfilenot:37: invalid user input error:\n",
+      "ERROR @api/thread/addfilenote:36: invalid user input error:\n",
       file_info
     );
-    return new (error as any)(422, "Invalid inputs, while getting file data.");
+    return new (error as any)(422, "Invalid inputs, while adding file notes.");
   }
 
   let { data: result, error: _error } = await supabase.rpc("add_file_note", {
@@ -51,11 +50,13 @@ export async function POST({
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/thread/addfilenote:54: supabase add file note error\n",
+      "ERROR @api/thread/addfilenote:53: supabase add file note error\n",
       _error
     );
-    return  new (error as any)(500, "Internal Server Error, while adding file notes.");
-    
+    return new (error as any)(
+      500,
+      "Internal Server Error, while adding file notes."
+    );
   }
 
   let response: Response = new Response(JSON.stringify(result), {
