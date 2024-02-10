@@ -1,13 +1,10 @@
 <script lang="ts">
-    import { Avatar, Dropdown, DropdownHeader, DropdownItem, Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
-    import { uid,useremail,username } from '../../stores';
-    import { get } from 'svelte/store';
-    import { signOut } from '@auth/sveltekit/client';
-    import { db } from '$lib/db';
+    import { Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
+    import { username } from '../../stores';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import { common_fetch } from '$lib/fetch_func';
-    import NotificationDropdown from './notification-dropdown.svelte';
+    import NotificationDropdown from "$lib/components/notification/notification-dropdown.svelte";
     import Pfp from './pfp.svelte';
 
     let logged_in_state: boolean = false;

@@ -2,9 +2,11 @@
     import { page } from "$app/stores";
     import { initDropdowns } from "flowbite";
     import { onMount } from "svelte";
+    import NotifcatinElement from "./notifcatin-element.svelte";
 
     class Notification
     {
+        public id: string = "";
         public content: string = "";
         public seen: boolean = false;
     }
@@ -32,14 +34,12 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            
-            console.log(response_obj);
-
             notifications = new Array(response_obj.length);
 
             for(let i: number = 0; i < notifications.length; ++i)
             {
                 notifications[i] = new Notification();
+                notifications[i].id = response_obj[i].f_notificationid;
                 notifications[i].content = response_obj[i].f_content;
                 notifications[i].seen = response_obj[i].f_is_seen;
             }
@@ -55,21 +55,12 @@
 </button>
 
 <!-- Dropdown menu -->
-<div id="notification-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-96 dark:bg-gray-700">
+<div id="notification-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-96 h-3/4 overflow-y-auto dark:bg-gray-700">
     <p class="text-2xl font-semibold text-gray-700 truncate dark:text-white my-2 mx-4">Notifications</p>
     <ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700 my-2 mx-4">
         {#each notifications as notification}
             <li class="py-3 sm:py-4">
-                <div class="flex items-center justify-between space-x-4 rtl:space-x-reverse">
-                    <p class="text-sm font-medium text-gray-700 truncate dark:text-white">
-                        {notification.content}
-                    </p>
-                    <button type="button" class="py-2 px-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" disabled={notification.seen}>
-                        <svg class="w-4 h-4 text-green-600 dark:text-green-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                        </svg>
-                    </button>
-                </div>
+                <NotifcatinElement id={notification.id} content={notification.content} seen={notification.seen} />
             </li>
         {/each}
     </ul>
