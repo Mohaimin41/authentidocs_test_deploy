@@ -341,7 +341,7 @@
         required
       />
     {:else}
-      <p class="text-2xl font-medium text-gray-900 dark:text-white mt-2 mb-6">
+      <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mt-2 mb-6">
         {username}
       </p>
     {/if}
@@ -357,7 +357,7 @@
         required
       />
     {:else}
-      <p class="text-xl font-medium text-gray-900 dark:text-white mb-4">
+      <p class="text-xl font-medium text-gray-700 dark:text-gray-200 mb-4">
         {email}
       </p>
     {/if}
@@ -381,7 +381,7 @@
     </p>
     <div class="flex items-start mb-2" style="max-width: 100%;">
       <p
-        class="text-xl font-medium text-gray-900 {pubkey_truncate_status} dark:text-white mt-auto mb-auto"
+        class="text-xl font-medium text-gray-700 dark:text-gray-200 {pubkey_truncate_status} mt-auto mb-auto"
         style="width: 80%; word-wrap: break-word;"
         bind:this={pubkey_p}
       >
@@ -432,7 +432,7 @@
     </p>
     <div class="flex items-start mb-4" style="max-width: 100%;">
       <p
-        class="text-xl font-medium text-gray-900 dark:text-white mt-auto mb-auto"
+        class="text-xl font-medium text-gray-700 dark:text-gray-200 mt-auto mb-auto"
         style="width: 80%; word-wrap: break-word;"
         bind:this={privkey_p}
       >
