@@ -1,25 +1,109 @@
 <script lang="ts">
-    import { Avatar, Dropdown, DropdownHeader, DropdownItem, Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
-    import { uid,useremail,username } from '../../stores';
-    import { get } from 'svelte/store';
-    import { signOut } from '@auth/sveltekit/client';
-    import { db } from '$lib/db';
+    import { Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
+    import { username } from '../../stores';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
-  import { common_fetch } from '$lib/fetch_func';
+    import { common_fetch } from '$lib/fetch_func';
+    import NotificationDropdown from "$lib/components/notification/notification-dropdown.svelte";
+    import Pfp from './pfp.svelte';
+    import { Modal } from 'flowbite';
 
     let logged_in_state: boolean = false;
+    let pubkey_value: string;
+    let signature_value: string;
+    let verify_modal_elem: HTMLDivElement;
+    let verify_modal: Modal;
+    let verify_result: number = 0;
+    let verify_success_text: string = "File Verified";
+    let verify_failure_text: string = "File Verification Failed";
 
-    async function logout(): Promise<void>
+    function show_verify_modal(): void
     {
-        await db.priv_key.delete(get(uid));
-        await db.delete();
+        verify_modal.show();
+    }
 
-        signOut({callbackUrl: "/"});
+    function hide_verify_modal(): void
+    {
+        verify_modal.hide();
+    }
+
+    function objectify_hash(hash: string, parse: boolean): any
+    {
+        let number_array: number[] = [];
+
+        for(let i: number = 0; i < hash.length; i += 2)
+        {
+            let hex_str: string = hash.substring(i, i + 2);
+            let byte_number: number = parseInt(hex_str, 16);
+
+            number_array.push(byte_number);
+        }
+
+        let uint8_array: Uint8Array = new Uint8Array(number_array);
+
+        if(parse)
+        {
+            let json: string = new TextDecoder().decode(uint8_array);
+
+            return JSON.parse(JSON.parse(json));
+        }
+        else
+        {
+            return uint8_array.buffer;
+        }
+    }
+
+    function upload(): void
+    {
+        let input_elem: HTMLInputElement = document.createElement("input");
+        input_elem.type = "file";
+        input_elem.onchange = async (ev: Event): Promise<void> =>
+        {
+            let pubkey_jwk: JsonWebKey = objectify_hash(pubkey_value, true) as JsonWebKey;
+            let pubkey: CryptoKey = await window.crypto.subtle.importKey("jwk", pubkey_jwk,
+            {
+                name: "ECDSA",
+                namedCurve: "P-384",
+            }, true, ["verify"]);
+            let signature: ArrayBuffer = objectify_hash(signature_value, false);
+            let files: FileList | null = input_elem.files;
+
+            if(files === null)
+            {
+                return;
+            }
+
+            let file: File | null = files[0];
+
+            if(file === null)
+            {
+                return;
+            }
+
+            let file_buffer: ArrayBuffer = await file.arrayBuffer();
+            let result = await window.crypto.subtle.verify(
+            {
+                name: "ECDSA",
+                hash: { name: "SHA-384" },
+            }, pubkey, signature, file_buffer);
+
+            if(result === true)
+            {
+                verify_result = 1;
+            }
+            else
+            {
+                verify_result = 2;
+            }
+        }
+
+        input_elem.click();
     }
 
     onMount((): void =>
     {
+        verify_modal = new Modal(verify_modal_elem);
+
         if($page.data.session)
         {
             logged_in_state = true;
@@ -46,6 +130,7 @@
     });
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <Navbar fluid={false}>
     <NavBrand href="/">
         <img src="/logo.webp" class="rounded-lg me-3 h-6 sm:h-9" alt="App Logo" /> <!-- apatoto -->
@@ -56,23 +141,12 @@
         <NavLi href="/about">Organizations</NavLi>
         <NavLi href="/docs/components/navbar">Teams</NavLi>
         <NavLi href="/pricing">Work Threads</NavLi>
-        <NavLi href="/contact">Upload & Sign</NavLi>
+        <a on:click={show_verify_modal} href="javascript:" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Upload & Verify</a>
     </NavUl>
     {#if logged_in_state}
         <div class="flex items-center md:order-2">
-            <a id="avatar-menu" role="button" data-dropdown-toggle="dropdown" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                <Avatar src="/pochita.webp" />
-            </a>
-            <Dropdown placement="bottom" triggeredBy="#avatar-menu">
-                <DropdownHeader>
-                <span class="block font-semibold text-lg">{$username}</span>
-                <span class="block truncate text-sm font-medium">{$useremail}</span>
-                </DropdownHeader>
-                <a href="/dashboard">
-                <DropdownItem>Settings</DropdownItem>
-                </a>
-                <DropdownItem on:click={logout}>Logout</DropdownItem>
-            </Dropdown>
+            <NotificationDropdown />
+            <Pfp />
         </div>
     {:else}
         <div class="flex">
@@ -81,3 +155,50 @@
         </div>
     {/if}
 </Navbar>
+
+<div bind:this={verify_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Upload & Verify
+                </h3>
+                <button on:click={hide_verify_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 space-y-4">
+                <form on:submit={upload} class="mx-auto">
+                    <div class="mb-4">
+                      <label for="public-key" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Public Key</label>
+                      <textarea bind:value={pubkey_value} id="public-key" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="signature" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Signature</label>
+                        <textarea bind:value={signature_value} id="signature" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"></textarea>
+                    </div>
+                    {#if verify_result === 0}
+                        <div></div>
+                    {:else if verify_result === 1}
+                        <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+                            {verify_success_text}
+                        </div>
+                    {:else}
+                        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                            {verify_failure_text}
+                        </div>
+                    {/if}
+                    <div class="flex justify-end">
+                        <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

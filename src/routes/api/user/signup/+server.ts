@@ -12,6 +12,7 @@ export async function POST({ request }: RequestEvent): Promise<Response> {
   //  if (error) console.error(error)
   //  else console.log(result)
   if (_error) {
+    console.log("ERROR @api/user/signup:15: supabase checking user data error\n", _error)
     return new Response(JSON.stringify("internal server error while checking user input: "+_error), {
       headers: {
         "Content-Type": "application/json",
@@ -35,6 +36,7 @@ export async function POST({ request }: RequestEvent): Promise<Response> {
       given_username,
     });
     if (_error1) {
+      console.log("ERROR @api/user/signup:39: supabase adding user data error\n", _error1)
       return new Response(JSON.stringify("internal server error while adding user: "+_error), {
         headers: {
           "Content-Type": "application/json",
