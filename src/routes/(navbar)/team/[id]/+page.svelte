@@ -95,8 +95,6 @@
                 threads[i].uid = response_obj[i].f_threadid;
                 threads[i].name = response_obj[i].f_threadname;
             }
-
-            console.log(threads);
         });
     }
 

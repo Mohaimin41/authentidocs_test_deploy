@@ -352,9 +352,6 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-
-            console.log(response_obj);
-
             thread_name = response_obj.thread_detail.threadname;
             team_name = response_obj.thread_detail.team_name;
             started_at = new Date(response_obj.thread_detail.created_at);
