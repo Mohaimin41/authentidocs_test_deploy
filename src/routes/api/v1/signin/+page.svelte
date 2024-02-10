@@ -2,6 +2,9 @@
   import { signIn, signOut } from "@auth/sveltekit/client";
   import { page } from "$app/stores";
   import { common_fetch } from "$lib/fetch_func";
+  import { source } from 'sveltekit-sse'
+
+  const value = source('/api/user/notificationevent').select('message')
 
   let email = "";
   let password = "";
@@ -16,6 +19,7 @@
       console.log(response_obj);
     }
   );
+  console.log("sse value:", value);
 </script>
 
 <div>
