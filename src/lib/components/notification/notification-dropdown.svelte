@@ -74,7 +74,7 @@
 </button>
 
 <!-- Dropdown menu -->
-<div id="notification-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-96 h-3/4 overflow-y-auto dark:bg-gray-700">
+<div id="notification-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-96 overflow-y-auto dark:bg-gray-700" style="max-height: 75%;">
     <p class="text-2xl font-semibold text-gray-700 truncate dark:text-white my-2 mx-4">Notifications</p>
     <ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700 my-2 mx-4">
         {#each notifications as notification}
