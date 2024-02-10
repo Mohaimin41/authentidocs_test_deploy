@@ -87,6 +87,7 @@
    */
   class Team {
     public name!: string;
+    public id!: string;
   }
 
   let teams: Team[] = new Array(5);
@@ -94,6 +95,7 @@
   for (let i: number = 0; i < teams.length; ++i) {
     teams[i] = new Team();
     teams[i].name = "Team " + (i + 1).toString();
+    teams[i].id = String(i);
   }
 
   /**
@@ -101,10 +103,11 @@
    */
   class Thread {
     public name!: string;
+    public id!: string;
   }
 
-  let act_threads: Thread[] = new Array(69);
-  let arch_threads: Thread[] = new Array(12);
+  let act_threads: Thread[] = new Array(10);
+  let arch_threads: Thread[] = new Array(10);
 
   function show_modal(): void {
     modal_obj.show();
@@ -140,6 +143,84 @@
         }
 
         personal_files_loading = false;
+      }
+    );
+  }
+  function get_user_teams(): void {
+    personal_files_loading = true;
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getteams",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        teams = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        console.log(response_obj);
+        for (let i: number = 0; i < response_obj.length; ++i) {
+            teams[i] = new Team();
+            teams[i].name = response_obj[i].f_team_name;
+            teams[i].id = response_obj[i].f_teamid;
+            }
+      }
+    );
+  }
+  function get_user_active_threads(): void {
+    personal_files_loading = true;
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getactivethreads",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        act_threads = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        console.log(response_obj);
+        for (let i: number = 0; i < response_obj.length; ++i) {
+            act_threads[i] = new Thread();
+            act_threads[i].name = response_obj[i].f_threadname;
+            act_threads[i].id = response_obj[i].f_threadid;
+            }
+      }
+    );
+  }
+  function get_user_archive_threads(): void {
+    personal_files_loading = true;
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getarchivethreads",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        arch_threads = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        console.log(response_obj);
+        for (let i: number = 0; i < response_obj.length; ++i) {
+            arch_threads[i] = new Thread();
+            arch_threads[i].name = response_obj[i].f_threadname;
+            arch_threads[i].id = response_obj[i].f_threadid;
+            }
       }
     );
   }
@@ -255,6 +336,7 @@
     }
   };
 
+  
   onMount((): void => {
     personal_files_loading = true;
 
@@ -269,6 +351,9 @@
     }
 
     get_personal_files();
+    get_user_teams();
+    get_user_active_threads();
+    get_user_archive_threads();
 
     modal_obj = new Modal(modal_elem, {
       onHide: (): void => {
@@ -281,16 +366,19 @@
 
     tabs[0].callback();
 
-    for (let i: number = 0; i < act_threads.length; ++i) {
-      act_threads[i] = new Thread();
-      act_threads[i].name = "Thread " + (i + 1).toString();
-    }
+    // for (let i: number = 0; i < act_threads.length; ++i) {
+    //   act_threads[i] = new Thread();
+    //   act_threads[i].name = "Thread " + (i + 1).toString();
+    // }
 
-    for (let i: number = 0; i < arch_threads.length; ++i) {
-      arch_threads[i] = new Thread();
-      arch_threads[i].name = "Thread " + (i + 1).toString();
-    }
+    // for (let i: number = 0; i < arch_threads.length; ++i) {
+    //   arch_threads[i] = new Thread();
+    //   arch_threads[i].name = "Thread " + (i + 1).toString();
+    // }
   });
+
+
+  
 </script>
 
 <div class="pg-center flex">
@@ -483,7 +571,10 @@
         <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
           {#each teams as team}
             <li>
-              <TeamCard team_name={team.name} />
+              <TeamCard 
+              team_name={team.name}
+              team_id={team.id}
+              />
             </li>
           {/each}
         </ul>
@@ -498,7 +589,8 @@
         <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
           {#each act_threads as thread}
             <li>
-              <ThreadCard thread_name={thread.name} />
+              <ThreadCard thread_name={thread.name}
+              thread_id={thread.id} />
             </li>
           {/each}
         </ul>
@@ -513,7 +605,8 @@
         <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
           {#each arch_threads as thread}
             <li>
-              <ThreadCard thread_name={thread.name} />
+              <ThreadCard thread_name={thread.name}
+              thread_id={thread.id}  />
             </li>
           {/each}
         </ul>
