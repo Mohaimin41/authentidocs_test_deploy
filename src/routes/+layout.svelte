@@ -36,8 +36,8 @@
                 });
 
                 let request_obj: any = {
-                user_id: $page.data.session?.user?.name,
-                key: JSON.stringify(public_key),
+                    user_id: $page.data.session?.user?.name,
+                    key: JSON.stringify(public_key),
                 };
                 common_fetch(
                 "/api/user/addkey",
