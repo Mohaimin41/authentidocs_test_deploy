@@ -328,7 +328,8 @@
             let response_obj: any = await response.json();
 
             console.log(response_obj);
-            close_thread_modal.hide(); 
+            close_thread_modal.hide();
+            init();
         });
     }
 
