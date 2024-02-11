@@ -64,7 +64,7 @@ export async function POST({ request, cookies, locals }: RequestEvent) {
         }
         if (result1) {
           let { data: result2, error: _error } = await supabase.rpc(
-            "get_user_live_notifications",
+            "get_user_unsent_notifications",
             {
               given_userid,
             }
@@ -80,10 +80,11 @@ export async function POST({ request, cookies, locals }: RequestEvent) {
               "Internal Server Error, while getting user notifications."
             );
           }
-          
-          emit("notifications", JSON.stringify(result2));
-        } else {
-          emit("notifications", JSON.stringify([]));
+
+          if (result2.length > 0)
+          {
+            emit("notifications", JSON.stringify(result2));
+          }
         }
 
         await delay(5000);

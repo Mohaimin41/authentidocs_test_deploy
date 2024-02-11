@@ -3,47 +3,18 @@
     import { initDropdowns } from "flowbite";
     import { onMount } from "svelte";
     import NotifcatinElement from "./notifcatin-element.svelte";
+    import { notifications } from "../../../stores";
+    import { get_notifications } from "$lib/notification";
 
-    class Notification
-    {
-        public id: string = "";
-        public content: string = "";
-        public seen: boolean = false;
-    }
-
-    let notifications: Notification[] = [];
     let available: boolean;
 
-    $: available = notifications.length > 0;
+    $: available = $notifications.length > 0;
 
     onMount((): void =>
     {
         initDropdowns();
 
-        fetch("/api/user/getnotifications",
-        {
-            method: "POST",
-            headers:
-            {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify(
-            {
-                user_id: $page.data.session?.user?.name
-            })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
-            notifications = new Array(response_obj.length);
-
-            for(let i: number = 0; i < notifications.length; ++i)
-            {
-                notifications[i] = new Notification();
-                notifications[i].id = response_obj[i].f_notificationid;
-                notifications[i].content = response_obj[i].f_content;
-                notifications[i].seen = response_obj[i].f_is_seen;
-            }
-        });
+        get_notifications($page.data.session?.user?.name);
     });
   
     async function read_all()
@@ -77,7 +48,7 @@
 <div id="notification-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-96 overflow-y-auto dark:bg-gray-700" style="max-height: 75%;">
     <p class="text-2xl font-semibold text-gray-700 truncate dark:text-white my-2 mx-4">Notifications</p>
     <ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700 my-2 mx-4">
-        {#each notifications as notification}
+        {#each $notifications as notification}
             <li class="py-3 sm:py-4">
                 <NotifcatinElement id={notification.id} content={notification.content} seen={notification.seen} />
             </li>
