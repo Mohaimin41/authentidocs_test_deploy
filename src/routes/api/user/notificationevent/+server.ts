@@ -81,13 +81,15 @@ export async function POST({ request, cookies, locals }: RequestEvent) {
             );
           }
 
+          // console.log(result2.length);
+
           if (result2.length > 0)
           {
             emit("notifications", JSON.stringify(result2));
           }
         }
 
-        await delay(5000);
+        await delay(1000);
       }
     },
   });
