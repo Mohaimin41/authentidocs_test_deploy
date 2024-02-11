@@ -308,6 +308,8 @@
         }, async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            if(request_obj.length !=0)
+            {
             notes = new Array(response_obj.length);
 
             for(let i: number = 0; i < notes.length; ++i)
@@ -319,6 +321,8 @@
                 notes[i].time = timestamp.toLocaleTimeString();
                 notes[i].content = response_obj[i].f_content;
             }
+            }
+            
         });
 
         common_fetch("/api/thread/getfilehistory",
@@ -327,8 +331,9 @@
         }, async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            history = new Array(response_obj.length);
-
+            if(response_obj.length!=0)
+            {
+                history = new Array(response_obj.length);
             for(let i: number = 0; i < history.length; ++i)
             {
                 history[i] = new History();
@@ -337,6 +342,8 @@
                 history[i].date = timestamp.toLocaleDateString();
                 history[i].time = timestamp.toLocaleTimeString();
             }
+            }
+           
         });
     }
 
