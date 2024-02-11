@@ -62,6 +62,7 @@ export async function POST({ request, cookies, locals }: RequestEvent) {
             })
           );
         }
+
         if (result1) {
           let { data: result2, error: _error } = await supabase.rpc(
             "get_user_unsent_notifications",
@@ -81,12 +82,7 @@ export async function POST({ request, cookies, locals }: RequestEvent) {
             );
           }
 
-          // console.log(result2.length);
-
-          if (result2.length > 0)
-          {
-            emit("notifications", JSON.stringify(result2));
-          }
+          emit("notifications", JSON.stringify(result2));
         }
 
         await delay(1000);
