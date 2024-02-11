@@ -27,27 +27,24 @@ export async function POST({
       "Invalid inputs, while getting user notifications."
     );
   }
-  do {
-    let { data: result, error: _error } = await supabase.rpc(
-      "get_user_live_notifications",
-      {
-        given_userid,
-      }
-    );
-
-    if (_error) {
-      console.log(
-        "ERROR @api/user/getnotifications:40: supabase getting user notification error\n",
-        _error
-      );
-      return new (error as any)(
-        500,
-        "Internal Server Error, while getting user notifications."
-      );
+  let { data: result, error: _error } = await supabase.rpc(
+    "get_user_live_notifications",
+    {
+      given_userid,
     }
-    notifications_list = result;
-  } while (notifications_list?.length === 0);
+  );
 
+  if (_error) {
+    console.log(
+      "ERROR @api/user/getnotifications:40: supabase getting user notification error\n",
+      _error
+    );
+    return new (error as any)(
+      500,
+      "Internal Server Error, while getting user notifications."
+    );
+  }
+  notifications_list = result;
   let response: Response = new Response(JSON.stringify(notifications_list), {
     headers: {
       "Content-Type": "application/json",
