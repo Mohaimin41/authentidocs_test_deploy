@@ -248,6 +248,7 @@
                     file_success_response_obj = await response.json();
 
                     file_uploading_modal.hide();
+                    init();
                 });
             }
             else
@@ -277,6 +278,7 @@
             let response_obj: any = await response.json();
 
             console.log(response_obj);
+            init();
         });
     }
 
