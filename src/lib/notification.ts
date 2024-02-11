@@ -6,6 +6,7 @@ export class LiveNotification
     public id: string = "";
     public content: string = "";
     public seen: boolean = false;
+    public thread_id: string = "";
 }
 
 export function get_notifications(user_id: string | null |undefined): void
@@ -33,6 +34,7 @@ export function get_notifications(user_id: string | null |undefined): void
             get(notifications)[i].id = response_obj[i].f_notificationid;
             get(notifications)[i].content = response_obj[i].f_content;
             get(notifications)[i].seen = response_obj[i].f_is_seen;
+            get(notifications)[i].thread_id = response_obj[i].f_threadid;
         }
     });
 }
