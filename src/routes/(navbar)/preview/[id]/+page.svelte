@@ -222,18 +222,18 @@
         common_fetch("/api/files/getfilelink", request_obj,
         async (response: Response): Promise<void> =>
         {
-             response_obj = await response.json();
-             file_name = response_obj.file_data.filename;
-             file_type = response_obj.file_data.file_mimetype;
-             file_status = response_obj.file_data.current_state;
-             username=response_obj.file_data.username;
-             ownerid=response_obj.file_data.file_ownerid;
-             current_custodianid=response_obj.file_data.current_custodianid;
+            response_obj = await response.json();
+            file_name = response_obj.file_data.filename;
+            file_type = response_obj.file_data.file_mimetype;
+            file_status = response_obj.file_data.current_state;
+            username=response_obj.file_data.username;
+            ownerid=response_obj.file_data.file_ownerid;
+            current_custodianid=response_obj.file_data.current_custodianid;
 
             viewer_custodian = current_custodianid === $page.data.session?.user?.name;
 
-             upload_timestamp= new Date(response_obj.file_data.created_at);
-             current_state=response_obj.file_data.current_state;
+            upload_timestamp= new Date(response_obj.file_data.created_at);
+            current_state=response_obj.file_data.current_state;
 
             let mime_text: string = "Application/octet-stream";
 
@@ -308,6 +308,8 @@
         }, async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            if(request_obj.length !=0)
+            {
             notes = new Array(response_obj.length);
 
             for(let i: number = 0; i < notes.length; ++i)
@@ -319,6 +321,8 @@
                 notes[i].time = timestamp.toLocaleTimeString();
                 notes[i].content = response_obj[i].f_content;
             }
+            }
+            
         });
 
         common_fetch("/api/thread/getfilehistory",
@@ -327,8 +331,9 @@
         }, async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            history = new Array(response_obj.length);
-
+            if(response_obj.length!=0)
+            {
+                history = new Array(response_obj.length);
             for(let i: number = 0; i < history.length; ++i)
             {
                 history[i] = new History();
@@ -337,6 +342,8 @@
                 history[i].date = timestamp.toLocaleDateString();
                 history[i].time = timestamp.toLocaleTimeString();
             }
+            }
+           
         });
     }
 
@@ -395,8 +402,12 @@
     <div class="preview-body flex-grow block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
         {#if file_loaded}
             {#if file_type === 3}
-                <!-- <div class="inline-block align-middle" ><center><h1>No preview available for this file type.</h1> </center></div> -->
-                <img class="img-preview rounded" src={"/no_preview.jpg"} alt="No preview available for this file type." />
+                <div class="flex items-center" style="height: 100%;">
+                    <div class="grow text-center p-4 mb-4 text-lg text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                        No preview available
+                    </div>
+                </div>
+                <!-- <img class="img-preview rounded" src={"/no_preview.jpg"} alt="No preview available for this file type." /> -->
             {:else if file_type === 1}
                 <img class="img-preview rounded" src={file_view_link} alt="img-placeholder" />
             {:else if file_type === 2}
