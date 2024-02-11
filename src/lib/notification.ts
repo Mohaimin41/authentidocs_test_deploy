@@ -24,6 +24,7 @@ export function get_notifications(user_id: string | null |undefined): void
     }).then(async (response: Response): Promise<void> =>
     {
         let response_obj: any = await response.json();
+
         notifications.set(new Array(response_obj.length));
 
         for(let i: number = 0; i < get(notifications).length; ++i)
