@@ -32,7 +32,7 @@
         <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">{name}</p>
         <div class="flex justify-between items-end">
             <p class="text-base font-semibold text-blue-500 dark:text-blue-400 me-2">{type}</p>
-            <p class="text-sm font-semibold text-gray-500 dark:text-green-400">Siging Serial: {serial}</p>
+            <p class="text-sm font-semibold text-gray-500 dark:text-green-400">Signing Serial: {serial}</p>
         </div>
     </div>
 </button>
