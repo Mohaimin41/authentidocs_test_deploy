@@ -4,6 +4,7 @@
     import MemberCard from "$lib/components/thread/member-card.svelte";
     import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
+    import { update_thread } from "../../../../stores";
 
     class FileObj
     {
@@ -57,11 +58,18 @@
     let close_thread_modal: Modal;
     let add_member_modal: Modal;
     let file_uploading_modal: Modal;
+    let details_loading: boolean;
     let files_loading: boolean;
     let members_loading: boolean;
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
+    $:
+    {
+        id = $page.params.id;
+
+        init();
+    }
 
     function reset_tabs(): void
     {
@@ -338,6 +346,7 @@
 
     function init(): void
     {
+        details_loading = true;
         files_loading = true;
         members_loading = true;
 
@@ -468,7 +477,7 @@
     {
         initModals();
 
-        id = $page.params.id;
+        // id = $page.params.id;
         close_thread_modal = new Modal(close_thread_modal_elem);
         add_member_modal = new Modal(add_member_modal_elem);
         file_uploading_modal = new Modal(file_uploading_modal_elem);
