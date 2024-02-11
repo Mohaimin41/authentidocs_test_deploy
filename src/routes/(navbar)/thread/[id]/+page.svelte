@@ -46,6 +46,7 @@
     let is_active: boolean;
     let can_forward: boolean;
     let can_close: boolean;
+    let can_add_file: boolean
     let closing_comment: string;
     let member_count: number;
     let file_count: number;
@@ -438,6 +439,24 @@
             can_close = response_obj;
         });
 
+        fetch("/api/thread/canaddfile",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_threadid: id,
+                given_userid: $page.data.session?.user?.name
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            can_add_file = response_obj;
+        });
+
         get_members();
         get_addable_members();
     });
@@ -553,7 +572,7 @@
             <button on:click={show_close_thread_modal} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" disabled={!can_close}>Close Thread</button>
         {:else if tab_active[1]}
             <!-- Add File -->
-            <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_forward}>Add File</button>
+            <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
         {:else if tab_active[2]}
             <!-- Add Members -->
             <button on:click={show_add_member_modal} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
