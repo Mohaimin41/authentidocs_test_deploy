@@ -45,7 +45,6 @@ export async function POST({
     );
   }
   notifications_list = result;
-
   let response: Response = new Response(JSON.stringify(notifications_list), {
     headers: {
       "Content-Type": "application/json",
