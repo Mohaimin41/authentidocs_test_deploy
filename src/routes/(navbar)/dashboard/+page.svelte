@@ -289,6 +289,10 @@
   });
 </script>
 
+<svelte:head>
+    <title>{username} Profile</title> 
+</svelte:head>
+
 <!-- Dashboard card root div -->
 <div
   class="dash-root flex block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
