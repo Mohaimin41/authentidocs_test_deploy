@@ -17,10 +17,8 @@
   let profile_edit_mode: boolean = false;
   let username: string = "";
   let email: string = "";
-  let pubkey: string =
-    "";
-  let privkey: string =
-    "";
+  let pubkey: string = "";
+  let privkey: string = "";
   /**
    * Visibility/truncated state of public key
    */
@@ -195,10 +193,10 @@
         }
         console.log(response_obj);
         for (let i: number = 0; i < response_obj.length; ++i) {
-            teams[i] = new Team();
-            teams[i].name = response_obj[i].f_team_name;
-            teams[i].id = response_obj[i].f_teamid;
-            }
+          teams[i] = new Team();
+          teams[i].name = response_obj[i].f_team_name;
+          teams[i].id = response_obj[i].f_teamid;
+        }
       }
     );
   }
@@ -220,24 +218,23 @@
         }
         console.log(response_obj);
         for (let i: number = 0; i < response_obj.length; ++i) {
-            threads[i] = new Thread();
-            threads[i].name = response_obj[i].f_threadname;
-            threads[i].id = response_obj[i].f_threadid;
-            }
+          threads[i] = new Thread();
+          threads[i].name = response_obj[i].f_threadname;
+          threads[i].id = response_obj[i].f_threadid;
+        }
       }
     );
   }
-  
 
   onMount((): void => {
     if ($page.data.session === null) {
-        goto("/");
+      goto("/");
 
-        return;
+      return;
     } else {
-        logged_in_store.set(true);
-        uid.set($page.data.session?.user?.name as string)
-        useremail.set($page.data.session?.user?.email as string)
+      logged_in_store.set(true);
+      uid.set($page.data.session?.user?.name as string);
+      useremail.set($page.data.session?.user?.email as string);
     }
 
     get_personal_files();
@@ -287,6 +284,50 @@
       }
     );
   });
+
+  async function regenkey(): Promise<void> {
+    if ($page.data.session?.user) {
+      let subtle_crypto: SubtleCrypto = window.crypto.subtle;
+
+      let keyPair = await subtle_crypto.generateKey(
+        {
+          name: "ECDSA",
+          namedCurve: "P-384",
+        },
+        true,
+        ["sign", "verify"]
+      );
+
+      let public_key = await subtle_crypto.exportKey("jwk", keyPair.publicKey);
+
+      await db.priv_key.put({
+        id: $page.data.session.user?.name as string,
+        key: keyPair.privateKey,
+      });
+
+      let request_obj: any = {
+        user_id: $page.data.session?.user?.name,
+        key: JSON.stringify(public_key),
+      };
+      common_fetch(
+        "/api/user/addkey",
+        request_obj,
+        async (response: Response): Promise<void> => {
+          // new_key.set(false);
+          console.log("layout add key response:", response);
+          localStorage.setItem("new_key", "0");
+          localStorage.setItem("pub_key", JSON.stringify(public_key));
+        }
+      );
+
+      let temp_key: PriveKey | undefined = await db.priv_key.get($page.data.session.user?.name as string);
+
+            if(temp_key)
+            {
+                priv_key.set(temp_key.key);
+            }
+    }
+  }
 </script>
 
 <!-- Dashboard card root div -->
@@ -341,7 +382,9 @@
         required
       />
     {:else}
-      <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mt-2 mb-6">
+      <p
+        class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mt-2 mb-6"
+      >
         {username}
       </p>
     {/if}
@@ -485,7 +528,7 @@
     <button
       type="button"
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    >Regenerate Keys</button
+      on:click={regenkey}>Regenerate Keys</button
     >
   </div>
   <!-- This segment shows various lists like files orgs etc -->
@@ -521,18 +564,20 @@
       </p> -->
       <!-- Each option of tab_index show each type of tab -->
       {#if tab_index === 0}
-      <ul class="tab-content-list space-y-2 mt-2 mb-6 mx-6 pe-1 pb-1"
-      style="overflow-y: auto;">
-        {#each personal_files as file}
-          <li>
-            <FileCard
-              file_id={file.id}
-              file_name={file.name}
-              file_type={file.type}
-            />
-          </li>
-        {/each}
-      </ul>
+        <ul
+          class="tab-content-list space-y-2 mt-2 mb-6 mx-6 pe-1 pb-1"
+          style="overflow-y: auto;"
+        >
+          {#each personal_files as file}
+            <li>
+              <FileCard
+                file_id={file.id}
+                file_name={file.name}
+                file_type={file.type}
+              />
+            </li>
+          {/each}
+        </ul>
       {:else if tab_index === 1}
         <ul
           class="tab-content-list space-y-2 mb-6 mx-6 pb-2"
@@ -592,26 +637,22 @@
           class="tab-content-list space-y-2 mb-6 mx-6 pb-2"
           style="overflow-y: auto;"
         >
-        {#each teams as team}
-        <li>
-          <TeamCard 
-          team_name={team.name}
-          team_id={team.id}
-          />
-        </li>
-      {/each}
+          {#each teams as team}
+            <li>
+              <TeamCard team_name={team.name} team_id={team.id} />
+            </li>
+          {/each}
         </ul>
       {:else if tab_index === 4}
         <ul
           class="tab-content-list space-y-2 mb-6 mx-6 pb-2"
           style="overflow-y: auto;"
         >
-        {#each threads as thread}
-        <li>
-          <ThreadCard thread_name={thread.name}
-          thread_id={thread.id} />
-        </li>
-      {/each}
+          {#each threads as thread}
+            <li>
+              <ThreadCard thread_name={thread.name} thread_id={thread.id} />
+            </li>
+          {/each}
         </ul>
       {/if}
     </div>
