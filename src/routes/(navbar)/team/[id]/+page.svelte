@@ -138,6 +138,9 @@
         
     });
 </script>
+<svelte:head>
+    <title>{team_name} preview</title> 
+</svelte:head>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <div class="pg-center flex justify-between">

@@ -485,7 +485,9 @@
         init();
     });
 </script>
-
+<svelte:head>
+    <title>{thread_name} preview</title> 
+</svelte:head>
 <div class="pg-center flex justify-between">
     <!-- svelte-ignore a11y-invalid-attribute -->
     <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
