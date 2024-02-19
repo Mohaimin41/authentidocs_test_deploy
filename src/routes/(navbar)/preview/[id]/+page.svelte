@@ -398,6 +398,10 @@
 }
 </script>
 
+<svelte:head>
+    <title>{file_name} preview</title> 
+</svelte:head>
+
 <div class="preview-root flex flex-col">
     <div class="preview-body flex-grow block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-2">
         {#if file_loaded}
