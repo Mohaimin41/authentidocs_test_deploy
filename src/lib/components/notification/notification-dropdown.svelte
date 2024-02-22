@@ -3,7 +3,7 @@
     import { initDropdowns } from "flowbite";
     import { onMount } from "svelte";
     import NotifcatinElement from "./notifcatin-element.svelte";
-    import { notifications } from "../../../stores";
+    import { notifications } from "$lib/stores";
     import { get_notifications } from "$lib/notification";
 
     let available: boolean;

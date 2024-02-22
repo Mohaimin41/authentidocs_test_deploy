@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
-    import { update_thread } from "../../../stores";
+    import { update_thread } from "$lib/stores";
 
     export let id: string;
     export let content: string;

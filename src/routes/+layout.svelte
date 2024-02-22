@@ -1,7 +1,7 @@
 <script lang="ts">
     import "../app.pcss";
     import { db, type PriveKey } from "$lib/db";
-    import { priv_key } from "../stores";
+    import { priv_key } from "$lib/stores";
     import { page } from "$app/stores";
     import { onMount } from "svelte";
     import { common_fetch } from "$lib/fetch_func";

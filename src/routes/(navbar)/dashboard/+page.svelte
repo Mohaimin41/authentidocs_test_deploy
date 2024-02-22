@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { get } from "svelte/store";
   import { goto } from "$app/navigation";
   import FileCard from "$lib/components/dashboard/file-card.svelte";
   import OrgCard from "$lib/components/dashboard/org-card.svelte";
@@ -9,7 +8,7 @@
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import { db, type PriveKey } from "$lib/db";
-  import { logged_in_store, priv_key, uid, useremail } from "../../../stores";
+  import { logged_in_store, priv_key, uid, useremail } from "$lib/stores";
 
   /**
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"

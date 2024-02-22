@@ -1,5 +1,5 @@
 import { get } from "svelte/store";
-import { notifications } from "../stores";
+import { notifications } from "$lib/stores";
 
 export class LiveNotification
 {

@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { json } from '@sveltejs/kit';
     import { Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
-    import { username } from '../../stores';
+    import { username } from '../stores';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import { common_fetch } from '$lib/fetch_func';
