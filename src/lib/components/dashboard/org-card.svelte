@@ -1,13 +1,13 @@
 <script lang="ts">
+    import { gen_random_color } from "$lib/helpers";
     import { onMount } from "svelte";
 
     export let org_name: string;
-    const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
 
     onMount(() : void =>
     {
-        color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
+        color = gen_random_color();
     });
 </script>
 

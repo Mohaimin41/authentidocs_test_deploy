@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
-    import { update_thread } from "../../../stores";
+    import { update_thread } from "$lib/stores";
 
     export let id: string;
     export let content: string;
@@ -35,6 +35,7 @@
     }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="flex items-center justify-between space-x-4 rtl:space-x-reverse">
     <a on:click={goto_thread} href="javascript:" class="text-sm font-medium text-gray-700 truncate dark:text-white">
         {content}

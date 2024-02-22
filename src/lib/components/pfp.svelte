@@ -1,7 +1,7 @@
 <script lang="ts">
     import { initDropdowns } from "flowbite";
     import { onMount } from "svelte";
-    import { uid, useremail, username } from "../../stores";
+    import { uid, useremail, username } from "$lib/stores";
     import { db } from "$lib/db";
     import { get } from "svelte/store";
     import { signOut } from "@auth/sveltekit/client";

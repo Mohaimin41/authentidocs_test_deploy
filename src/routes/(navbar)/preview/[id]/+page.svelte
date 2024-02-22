@@ -4,7 +4,7 @@
     import { common_fetch } from "$lib/fetch_func";
     import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
-    import { logged_in_store, priv_key, uid, useremail } from "../../../../stores";
+    import { logged_in_store, priv_key, uid, useremail } from "$lib/stores";
     import { jsPDF } from "jspdf";
     import { get } from "svelte/store";
 

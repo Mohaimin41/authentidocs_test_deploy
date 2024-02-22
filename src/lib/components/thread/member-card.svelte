@@ -7,7 +7,6 @@
     export let type: string;
     export let serial: number;
     export let joined: Date;
-    export let pubkey: string;
     let joined_date_text: string;
     let joined_time_text: string;
 

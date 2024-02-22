@@ -4,7 +4,6 @@
     import MemberCard from "$lib/components/thread/member-card.svelte";
     import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
-    import { update_thread } from "../../../../stores";
 
     class FileObj
     {

@@ -1,18 +1,18 @@
 <script lang="ts">
+    import { gen_random_color } from "$lib/helpers";
     import { onMount } from "svelte";
 
     export let file_id: string;
     export let file_name: string;
     export let file_type: string;
     export let file_status: string;
-    const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
     let file_status_color: string;
     let file_status_text: string;
 
     onMount(() : void =>
     {
-        color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
+        color = gen_random_color();
 
         if(file_status === "not_viewed_by_custodian")
         {

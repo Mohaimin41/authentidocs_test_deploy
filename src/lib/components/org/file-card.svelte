@@ -1,17 +1,17 @@
 <script lang="ts">
-    import { gen_random_color } from "$lib/helpers";
     import { onMount } from "svelte";
 
     export let file_name: string;
     export let file_type: string;
     export let file_status: number;
+    const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
     let file_status_color: string;
     let file_status_text: string;
 
     onMount(() : void =>
     {
-        color = gen_random_color();
+        color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
 
         if(file_status === 0)
         {
