@@ -35,6 +35,7 @@
     }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="flex items-center justify-between space-x-4 rtl:space-x-reverse">
     <a on:click={goto_thread} href="javascript:" class="text-sm font-medium text-gray-700 truncate dark:text-white">
         {content}
