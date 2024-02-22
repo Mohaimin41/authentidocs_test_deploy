@@ -8,10 +8,7 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new (error as any)(
-      401,
-      "You must be logged in to view thread members"
-    );
+    return new (error as any)(401, "You must be logged in to add team members");
   }
 
   // console.log(session);
@@ -21,29 +18,32 @@ export async function POST({
 
   if (given_teamid === undefined || given_teamid === null) {
     console.log(
-      "ERROR @api/thread/getaddablemembers:24: invalid user input error:\n",
+      "ERROR @api/team/getaddablemembers:21: invalid user input error:\n",
       team_info
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while getting thread addable members."
+      "Invalid inputs, while getting team addable members."
     );
   }
 
-
-  let { data:result, error:_error } = await supabase
-  .rpc('get_team_addable_member_list', {
-    given_teamid
-  })
-
+  let { data: result, error: _error } = await supabase.rpc(
+    "get_team_addable_member_list",
+    {
+      given_teamid,
+    }
+  );
 
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/thread/getaddablemembers:43: supabase get addable thread members error\n",
+      "ERROR @api/team/getaddablemembers:40: supabase get addable team members error\n",
       _error
     );
-    return  new (error as any)(500, "Internal Server Error, while getting addable member to thread.");
+    return new (error as any)(
+      500,
+      "Internal Server Error, while getting addable member to team."
+    );
   }
 
   let response: Response = new Response(JSON.stringify(result), {
@@ -54,3 +54,4 @@ export async function POST({
 
   return response;
 }
+//team/getaddablemembers

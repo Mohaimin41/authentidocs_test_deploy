@@ -8,41 +8,43 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to view org members");
+    return new (error as any)(
+      401,
+      "You must be logged in to view thread notices."
+    );
   }
-
   // console.log(session);
-  const org_info = await request.json();
+  const thread_info = await request.json();
   // console.log("inside add key",key_info);
-  let given_orgid = org_info.orgid;
+  let given_threadid = thread_info.threadid;
 
-  if (given_orgid === undefined || given_orgid === null) {
+  if (given_threadid === undefined || given_threadid === null) {
     console.log(
-      "ERROR @api/org/getaddablemembers:21: invalid user input error:\n",
-      org_info
+      "ERROR @api/thread/getunseennotices:23: invalid user input error:\n",
+      thread_info
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while getting org addable members."
+      "Invalid inputs, while getting thread notices."
     );
   }
 
   let { data: result, error: _error } = await supabase.rpc(
-    "get_org_addable_member_list",
+    "get_thread_unseen_notice",
     {
-      given_orgid,
+      given_threadid,
     }
   );
 
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/org/getaddablemembers:40: supabase get addable org members error\n",
+      "ERROR @api/thread/getunseennotices:42: supabase get thread notices error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while getting addable member to org."
+      "Internal Server Error, while getting thread notices."
     );
   }
 
@@ -54,4 +56,4 @@ export async function POST({
 
   return response;
 }
-//org/getaddablemembers
+//thread/getunseennotices
