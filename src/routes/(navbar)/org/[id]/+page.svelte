@@ -5,23 +5,11 @@
     import { Modal, initModals } from "flowbite";
     import { page } from "$app/stores";
     import TeamCard from '$lib/components/org/team-card.svelte';
+    import { Entity, type Member } from '$lib/containers';
 
-    class TeamMember
-    {
-        public uid: string = "";
-        public name: string = "";
-        public checked: boolean = false;
-    }
+    let team_members: Member[] = [];
 
-    let team_members: TeamMember[] = [];
-
-    class Team
-    {
-        public uid: string = "";
-        public name: string = "";
-    }
-
-    let teams: Team[] = [];
+    let teams: Entity[] = [];
     let id: string;
     let thread_name_input: string;
     let thread_description_input: string;
@@ -107,7 +95,7 @@
 
         for(let i = 0; i < 10; ++i)
         {
-            teams[i] = new Team();
+            teams[i] = new Entity();
             teams[i].name = "Team " + (i + 1);
             teams[i].uid = (i + 1).toString();
         }

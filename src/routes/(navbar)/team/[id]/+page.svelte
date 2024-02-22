@@ -4,22 +4,10 @@
     import ThreadCard from "$lib/components/team/thread-card.svelte";
     import { Modal, initModals } from "flowbite";
     import { page } from "$app/stores";
+    import { Entity, type Member } from '$lib/containers';
 
-    class TeamMember
-    {
-        public uid: string = "";
-        public name: string = "";
-        public checked: boolean = false;
-    }
-
-    class Thread
-    {
-        public uid: string = "";
-        public name: string = "";
-    }
-
-    let team_members: TeamMember[] = [];
-    let threads: Thread[] = [];
+    let team_members: Member[] = [];
+    let threads: Entity[] = [];
     let id: string;
     let thread_name_input: string;
     let thread_description_input: string;
@@ -95,7 +83,7 @@
 
             for(let i: number = 0; i < threads.length; ++i)
             {
-                threads[i] = new Thread();
+                threads[i] = new Entity();
                 threads[i].uid = response_obj[i].f_threadid;
                 threads[i].name = response_obj[i].f_threadname;
             }
@@ -139,7 +127,7 @@
     });
 </script>
 <svelte:head>
-    <title>{team_name} preview</title> 
+    <title>{team_name} preview</title>
 </svelte:head>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
