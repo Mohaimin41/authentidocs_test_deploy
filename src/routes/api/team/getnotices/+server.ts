@@ -8,41 +8,44 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to view org members");
+    return new (error as any)(
+      401,
+      "You must be logged in to view team notices."
+    );
   }
 
   // console.log(session);
-  const org_info = await request.json();
+  const team_info = await request.json();
   // console.log("inside add key",key_info);
-  let given_orgid = org_info.orgid;
+  let given_teamid = team_info.teamid;
 
-  if (given_orgid === undefined || given_orgid === null) {
+  if (given_teamid === undefined || given_teamid === null) {
     console.log(
-      "ERROR @api/org/getaddablemembers:21: invalid user input error:\n",
-      org_info
+      "ERROR @api/team/getnotices:24: invalid user input error:\n",
+      team_info
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while getting org addable members."
+      "Invalid inputs, while getting team notices."
     );
   }
 
   let { data: result, error: _error } = await supabase.rpc(
-    "get_org_addable_member_list",
+    "get_team_all_notice",
     {
-      given_orgid,
+      given_teamid,
     }
   );
 
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/org/getaddablemembers:40: supabase get addable org members error\n",
+      "ERROR @api/team/getnotices:43: supabase get team notices error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while getting addable member to org."
+      "Internal Server Error, while getting team notices."
     );
   }
 
@@ -54,4 +57,3 @@ export async function POST({
 
   return response;
 }
-//org/getaddablemembers
