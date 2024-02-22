@@ -1,3 +1,6 @@
+/**
+ * Common class for all types of objects with similar behaviour
+ */
 export class Entity
 {
     public uid: string = "";

@@ -4,9 +4,11 @@
     import { page } from "$app/stores";
     import TeamCard from '$lib/components/org/team-card.svelte';
     import { Entity, type Member } from '$lib/containers';
+    import Notice from "$lib/components/notice.svelte";
 
     let team_members: Member[] = [];
     let teams: Entity[] = [];
+    let notices: Entity[] = [];
     let id: string;
     let thread_name_input: string;
     let thread_description_input: string;
@@ -99,6 +101,7 @@
             teams[i].uid = (i + 1).toString();
         }
     }
+
     function get_org_details(): void
     {
         let request_obj: any = {
@@ -122,6 +125,18 @@
         // });
     }
 
+    function get_notices(): void
+    {
+        notices = new Array();
+
+        for(let i = 0; i < 10; ++i)
+        {
+            notices[i] = new Entity();
+            notices[i].uid = (i + 1).toString();
+            notices[i].name = "Notice " + (i + 1);
+        }
+    }
+
     onMount((): void =>
     {
         create_team_modal = new Modal(create_team_modal_elem);
@@ -133,6 +148,7 @@
 
         get_teams();
         get_org_details();
+        get_notices();
     });
 </script>
 <svelte:head>
@@ -290,7 +306,13 @@
             </div>
             <!-- Modal body -->
             <div class="p-4 md:p-5 space-y-4">
-                
+                <ul class="notice-elements space-y-2">
+                    {#each notices as notice}
+                        <li>
+                            <Notice uid={notice.uid} title={notice.name} />
+                        </li>
+                    {/each}
+                </ul>
             </div>
         </div>
     </div>
