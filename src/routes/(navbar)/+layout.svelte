@@ -11,8 +11,6 @@
 
     $: 
     {
-        console.log("notifcation recieved");
-
         if(!($noti_json === null || $noti_json === undefined))
         {
             get_notifications($page.data.session?.user?.name);
