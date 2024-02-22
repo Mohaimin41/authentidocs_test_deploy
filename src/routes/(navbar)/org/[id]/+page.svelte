@@ -1,14 +1,11 @@
 <script lang="ts">
-	import { common_fetch } from '$lib/fetch_func';
     import { onMount } from "svelte";
-    import ThreadCard from "$lib/components/org/team-card.svelte";
     import { Modal, initModals } from "flowbite";
     import { page } from "$app/stores";
     import TeamCard from '$lib/components/org/team-card.svelte';
     import { Entity, type Member } from '$lib/containers';
 
     let team_members: Member[] = [];
-
     let teams: Entity[] = [];
     let id: string;
     let thread_name_input: string;

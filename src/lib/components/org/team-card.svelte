@@ -1,10 +1,10 @@
 <script lang="ts">
+    import { gen_random_color } from "$lib/helpers";
     import { onMount } from "svelte";
 
     export let uid: string;
     export let team_name: string;
     export let selected: boolean = false;
-    const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
     let bg_color_class: string;
 
@@ -19,7 +19,7 @@
             bg_color_class = "bg-white dark:bg-gray-800";
         }
 
-        color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
+        color = gen_random_color();
     });
 </script>
 
