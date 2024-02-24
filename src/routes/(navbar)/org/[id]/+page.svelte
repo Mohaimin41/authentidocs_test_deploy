@@ -5,6 +5,7 @@
     import TeamCard from '$lib/components/org/team-card.svelte';
     import { Entity, type Member } from '$lib/containers';
     import Notice from "$lib/components/notice.svelte";
+  import { common_fetch } from "$lib/fetch_func";
 
     let team_members: Member[] = [];
     let teams: Entity[] = [];
@@ -67,62 +68,61 @@
 
     function get_teams(): void
     {
-        // fetch("/api/team/getthreads",
-        // {
-        //     method: "POST",
-        //     headers:
-        //     {
-        //         "content-type": "application/json"
-        //     },
-        //     body: JSON.stringify(
-        //     {
-        //         teamid: id
-        //     })
-        // }).then(async (response: Response): Promise<void> =>
-        // {
-        //     let response_obj: any = await response.json();
-        //     teams = new Array(response_obj.length);
-
-        //     for(let i: number = 0; i < teams.length; ++i)
-        //     {
-        //         teams[i] = new Team();
-        //         teams[i].uid = response_obj[i].f_threadid;
-        //         teams[i].name = response_obj[i].f_threadname;
-        //     }
-        // });
-
-        // delete everything below this when connecting api
-        teams = new Array(10);
-
-        for(let i = 0; i < 10; ++i)
+        fetch("/api/org/getteams",
         {
-            teams[i] = new Entity();
-            teams[i].name = "Team " + (i + 1);
-            teams[i].uid = (i + 1).toString();
-        }
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                orgid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            teams = new Array(response_obj.length);
+            console.log(response_obj)
+
+            for(let i: number = 0; i < teams.length; ++i)
+            {
+                teams[i] = new Entity();
+                teams[i].uid = response_obj[i].f_teamid;
+                teams[i].name = response_obj[i].f_team_name;
+            }
+        });
+
+        // // delete everything below this when connecting api
+        // teams = new Array(10);
+
+        // for(let i = 0; i < 10; ++i)
+        // {
+        //     teams[i] = new Entity();
+        //     teams[i].name = "Team " + (i + 1);
+        //     teams[i].uid = (i + 1).toString();
+        // }
     }
 
     function get_org_details(): void
     {
         let request_obj: any = {
-            teamid: id,
+            orgid: id,
         };
 
-        // common_fetch(
-        // "/api/org/getdetails",
-        // request_obj,
-        // async (response: Response): Promise<void> => {
-        //     let response_obj: any = await response.json();
+        common_fetch(
+        "/api/org/getdetails",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
 
-        //     if (response_obj === null) {
-        //     return;
-        //     }
-
-        //     org_info=response_obj;
-        //     console.log(org_info);
-        //     org_name=org_info.team_detail.team_name;
-        //     org_leader=org_info.team_mod_detail.f_username;
-        // });
+            if (response_obj === null) {
+            return;
+            }
+            console.log(response_obj)
+             org_name=response_obj.org_detail.team_name;
+             org_leader=response_obj.org_mod_detail.f_username;
+        });
     }
 
     function get_notices(): void
