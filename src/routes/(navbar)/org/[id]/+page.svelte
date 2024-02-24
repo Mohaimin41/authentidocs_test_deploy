@@ -5,54 +5,117 @@
     import TeamCard from '$lib/components/org/team-card.svelte';
     import { Entity, type Member } from '$lib/containers';
     import Notice from "$lib/components/notice.svelte";
-  import { common_fetch } from "$lib/fetch_func";
+    import { common_fetch } from "$lib/fetch_func";
 
-    let team_members: Member[] = [];
+    class AddableMemberObj
+    {
+        public id: string = "";
+        public name: string = "";
+        public checked: boolean = false;
+    }
+
     let teams: Entity[] = [];
     let notices: Entity[] = [];
     let id: string;
-    let thread_name_input: string;
-    let thread_description_input: string;
+    let team_name_input: string;
+    let team_description_input: string;
     let org_name:string = "স্বদীপের org";  // remove the names, আপাতত এমনে দিসি কারণ undefined লেখা দেখলে কেমন জানি লাগে :3
     let org_leader:string = "স্বদীপ আহমেদ";
     let create_team_modal_elem: HTMLDivElement;
     let notifications_modal_elem: HTMLDivElement;
     let create_team_modal: Modal;
     let notifications_modal: Modal;
+    let addable_members: AddableMemberObj[] = [];
+
 
     function create_team(): void
     {
-        let temp_desc: string | undefined = thread_description_input;
+        let temp_desc: string | undefined = team_description_input;
 
         if(temp_desc === undefined)
         {
             temp_desc = "";
         }
 
-        // fetch("/api/team/createthread",
-        // {
-        //     method: "POST",
-        //     headers:
-        //     {
-        //         "content-type": "application/json"
-        //     },
-        //     body: JSON.stringify(
-        //     {
-        //         given_parent_teamid: id,
-        //         given_threadname: thread_name_input,
-        //         description: temp_desc
-        //     })
-        // }).then(async (response: Response): Promise<void> =>
-        // {
-        //     let response_obj: any = await response.json();
-
-        //     create_team_modal.hide();
-        //     get_threads();
-        // });
+        fetch("/api/team/createteam",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                parentorgid: id,
+                teamname: team_name_input,
+                description: temp_desc
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            create_team_modal.hide();
+            get_teams();
+        });
     }
 
+    function get_addable_members(): void
+    {
+        fetch("/api/org/getaddablemembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                orgid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();            
+            addable_members = new Array(response_obj.length);
+
+            for(let i: number = 0; i < addable_members.length; ++i)
+            {
+                addable_members[i] = new AddableMemberObj();
+                addable_members[i].id = response_obj[i].f_userid;
+                addable_members[i].name = response_obj[i].f_username;
+            }
+            console.log(addable_members)
+        });
+    }
     function add_member(): void
     {
+        let addable_member_ids: string[] = [];
+
+        for(let i: number = 0; i < addable_members.length; ++i)
+        {
+            if(addable_members[i].checked)
+            {
+                addable_member_ids.push(addable_members[i].id);
+            }
+        }
+
+        fetch("/api/org/addmember",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                orgid: id,
+                uid_list: addable_member_ids
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+
+            console.log(response_obj);
+            get_addable_members();
+        });
         
     }
 
@@ -120,7 +183,7 @@
             return;
             }
             console.log(response_obj)
-             org_name=response_obj.org_detail.team_name;
+             org_name=response_obj.org_detail.org_name;
              org_leader=response_obj.org_mod_detail.f_username;
         });
     }
@@ -149,6 +212,7 @@
         get_teams();
         get_org_details();
         get_notices();
+        get_addable_members();
     });
 </script>
 <svelte:head>
@@ -206,7 +270,7 @@
         </div>
     </div>
     <div class="team-list-card block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mt-2">
-        <p class="team-list-title text-2xl font-semibold text-gray-700 mx-6 mt-6">Threads</p>
+        <p class="team-list-title text-2xl font-semibold text-gray-700 mx-6 mt-6">Teams</p>
         <ul class="team-elements space-y-2 mt-2 pb-1 mx-6 mb-6">
             {#each teams as team}
                 <li>
@@ -241,10 +305,10 @@
                 <form on:submit={create_team} class="mx-auto">
                     <div class="mb-5">
                       <label for="create-team-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Team Name</label>
-                      <input bind:value={thread_name_input} type="text" id="create-team-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off" required>
+                      <input bind:value={team_name_input} type="text" id="create-team-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off" required>
                     </div>
                     <label for="create-team-description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Team Description</label>
-                    <textarea bind:value={thread_description_input} id="create-team-description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"></textarea>
+                    <textarea bind:value={team_description_input} id="create-team-description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"></textarea>
                     <div class="flex justify-end">
                         <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
                     </div>
@@ -273,10 +337,10 @@
             <!-- Modal body -->
             <div class="p-4 md:p-5 space-y-4">
                 <form on:submit={add_member} class="mx-auto">
-                    {#each team_members as member}
+                    {#each addable_members as member}
                         <div class="flex items-center mb-4">
-                            <input bind:checked={member.checked} id="checkbox-{member.uid}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
-                            <label for="checkbox-{member.uid}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
+                            <input bind:checked={member.checked} id="checkbox-{member.id}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
+                            <label for="checkbox-{member.id}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
                         </div>
                     {/each}
                     <div class="flex justify-end">

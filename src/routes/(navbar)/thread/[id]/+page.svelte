@@ -606,7 +606,7 @@
                     <ul class="list-elements space-y-2 mt-2 pb-1">
                         {#each members as member}
                             <li>
-                                <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial} pubkey={member.pubkey} joined={member.joined} />
+                                <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial}  joined={member.joined} />
                             </li>
                         {/each}
                     </ul>

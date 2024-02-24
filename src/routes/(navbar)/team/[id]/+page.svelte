@@ -6,7 +6,12 @@
     import { page } from "$app/stores";
     import { Entity, type Member } from '$lib/containers';
 
-    let team_members: Member[] = [];
+    class AddableMemberObj
+    {
+        public id: string = "";
+        public name: string = "";
+        public checked: boolean = false;
+    }
     let threads: Entity[] = [];
     let id: string;
     let thread_name_input: string;
@@ -16,6 +21,7 @@
     let team_info: any;
     let team_name:string;
     let team_leader:string;
+    let addable_members: AddableMemberObj[] = [];
 
     function create_thread(): void
     {
@@ -47,12 +53,66 @@
             get_threads();
         });
     }
-
-    function add_member(): void
+    function get_addable_members(): void
     {
-        
+        fetch("/api/team/getaddablemembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                teamid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            addable_members = new Array(response_obj.length);
+
+            for(let i: number = 0; i < addable_members.length; ++i)
+            {
+                addable_members[i] = new AddableMemberObj();
+                addable_members[i].id = response_obj[i].f_userid;
+                addable_members[i].name = response_obj[i].f_username;
+            }
+            console.log(addable_members);
+        });
     }
 
+    function add_members(): void
+    {
+        let addable_member_ids: string[] = [];
+
+        for(let i: number = 0; i < addable_members.length; ++i)
+        {
+            if(addable_members[i].checked)
+            {
+                addable_member_ids.push(addable_members[i].id);
+            }
+        }
+
+        fetch("/api/team/addmember",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                teamid: id,
+                uid_list: addable_member_ids
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+
+            console.log(response_obj);
+            get_addable_members();
+        });
+    }
     function show_create_thread_modal(): void
     {
         create_thread_modal.show();
@@ -122,6 +182,7 @@
 
         get_threads();
         get_team_details();
+        get_addable_members();
 
         
     });
@@ -255,11 +316,11 @@
             </div>
             <!-- Modal body -->
             <div class="p-4 md:p-5 space-y-4">
-                <form on:submit={add_member} class="mx-auto">
-                    {#each team_members as member}
+                <form on:submit={add_members} class="mx-auto">
+                    {#each addable_members as member}
                         <div class="flex items-center mb-4">
-                            <input bind:checked={member.checked} id="checkbox-{member.uid}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
-                            <label for="checkbox-{member.uid}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
+                            <input bind:checked={member.checked} id="checkbox-{member.id}" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
+                            <label for="checkbox-1" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
                         </div>
                     {/each}
                     <div class="flex justify-end">
