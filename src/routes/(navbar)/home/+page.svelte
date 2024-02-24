@@ -108,7 +108,16 @@
   }
 
   let act_threads: Thread[] = [];
-  let arch_threads: Thread[] = new Array(10);
+  let act_thread_loaded: boolean = false;
+  let act_thread_empty: boolean;
+
+  $: act_thread_empty = act_threads.length === 0;
+
+  let arch_threads: Thread[] = [];
+  let arch_thread_loaded: boolean = false;
+  let arch_thread_empty: boolean;
+
+  $: arch_thread_empty = arch_threads.length === 0;
 
   function show_modal(): void {
     modal_obj.show();
@@ -197,6 +206,7 @@
     );
   }
   function get_user_active_threads(): void {
+    act_thread_loaded = false;
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
     };
@@ -218,10 +228,23 @@
           act_threads[i].name = response_obj[i].f_threadname;
           act_threads[i].id = response_obj[i].f_threadid;
         }
+
+        // these should stay for testing
+        let test_count = 10;
+        act_threads = new Array(test_count);
+
+        for (let i: number = 0; i < test_count; ++i) {
+          act_threads[i] = new Thread();
+          act_threads[i].id = (i + 1).toString();
+          act_threads[i].name = "Thread " + (i + 1);
+        }
+
+        act_thread_loaded = true;
       },
     );
   }
   function get_user_archive_threads(): void {
+    arch_thread_loaded = false;
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
     };
@@ -243,6 +266,18 @@
           arch_threads[i].name = response_obj[i].f_threadname;
           arch_threads[i].id = response_obj[i].f_threadid;
         }
+
+        // these should stay for testing
+        let test_count = 10;
+        arch_threads = new Array(test_count);
+
+        for (let i: number = 0; i < test_count; ++i) {
+          arch_threads[i] = new Thread();
+          arch_threads[i].id = (i + 1).toString();
+          arch_threads[i].name = "Thread " + (i + 1);
+        }
+
+        arch_thread_loaded = true;
       },
     );
   }
@@ -360,9 +395,6 @@
   }
 
   onMount((): void => {
-    personal_files_loaded = false;
-    teams_loaded = false;
-
     if ($page.data.session === null) {
       goto("/");
 
@@ -579,35 +611,31 @@
           {/each}
         </List>
       {:else if tab_index === 2}
-        <div class="list-container">
-          <p
-            class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
-          >
-            Active Threads
-          </p>
-          <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
-            {#each act_threads as thread}
-              <li>
-                <ThreadCard thread_name={thread.name} thread_id={thread.id} />
-              </li>
-            {/each}
-          </ul>
-        </div>
+        <p
+          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+        >
+          Active Threads
+        </p>
+        <List loaded={act_thread_loaded} empty={act_thread_empty}>
+          {#each act_threads as thread}
+            <li>
+              <ThreadCard thread_name={thread.name} thread_id={thread.id} />
+            </li>
+          {/each}
+        </List>
       {:else if tab_index === 3}
-        <div class="list-container">
-          <p
-            class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
-          >
-            Archived Threads
-          </p>
-          <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
-            {#each arch_threads as thread}
-              <li>
-                <ThreadCard thread_name={thread.name} thread_id={thread.id} />
-              </li>
-            {/each}
-          </ul>
-        </div>
+        <p
+          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+        >
+          Archived Threads
+        </p>
+        <List loaded={arch_thread_loaded} empty={arch_thread_empty}>
+          {#each arch_threads as thread}
+            <li>
+              <ThreadCard thread_name={thread.name} thread_id={thread.id} />
+            </li>
+          {/each}
+        </List>
       {/if}
     </div>
   </div>
