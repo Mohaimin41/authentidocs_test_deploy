@@ -144,15 +144,15 @@
         }
 
         // these should stay for testing
-        let test_count = 10;
-        personal_files = new Array(test_count);
+        // let test_count = 10;
+        // personal_files = new Array(test_count);
 
-        for (let i: number = 0; i < test_count; ++i) {
-          personal_files[i] = new File();
-          personal_files[i].id = (i + 1).toString();
-          personal_files[i].name = "File " + (i + 1);
-          personal_files[i].type = "png";
-        }
+        // for (let i: number = 0; i < test_count; ++i) {
+        //   personal_files[i] = new File();
+        //   personal_files[i].id = (i + 1).toString();
+        //   personal_files[i].name = "File " + (i + 1);
+        //   personal_files[i].type = "png";
+        // }
 
         personal_files_loaded = true;
       },
@@ -183,14 +183,14 @@
         }
 
         // these should stay for testing
-        let test_count = 10;
-        teams = new Array(test_count);
+        // let test_count = 10;
+        // teams = new Array(test_count);
 
-        for (let i: number = 0; i < test_count; ++i) {
-          teams[i] = new Team();
-          teams[i].id = (i + 1).toString();
-          teams[i].name = "Team " + (i + 1);
-        }
+        // for (let i: number = 0; i < test_count; ++i) {
+        //   teams[i] = new Team();
+        //   teams[i].id = (i + 1).toString();
+        //   teams[i].name = "Team " + (i + 1);
+        // }
 
         teams_loaded = true;
       },
