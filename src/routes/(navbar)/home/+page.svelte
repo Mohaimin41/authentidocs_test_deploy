@@ -410,14 +410,7 @@
     get_user_active_threads();
     get_user_archive_threads();
 
-    modal_obj = new Modal(modal_elem, {
-      onHide: (): void => {
-        modal_show = false;
-      },
-      onShow: (): void => {
-        modal_show = true;
-      },
-    });
+    modal_obj = new Modal(modal_elem);
 
     tabs[0].callback();
   });
@@ -427,145 +420,159 @@
   <div class="pg-container">
     <!-- Select Tabs to see various lists -->
     <div
-      class="pg-left block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+      class="pg-left block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6"
     >
-      <!-- svelte-ignore a11y-invalid-attribute -->
-      <ul class="tab-options space-y-2 mx-6 mt-6 mb-6 pe-1 pb-1">
-        <!-- My personal files -->
-        <li>
-          <a
-            href="javascript:"
-            class="flex {color[0]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-            on:click={tabs[0].callback}
-          >
-            <svg
-              class="w-8 h-8 text-blue-500 dark:text-blue-400 me-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+      <div class="tab-options">
+        <ul class="space-y-2 pb-1">
+          <!-- My personal files -->
+          <li>
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            <a
+              href="javascript:"
+              class="flex {color[0]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[0].callback}
             >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="m4 12 8-8 8 8M6 10.5V19c0 .6.4 1 1 1h3v-3c0-.6.4-1 1-1h2c.6 0 1 .4 1 1v3h3c.6 0 1-.4 1-1v-8.5"
-              />
-            </svg>
-            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-              My Personal Files
-            </p>
-          </a>
-        </li>
-        <!-- My teams -->
-        <li>
-          <a
-            href="javascript:"
-            class="flex {color[1]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-            on:click={tabs[1].callback}
-          >
-            <svg
-              class="w-8 h-8 text-green-500 dark:text-green-400 me-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+              <svg
+                class="w-8 h-8 text-blue-500 dark:text-blue-400 me-2"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="m4 12 8-8 8 8M6 10.5V19c0 .6.4 1 1 1h3v-3c0-.6.4-1 1-1h2c.6 0 1 .4 1 1v3h3c.6 0 1-.4 1-1v-8.5"
+                />
+              </svg>
+              <p
+                class="text-2xl font-semibold text-gray-700 dark:text-gray-200"
+              >
+                My Personal Files
+              </p>
+            </a>
+          </li>
+          <!-- My teams -->
+          <li>
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            <a
+              href="javascript:"
+              class="flex {color[1]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[1].callback}
             >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-width="2"
-                d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"
-              />
-            </svg>
-            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-              My Teams
-            </p>
-          </a>
-        </li>
-        <!-- active threads -->
-        <li>
-          <a
-            href="javascript:"
-            class="flex {color[2]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-            on:click={tabs[2].callback}
-          >
-            <svg
-              class="w-8 h-8 text-indigo-500 dark:text-indigo-400 me-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+              <svg
+                class="w-8 h-8 text-green-500 dark:text-green-400 me-2"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"
+                />
+              </svg>
+              <p
+                class="text-2xl font-semibold text-gray-700 dark:text-gray-200"
+              >
+                My Teams
+              </p>
+            </a>
+          </li>
+          <!-- active threads -->
+          <li>
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            <a
+              href="javascript:"
+              class="flex {color[2]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[2].callback}
             >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8"
-              />
-            </svg>
-            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-              Active Threads ({act_threads.length})
-            </p>
-          </a>
-        </li>
-        <!-- Archived Threads -->
-        <li>
-          <a
-            href="javascript:"
-            class="flex {color[3]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-            on:click={tabs[3].callback}
-          >
-            <svg
-              class="w-8 h-8 text-yellow-500 dark:text-yellow-400 me-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+              <svg
+                class="w-8 h-8 text-indigo-500 dark:text-indigo-400 me-2"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8"
+                />
+              </svg>
+              <p
+                class="text-2xl font-semibold text-gray-700 dark:text-gray-200"
+              >
+                Active Threads ({act_threads.length})
+              </p>
+            </a>
+          </li>
+          <!-- Archived Threads -->
+          <li>
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            <a
+              href="javascript:"
+              class="flex {color[3]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[3].callback}
             >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13.5 8H4m0-2v13c0 .6.4 1 1 1h14c.6 0 1-.4 1-1V9c0-.6-.4-1-1-1h-5a1 1 0 0 1-.8-.4l-1.9-2.2a1 1 0 0 0-.8-.4H5a1 1 0 0 0-1 1Z"
-              />
-            </svg>
-            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-              Archived Threads
-            </p>
-          </a>
-        </li>
-        <!-- Notices -->
-        <li>
-          <a
-            href="javascript:"
-            class="flex {color[4]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-            on:click={tabs[4].callback}
-          >
-            <svg
-              class="w-8 h-8 text-red-500 dark:text-red-400 me-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+              <svg
+                class="w-8 h-8 text-yellow-500 dark:text-yellow-400 me-2"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13.5 8H4m0-2v13c0 .6.4 1 1 1h14c.6 0 1-.4 1-1V9c0-.6-.4-1-1-1h-5a1 1 0 0 1-.8-.4l-1.9-2.2a1 1 0 0 0-.8-.4H5a1 1 0 0 0-1 1Z"
+                />
+              </svg>
+              <p
+                class="text-2xl font-semibold text-gray-700 dark:text-gray-200"
+              >
+                Archived Threads
+              </p>
+            </a>
+          </li>
+          <!-- Notices -->
+          <li>
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            <a
+              href="javascript:"
+              class="flex {color[4]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[4].callback}
             >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 5.4V3m0 2.4a5.3 5.3 0 0 1 5.1 5.3v1.8c0 2.4 1.9 3 1.9 4.2 0 .6 0 1.3-.5 1.3h-13c-.5 0-.5-.7-.5-1.3 0-1.2 1.9-1.8 1.9-4.2v-1.8A5.3 5.3 0 0 1 12 5.4ZM8.7 18c.1.9.3 1.5 1 2.1a3.5 3.5 0 0 0 4.6 0c.7-.6 1.3-1.2 1.4-2.1h-7Z"
-              />
-            </svg>
-            <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-              Notices
-            </p>
-          </a>
-        </li>
-      </ul>
+              <svg
+                class="w-8 h-8 text-red-500 dark:text-red-400 me-2"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 5.4V3m0 2.4a5.3 5.3 0 0 1 5.1 5.3v1.8c0 2.4 1.9 3 1.9 4.2 0 .6 0 1.3-.5 1.3h-13c-.5 0-.5-.7-.5-1.3 0-1.2 1.9-1.8 1.9-4.2v-1.8A5.3 5.3 0 0 1 12 5.4ZM8.7 18c.1.9.3 1.5 1 2.1a3.5 3.5 0 0 0 4.6 0c.7-.6 1.3-1.2 1.4-2.1h-7Z"
+                />
+              </svg>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                Notices
+              </p>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
     <div
       class="pg-right block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 ms-5 p-6"
@@ -738,10 +745,6 @@
   </div>
 </div>
 
-{#if modal_show}
-  <div class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40" />
-{/if}
-
 <style>
   .pg-center {
     position: absolute;
@@ -759,6 +762,11 @@
     flex-direction: row;
     align-items: stretch;
   }
+  .tab-options
+  {
+    height: 100%;
+    overflow-y: auto;
+  }
   .pg-right {
     flex-grow: 1;
     height: 100%;
@@ -769,5 +777,12 @@
   .list-elements {
     overflow-y: auto;
     flex-grow: 1;
+  }
+  @media (max-width: 1231px) {
+    .pg-container {
+      width: 100%;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
   }
 </style>
