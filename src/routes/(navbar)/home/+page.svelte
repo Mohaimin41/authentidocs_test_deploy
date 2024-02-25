@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Notice from './../../../lib/components/notice.svelte';
   import { Modal } from "flowbite";
   import { page } from "$app/stores";
   import FileCard from "$lib/components/home/file-card.svelte";
@@ -9,6 +10,7 @@
   import { get } from "svelte/store";
   import { common_fetch } from "$lib/fetch_func";
   import { onMount } from "svelte";
+  import { Entity, type Member } from '$lib/containers';
 
   let file_input_elem: HTMLInputElement;
   let modal_elem: HTMLDivElement;
@@ -116,7 +118,33 @@
   function hide_modal(): void {
     modal_obj.hide();
   }
+  let notices: Entity[] = [];
+  function get_notices(): void
+    {
+        let request_obj: any = {
+            userid: $page.data.session?.user?.name,
+        };
 
+        common_fetch(
+        "/api/user/getnotices",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
+
+            if (response_obj === null) {
+            return;
+            }
+            console.log(response_obj)
+            notices = new Array((response_obj.length));
+            for(let i = 0; i < notices.length; ++i)
+        {
+            notices[i] = new Entity();
+            notices[i].uid = response_obj[i].f_noticeid;
+            notices[i].name = response_obj[i].f_content;
+            if(notices[i].name.length>10) notices[i].name = notices[i].name.substring(0,10) + "...."
+        }
+    });
+    }
   function get_personal_files(): void {
     personal_files_loading = true;
     let request_obj: any = {
@@ -355,6 +383,7 @@
     get_user_teams();
     get_user_active_threads();
     get_user_archive_threads();
+    get_notices();
 
     modal_obj = new Modal(modal_elem, {
       onHide: (): void => {
@@ -555,6 +584,21 @@
             </li>
           {/each}
         </ul>
+      </div>
+      {:else if tab_index === 4}
+      <div class="list-container m-6">
+        <p
+          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+        >
+          Notices
+        </p>
+        <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
+          {#each notices as notice}
+              <li>
+                  <Notice uid={notice.uid} title={notice.name} />
+              </li>
+          {/each}
+      </ul>
       </div>
     {/if}
   </div>

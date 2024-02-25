@@ -22,6 +22,9 @@
     let team_name:string;
     let team_leader:string;
     let addable_members: AddableMemberObj[] = [];
+    let thread_count:number = 0;
+    let member_count:number = 0;
+    let file_count:number = 0;
 
     function create_thread(): void
     {
@@ -77,7 +80,7 @@
                 addable_members[i].id = response_obj[i].f_userid;
                 addable_members[i].name = response_obj[i].f_username;
             }
-            console.log(addable_members);
+            //console.log(addable_members);
         });
     }
 
@@ -139,6 +142,7 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            console.log(response_obj);
             threads = new Array(response_obj.length);
 
             for(let i: number = 0; i < threads.length; ++i)
@@ -166,8 +170,11 @@
 
         team_info=response_obj;
         console.log(team_info);
-        team_name=team_info.team_detail.team_name;
+        team_name=team_info.team_detail.f_team_name;
         team_leader=team_info.team_mod_detail.f_username;
+        member_count=team_info.team_detail.f_member_count;
+        thread_count=team_info.team_detail.f_thread_count;
+        file_count=team_info.team_detail.f_file_count;
       }
     );
   }
@@ -211,21 +218,19 @@
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <a class="flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="#">+69</a>
+                        <a class="flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="#">{member_count}</a>
                     </div>
                     <div class="flex flex-wrap items-center">
                         <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8"/>
                         </svg>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">9</p>
-                        <p class="text-sm font-medium text-green-500 dark:text-green-400">(4 Active)</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
                     </div>
                     <div class="flex flex-wrap items-center">
                         <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
                         </svg>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">9</p>
-                        <p class="text-sm font-medium text-red-500 dark:text-red-400">(4 Unsigned)</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
                     </div>
                 </div>
             </div>

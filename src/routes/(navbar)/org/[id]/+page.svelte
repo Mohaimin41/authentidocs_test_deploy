@@ -26,6 +26,9 @@
     let create_team_modal: Modal;
     let notifications_modal: Modal;
     let addable_members: AddableMemberObj[] = [];
+    let team_count:number=0;
+    let member_count:number=0;
+
 
 
     function create_team(): void
@@ -183,22 +186,44 @@
             return;
             }
             console.log(response_obj)
-             org_name=response_obj.org_detail.org_name;
+             org_name=response_obj.org_detail.f_org_name;
              org_leader=response_obj.org_mod_detail.f_username;
+             team_count=response_obj.org_detail.f_team_count;
+             member_count=response_obj.org_detail.f_member_count;
         });
     }
 
     function get_notices(): void
     {
-        notices = new Array();
+        let request_obj: any = {
+            orgid: id,
+        };
 
-        for(let i = 0; i < 10; ++i)
+        common_fetch(
+        "/api/org/getnotices",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
+
+            if (response_obj === null) {
+            return;
+            }
+            console.log(response_obj)
+            notices = new Array((response_obj.length));
+            for(let i = 0; i < notices.length; ++i)
         {
             notices[i] = new Entity();
-            notices[i].uid = (i + 1).toString();
-            notices[i].name = "Notice " + (i + 1);
+            notices[i].uid = response_obj[i].f_noticeid;
+            notices[i].name = response_obj[i].f_content;
+            if(notices[i].name.length>10) notices[i].name = notices[i].name.substring(0,10) + "...."
         }
+    });
     }
+             
+        
+       
+
+        
 
     onMount((): void =>
     {
@@ -238,13 +263,13 @@
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <a class="flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="#">+69</a>
+                        <a class="flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="#">{member_count}</a>
                     </div>
                     <div class="flex flex-wrap items-center">
                         <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
                         </svg>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">9</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">{team_count}</p>
                     </div>
                 </div>
             </div>
@@ -359,7 +384,7 @@
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    Notifications
+                    Notices
                 </h3>
                 <button on:click={() => {notifications_modal.hide();}} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">

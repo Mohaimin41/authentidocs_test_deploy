@@ -9,6 +9,7 @@
   import { page } from "$app/stores";
   import { db, type PriveKey } from "$lib/db";
   import { logged_in_store, priv_key, uid, useremail } from "$lib/stores";
+  import { Entity, type Member } from '$lib/containers';
 
   /**
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"
@@ -156,6 +157,10 @@
     public name!: string;
     public id!: string;
   }
+  class Org {
+    public name!: string;
+    public id!: string;
+  }
 
   let teams: Team[] = new Array(5);
 
@@ -224,6 +229,30 @@
       }
     );
   }
+  let orgs: Entity[] = [];
+  function get_user_orgs(): void {
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getorgs",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+        if (response_obj === null) {
+          return;
+        }
+        console.log(response_obj);
+        for (let i: number = 0; i < response_obj.length; ++i) {
+          orgs[i] = new Entity();
+          orgs[i].name = response_obj[i].f_org_name;
+          orgs[i].uid = response_obj[i].f_orgid;
+        }
+      }
+    );
+  }
+
 
   onMount((): void => {
     if ($page.data.session === null) {
@@ -239,6 +268,7 @@
     get_personal_files();
     get_user_teams();
     get_user_all_threads();
+    get_user_orgs();
     let request_obj: any = {
       userid: $page.data.session?.user?.name,
     };
@@ -604,36 +634,14 @@
           class="tab-content-list space-y-2 mb-6 mx-6 pb-2"
           style="overflow-y: auto;"
         >
-          <li>
-            <OrgCard org_name={"Organization 1"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 2"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 3"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 4"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 5"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 6"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 7"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 8"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 9"} />
-          </li>
-          <li>
-            <OrgCard org_name={"Organization 10"} />
-          </li>
+        {#each orgs as org}
+        <li>
+          <OrgCard
+            org_name={org.name}
+            org_id={org.uid}
+          />
+        </li>
+      {/each}
         </ul>
       {:else if tab_index === 3}
         <ul

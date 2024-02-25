@@ -363,8 +363,9 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            console.log(response_obj);
             thread_name = response_obj.thread_detail.threadname;
-            team_name = response_obj.thread_detail.team_name;
+            team_name = response_obj.thread_detail.list_of_teams.slice(1);
             started_at = new Date(response_obj.thread_detail.created_at);
             moderator = response_obj.thread_mod_detail.f_username;
 
