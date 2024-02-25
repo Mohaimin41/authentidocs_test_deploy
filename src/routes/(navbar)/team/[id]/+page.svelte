@@ -6,7 +6,12 @@
     import { page } from "$app/stores";
     import { Entity, type Member } from '$lib/containers';
 
-    let team_members: Member[] = [];
+    class AddableMemberObj
+    {
+        public id: string = "";
+        public name: string = "";
+        public checked: boolean = false;
+    }
     let threads: Entity[] = [];
     let id: string;
     let thread_name_input: string;
@@ -16,6 +21,10 @@
     let team_info: any;
     let team_name:string;
     let team_leader:string;
+    let addable_members: AddableMemberObj[] = [];
+    let thread_count:number = 0;
+    let member_count:number = 0;
+    let file_count:number = 0;
 
     function create_thread(): void
     {
@@ -47,12 +56,66 @@
             get_threads();
         });
     }
-
-    function add_member(): void
+    function get_addable_members(): void
     {
-        
+        fetch("/api/team/getaddablemembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                teamid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            addable_members = new Array(response_obj.length);
+
+            for(let i: number = 0; i < addable_members.length; ++i)
+            {
+                addable_members[i] = new AddableMemberObj();
+                addable_members[i].id = response_obj[i].f_userid;
+                addable_members[i].name = response_obj[i].f_username;
+            }
+            //console.log(addable_members);
+        });
     }
 
+    function add_members(): void
+    {
+        let addable_member_ids: string[] = [];
+
+        for(let i: number = 0; i < addable_members.length; ++i)
+        {
+            if(addable_members[i].checked)
+            {
+                addable_member_ids.push(addable_members[i].id);
+            }
+        }
+
+        fetch("/api/team/addmember",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                teamid: id,
+                uid_list: addable_member_ids
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+
+            console.log(response_obj);
+            get_addable_members();
+        });
+    }
     function show_create_thread_modal(): void
     {
         create_thread_modal.show();
@@ -79,6 +142,7 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            console.log(response_obj);
             threads = new Array(response_obj.length);
 
             for(let i: number = 0; i < threads.length; ++i)
@@ -106,8 +170,11 @@
 
         team_info=response_obj;
         console.log(team_info);
-        team_name=team_info.team_detail.team_name;
+        team_name=team_info.team_detail.f_team_name;
         team_leader=team_info.team_mod_detail.f_username;
+        member_count=team_info.team_detail.f_member_count;
+        thread_count=team_info.team_detail.f_thread_count;
+        file_count=team_info.team_detail.f_file_count;
       }
     );
   }
@@ -122,6 +189,7 @@
 
         get_threads();
         get_team_details();
+        get_addable_members();
 
         
     });
@@ -150,21 +218,19 @@
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                         <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <a class="flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="#">+69</a>
+                        <a class="flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="#">{member_count}</a>
                     </div>
                     <div class="flex flex-wrap items-center">
                         <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8"/>
                         </svg>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">9</p>
-                        <p class="text-sm font-medium text-green-500 dark:text-green-400">(4 Active)</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
                     </div>
                     <div class="flex flex-wrap items-center">
                         <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
                         </svg>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">9</p>
-                        <p class="text-sm font-medium text-red-500 dark:text-red-400">(4 Unsigned)</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
                     </div>
                 </div>
             </div>
@@ -255,11 +321,11 @@
             </div>
             <!-- Modal body -->
             <div class="p-4 md:p-5 space-y-4">
-                <form on:submit={add_member} class="mx-auto">
-                    {#each team_members as member}
+                <form on:submit={add_members} class="mx-auto">
+                    {#each addable_members as member}
                         <div class="flex items-center mb-4">
-                            <input bind:checked={member.checked} id="checkbox-{member.uid}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
-                            <label for="checkbox-{member.uid}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
+                            <input bind:checked={member.checked} id="checkbox-{member.id}" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
+                            <label for="checkbox-1" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
                         </div>
                     {/each}
                     <div class="flex justify-end">
