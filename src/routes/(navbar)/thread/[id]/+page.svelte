@@ -363,8 +363,9 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            console.log(response_obj);
             thread_name = response_obj.thread_detail.threadname;
-            team_name = response_obj.thread_detail.team_name;
+            team_name = response_obj.thread_detail.list_of_teams.slice(1);
             started_at = new Date(response_obj.thread_detail.created_at);
             moderator = response_obj.thread_mod_detail.f_username;
 
@@ -606,7 +607,7 @@
                     <ul class="list-elements space-y-2 mt-2 pb-1">
                         {#each members as member}
                             <li>
-                                <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial} pubkey={member.pubkey} joined={member.joined} />
+                                <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial}  joined={member.joined} />
                             </li>
                         {/each}
                     </ul>
