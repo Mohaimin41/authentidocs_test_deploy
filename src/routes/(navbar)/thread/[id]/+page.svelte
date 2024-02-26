@@ -3,34 +3,25 @@
     import List from "$lib/components/list.svelte";
     import FileCard from "$lib/components/thread/file-card.svelte";
     import MemberCard from "$lib/components/thread/member-card.svelte";
+    import { MemberObj, AddableMemberObj, FileObj, Tab } from "$lib/containers";
     import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
 
-    class FileObj
-    {
-        public id: string = "";
-        public name: string = "";
-        public type: string = "";
-        public status: string = "";
-    }
-
-    class MemberObj
-    {
-        public id: string = "";
-        public name: string = "";
-        public role: string = "";
-        public serial: number = -1;
-        public pubkey: string = "";
-        public joined: Date = new Date();
-    }
-
-    class AddableMemberObj
-    {
-        public id: string = "";
-        public name: string = "";
-        public checked: boolean = false;
-    }
-
+    let tabs: Tab[] =
+    [
+        {
+            name: "Details",
+            active: true
+        },
+        {
+            name: "Files",
+            active: false
+        },
+        {
+            name: "Members",
+            active: false
+        }
+    ];
     let id: string;
     let thread_name: string;
     let team_name: string;
@@ -40,7 +31,6 @@
     let started_at: Date;
     let date_text: string;
     let time_text: string;
-    let tab_active: boolean[] = [true, false, false];
     let files: FileObj[] = [];
     let members: MemberObj[] = [];
     let addable_members: AddableMemberObj[] = [];
@@ -61,7 +51,7 @@
     let add_member_modal: Modal;
     let file_uploading_modal: Modal;
     let details_loading: boolean;
-    let files_loading: boolean;
+    let files_loaded: boolean = false;
     let members_loading: boolean;
 
     $: date_text = started_at?.toLocaleDateString();
@@ -80,31 +70,17 @@
 
     function reset_tabs(): void
     {
-        for(let i: number = 0; i < tab_active.length; ++i)
+        for(let i: number = 0; i < tabs.length; ++i)
         {
-            tab_active[i] = false;
+            tabs[i].active = false;
         }
     }
 
-    function show_tab1(): void
+    function show_tab(idx: number): void
     {
         reset_tabs();
 
-        tab_active[0] = true;
-    }
-
-    function show_tab2(): void
-    {
-        reset_tabs();
-
-        tab_active[1] = true;
-    }
-
-    function show_tab3(): void
-    {
-        reset_tabs();
-
-        tab_active[2] = true;
+        tabs[idx].active = true;
     }
 
     function get_members(): void
@@ -363,8 +339,8 @@
     function init(): void
     {
         details_loading = true;
-        files_loading = true;
         members_loading = true;
+        files_loaded = false;
 
         fetch("/api/thread/getdetails",
         {
@@ -380,7 +356,6 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            console.log(response_obj);
             thread_name = response_obj.thread_detail.threadname;
             team_name = response_obj.thread_detail.list_of_teams.slice(1);
             started_at = new Date(response_obj.thread_detail.created_at);
@@ -421,7 +396,7 @@
 
                     if(thread_current_custodian_detail === undefined || thread_current_custodian_detail.f_userid !== $page.data.session?.user?.name)
                     {
-                        files[i].status = "3";
+                        files[i].status = 3;
                     }
                     else
                     {
@@ -441,7 +416,7 @@
                 //     files[i].type = "png";
                 // }
 
-                files_loading = false;
+                files_loaded = true;
             });
         });
 
@@ -521,30 +496,18 @@
     <!-- svelte-ignore a11y-invalid-attribute -->
     <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
         <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
-            <li class="me-2">
-                {#if tab_active[0]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Details</a>
-                {:else}
-                    <a on:click={show_tab1} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Details</a>
-                {/if}
-            </li>
-            <li class="me-2">
-                {#if tab_active[1]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Files</a>
-                {:else}
-                    <a on:click={show_tab2} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Files</a>
-                {/if}
-            </li>
-            <li class="me-2">
-                {#if tab_active[2]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Members</a>
-                {:else}
-                    <a on:click={show_tab3} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Members</a>
-                {/if}
-            </li>
+            {#each tabs as tab, index}
+                <li class="mx-1">
+                    {#if tab.active}
+                        <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">{tab.name}</a>
+                    {:else}
+                        <a on:click={() => {show_tab(index)}} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">{tab.name}</a>
+                    {/if}
+                </li>    
+            {/each}
         </ul>
         <div class="tab-item-data">
-            {#if tab_active[0]}
+            {#if tabs[0].active}
                 <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{thread_name}</p>
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Moderator</p>
                 <div class="flex items-center mb-4">
@@ -599,16 +562,16 @@
                     <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Closing Comment</p>
                     <p class="text-base font-medium text-gray-700 dark:text-gray-200">{closing_comment}</p>
                 {/if}
-            {:else if tab_active[1]}
+            {:else if tabs[1].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
-                <List loaded={!files_loading} empty={files_empty}>
+                <List loaded={files_loaded} empty={files_empty}>
                     {#each files as file}
                         <li>
-                            <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
+                            <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status.toString()}/>
                         </li>
                     {/each}
                 </List>
-            {:else if tab_active[2]}
+            {:else if tabs[2].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Members</p>
                 <List loaded={!members_loading} empty={members_empty}>
                     {#each members as member}
@@ -620,13 +583,13 @@
             {/if}
         </div>
         <div class="thread-extra-button flex justify-end items-end mt-2">
-            {#if tab_active[0]}
+            {#if tabs[0].active}
                 <button on:click={forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Forward</button>
                 <button on:click={show_close_thread_modal} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" disabled={!can_close}>Close Thread</button>
-            {:else if tab_active[1]}
+            {:else if tabs[1].active}
                 <!-- Add File -->
                 <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
-            {:else if tab_active[2]}
+            {:else if tabs[2].active}
                 <!-- Add Members -->
                 <button on:click={show_add_member_modal} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
             {/if}
