@@ -1,17 +1,20 @@
 <script lang="ts">
+    import { gen_random_color } from "$lib/helpers";
     import { onMount } from "svelte";
+    import { file_preview_mode } from "$lib/stores";
 
+    export let file_id: string;
     export let file_name: string;
     export let file_type: string;
     export let file_status: number;
-    const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
     let file_status_color: string;
     let file_status_text: string;
 
     onMount(() : void =>
     {
-        color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
+        file_preview_mode.set(3);
+        color = gen_random_color();
 
         if(file_status === 0)
         {
@@ -32,7 +35,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<a href="javascript:" class="block p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
+<a href="/preview/{file_id}" class="block p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
     <div class="flex">
         <div class="pe-2">
             {#if file_type === "png" || file_type === "jpeg" || file_type === "jpeg"}
@@ -53,11 +56,6 @@
             </p>
             <p class="text-base text-gray-500 dark:text-gray-400">
                 {file_type.toUpperCase()}
-            </p>
-        </div>
-        <div class="flex flex-row-reverse items-end">
-            <p class="text-base text-{file_status_color}-500 dark:text-{file_status_color}-400">
-                {file_status_text}
             </p>
         </div>
     </div>                  

@@ -9,3 +9,4 @@ export const useremail: Writable<string> = writable("");
 export const priv_key: Writable<CryptoKey | null> = writable(null);
 export const notifications: Writable<LiveNotification[]> = writable([]);
 export const update_thread: Writable<boolean> = writable(false);
+export const file_preview_mode: Writable<Number> = writable(0);

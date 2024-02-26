@@ -1,35 +1,35 @@
 <script lang="ts">
     import { page } from "$app/stores";
+    import AddMember from "$lib/components/add-member.svelte";
+    import List from "$lib/components/list.svelte";
+    import {Entity} from '$lib/containers';
     import FileCard from "$lib/components/thread/file-card.svelte";
     import MemberCard from "$lib/components/thread/member-card.svelte";
+    import { MemberObj, AddableMemberObj, FileObj, Tab } from "$lib/containers";
     import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
+    import Notice from "$lib/components/notice.svelte";
+    import { common_fetch } from "$lib/fetch_func";
 
-    class FileObj
-    {
-        public id: string = "";
-        public name: string = "";
-        public type: string = "";
-        public status: string = "";
-    }
-
-    class MemberObj
-    {
-        public id: string = "";
-        public name: string = "";
-        public role: string = "";
-        public serial: number = -1;
-        public pubkey: string = "";
-        public joined: Date = new Date();
-    }
-
-    class AddableMemberObj
-    {
-        public id: string = "";
-        public name: string = "";
-        public checked: boolean = false;
-    }
-
+    let tabs: Tab[] =
+    [
+        {
+            name: "Details",
+            active: true
+        },
+        {
+            name: "Files",
+            active: false
+        },
+        {
+            name: "Members",
+            active: false
+        },
+        {
+            name: "Notices",
+            active: false
+        }
+    ];
     let id: string;
     let thread_name: string;
     let team_name: string;
@@ -39,27 +39,30 @@
     let started_at: Date;
     let date_text: string;
     let time_text: string;
-    let tab_active: boolean[] = [true, false, false];
     let files: FileObj[] = [];
     let members: MemberObj[] = [];
-    let addable_members: AddableMemberObj[] = [];
     let is_active: boolean;
     let can_forward: boolean;
     let can_close: boolean;
     let can_add_file: boolean
     let closing_comment: string;
     let member_count: number;
+    let members_empty: boolean;
     let file_count: number;
+    let files_empty: boolean;
     let close_thread_modal_elem: HTMLDivElement;
-    let add_member_modal_elem: HTMLDivElement;
     let file_uploading_modal_elem: HTMLDivElement;
     let file_upload_progress: HTMLDivElement;
     let close_thread_modal: Modal;
     let add_member_modal: Modal;
     let file_uploading_modal: Modal;
     let details_loading: boolean;
-    let files_loading: boolean;
+    let files_loaded: boolean = false;
     let members_loading: boolean;
+    let notices_loaded: boolean = false;
+    let notices_empty: boolean;
+    let notices: Entity[] = [];
+
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -70,33 +73,25 @@
         init();
     }
 
+    $: files_empty = files.length === 0;
+    $: members_empty = members.length === 0;
+    $: file_count = files.length;
+    $: member_count = members.length;
+    $: notices_empty = notices.length === 0;
+
     function reset_tabs(): void
     {
-        for(let i: number = 0; i < tab_active.length; ++i)
+        for(let i: number = 0; i < tabs.length; ++i)
         {
-            tab_active[i] = false;
+            tabs[i].active = false;
         }
     }
 
-    function show_tab1(): void
+    function show_tab(idx: number): void
     {
         reset_tabs();
 
-        tab_active[0] = true;
-    }
-
-    function show_tab2(): void
-    {
-        reset_tabs();
-
-        tab_active[1] = true;
-    }
-
-    function show_tab3(): void
-    {
-        reset_tabs();
-
-        tab_active[2] = true;
+        tabs[idx].active = true;
     }
 
     function get_members(): void
@@ -128,14 +123,23 @@
                 members[i].joined = new Date(response_obj[i].f_joined_at);
             }
 
-            member_count = members.length;
+            // let test_count: number = 0;
+            // members = new Array(test_count);
+
+            // for(let i: number = 0; i < test_count; ++i)
+            // {
+            //     members[i] = new MemberObj();
+            //     members[i].id = (i + 1).toString();
+            //     members[i].name = "Member " + (i + 1);
+            // }
+
             members_loading = false;
         });
     }
 
-    function get_addable_members(): void
+    async function get_addable_members(id:string): Promise<AddableMemberObj[]>
     {
-        fetch("/api/thread/getaddablemembers",
+        let response: Response = await fetch("/api/thread/getaddablemembers",
         {
             method: "POST",
             headers:
@@ -146,52 +150,97 @@
             {
                 given_threadid: id
             })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
-            addable_members = new Array(response_obj.length);
-
-            for(let i: number = 0; i < addable_members.length; ++i)
-            {
-                addable_members[i] = new AddableMemberObj();
-                addable_members[i].id = response_obj[i].f_userid;
-                addable_members[i].name = response_obj[i].f_username;
-            }
         });
-    }
-
-    function add_members(): void
-    {
-        let addable_member_ids: string[] = [];
+        let response_obj: any = await response.json();
+        let addable_members: AddableMemberObj[] = new Array(response_obj.length);
 
         for(let i: number = 0; i < addable_members.length; ++i)
         {
-            if(addable_members[i].checked)
-            {
-                addable_member_ids.push(addable_members[i].id);
-            }
+            addable_members[i] = new AddableMemberObj();
+            addable_members[i].id = response_obj[i].f_userid;
+            addable_members[i].name = response_obj[i].f_username;
         }
 
-        fetch("/api/thread/addmember",
+        return addable_members;
+    }
+
+    async function add_member(id: string, members: AddableMemberObj[]): Promise<any>
+    {
+        let adding_members = []
+        let count = 0 ;
+        for(let i=0;i<members.length;i++)
         {
-            method: "POST",
-            headers:
+            if(members[i].checked)
             {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify(
-            {
-                threadid: id,
-                uid_list: addable_member_ids
-            })
-        }).then(async (response: Response): Promise<void> =>
-        {
+                adding_members[count++]=members[i].id
+            }
+        }
+        let response: Response = await fetch(
+                    "/api/thread/addmember",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                           uid_list:adding_members,
+                           threadid:id,
+                        })
+                    }
+                );
+               
+                let response_obj: any = await response.json();
+
+                console.log(response_obj);
+
+        
+    }
+    async function send_notice_request(id: string, subject: string, content: string): Promise<any>
+    {
+        let response: Response = await fetch(
+                    "/api/notice/addnotice",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            hierarchy_level:'org',
+                            hierarchy_level_id:id,
+                            content:content,
+                            subject:subject,
+                        })
+                    }
+                );
+               
+                let response_obj: any = await response.json();
+
+                console.log(response_obj);
+    }
+    function get_notices(): void
+    {
+        let request_obj: any = {
+            threadid: id,
+        };
+
+        common_fetch(
+        "/api/thread/getnotices",
+        request_obj,
+        async (response: Response): Promise<void> => {
             let response_obj: any = await response.json();
 
-            console.log(response_obj);
-            add_member_modal.hide();
-            get_members();
-            get_addable_members();
+            if (response_obj === null) {
+            return;
+            }
+            console.log(response_obj)
+            notices = new Array((response_obj.length));
+            for(let i = 0; i < notices.length; ++i)
+            {
+                notices[i] = new Entity();
+                notices[i].uid = response_obj[i].f_noticeid;
+                notices[i].name = response_obj[i].f_subject;
+            }
+            notices_loaded=true;
         });
     }
 
@@ -302,16 +351,6 @@
         close_thread_modal.hide();
     }
 
-    function show_add_member_modal(): void
-    {
-        add_member_modal.show();
-    }
-
-    function hide_add_member_modal(): void
-    {
-        add_member_modal.hide();
-    }
-
     function close_thread(): void
     {
         let temp_comment: string = closing_comment;
@@ -346,8 +385,8 @@
     function init(): void
     {
         details_loading = true;
-        files_loading = true;
         members_loading = true;
+        files_loaded = false;
 
         fetch("/api/thread/getdetails",
         {
@@ -363,7 +402,6 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            console.log(response_obj);
             thread_name = response_obj.thread_detail.threadname;
             team_name = response_obj.thread_detail.list_of_teams.slice(1);
             started_at = new Date(response_obj.thread_detail.created_at);
@@ -404,7 +442,7 @@
 
                     if(thread_current_custodian_detail === undefined || thread_current_custodian_detail.f_userid !== $page.data.session?.user?.name)
                     {
-                        files[i].status = "3";
+                        files[i].status = 3;
                     }
                     else
                     {
@@ -412,8 +450,19 @@
                     }
                 }
 
-                file_count = files.length;
-                files_loading = false;
+                // let test_count: number = 10;
+                // files = new Array(test_count);
+
+                // for(let i: number = 0; i < test_count; ++i)
+                // {
+                //     files[i] = new FileObj();
+                //     files[i].id = (i + 1).toString();
+                //     files[i].name = "File " + (i + 1);
+                //     files[i].status = "hehe";
+                //     files[i].type = "png";
+                // }
+
+                files_loaded = true;
             });
         });
 
@@ -470,52 +519,41 @@
         });
 
         get_members();
-        get_addable_members();
+        get_notices();
     }
     
     onMount((): void =>
     {
         initModals();
 
-        // id = $page.params.id;
+        id = $page.params.id;
         close_thread_modal = new Modal(close_thread_modal_elem);
-        add_member_modal = new Modal(add_member_modal_elem);
         file_uploading_modal = new Modal(file_uploading_modal_elem);
 
         init();
     });
 </script>
+
 <svelte:head>
     <title>{thread_name} preview</title> 
 </svelte:head>
+
 <div class="pg-center flex justify-between">
     <!-- svelte-ignore a11y-invalid-attribute -->
-    <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
         <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
-            <li class="me-2">
-                {#if tab_active[0]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Details</a>
-                {:else}
-                    <a on:click={show_tab1} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Details</a>
-                {/if}
-            </li>
-            <li class="me-2">
-                {#if tab_active[1]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Files</a>
-                {:else}
-                    <a on:click={show_tab2} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Files</a>
-                {/if}
-            </li>
-            <li class="me-2">
-                {#if tab_active[2]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Members</a>
-                {:else}
-                    <a on:click={show_tab3} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Members</a>
-                {/if}
-            </li>
+            {#each tabs as tab, index}
+                <li class="mx-1">
+                    {#if tab.active}
+                        <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">{tab.name}</a>
+                    {:else}
+                        <a on:click={() => {show_tab(index)}} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">{tab.name}</a>
+                    {/if}
+                </li>    
+            {/each}
         </ul>
-        <div class="tab-item-data mx-6 mb-6">
-            {#if tab_active[0]}
+        <div class="tab-item-data">
+            {#if tabs[0].active}
                 <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{thread_name}</p>
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Moderator</p>
                 <div class="flex items-center mb-4">
@@ -570,99 +608,51 @@
                     <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Closing Comment</p>
                     <p class="text-base font-medium text-gray-700 dark:text-gray-200">{closing_comment}</p>
                 {/if}
-            {:else if tab_active[1]}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Files</p>
-                {#if files_loading}
-                    <div class="loader flex justify-center items-center">
-                        <div role="status">
-                            <svg aria-hidden="true" class="w-20 h-20 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-                            </svg>
-                            <span class="sr-only">Loading...</span>
-                        </div>
-                    </div>
-                {:else}
-                    <ul class="list-elements space-y-2 mt-2 pb-1">
-                        {#each files as file}
-                            <li>
-                                <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
-                            </li>
-                        {/each}
-                    </ul>
-                {/if}
-            {:else if tab_active[2]}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200">Members</p>
-                {#if members_loading}
-                    <div class="loader flex justify-center items-center">
-                        <div role="status">
-                            <svg aria-hidden="true" class="w-20 h-20 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-                            </svg>
-                            <span class="sr-only">Loading...</span>
-                        </div>
-                    </div>
-                {:else}
-                    <ul class="list-elements space-y-2 mt-2 pb-1">
-                        {#each members as member}
-                            <li>
-                                <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial}  joined={member.joined} />
-                            </li>
-                        {/each}
-                    </ul>
-                {/if}
+            {:else if tabs[1].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
+                <List loaded={files_loaded} empty={files_empty}>
+                    {#each files as file}
+                        <li>
+                            <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status.toString()}/>
+                        </li>
+                    {/each}
+                </List>
+            {:else if tabs[2].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Members</p>
+                <List loaded={!members_loading} empty={members_empty}>
+                    {#each members as member}
+                        <li>
+                            <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial}  joined={member.joined} />
+                        </li>
+                    {/each}
+                </List>
+                {:else if tabs[3].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
+                <List loaded={notices_loaded} empty={notices_empty}>
+                    {#each notices as notice}
+                        <li>
+                            <Notice uid={notice.uid} title={notice.name}/>
+                        </li>
+                    {/each}
+                </List>
+            {/if}
+        </div>
+        <div class="thread-extra-button flex justify-end items-end mt-2">
+            {#if tabs[0].active}
+                <button on:click={forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Forward</button>
+                <button on:click={show_close_thread_modal} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" disabled={!can_close}>Close Thread</button>
+            {:else if tabs[1].active}
+                <!-- Add File -->
+                <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
+            {:else if tabs[2].active}
+                <!-- Add Members -->
+                <button on:click={() => {add_member_modal.show();}} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
             {/if}
         </div>
     </div>
-
-    <div class="thread-extra-button flex justify-end items-end">
-        {#if tab_active[0]}
-            <button on:click={forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Forward</button>
-            <button on:click={show_close_thread_modal} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" disabled={!can_close}>Close Thread</button>
-        {:else if tab_active[1]}
-            <!-- Add File -->
-            <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
-        {:else if tab_active[2]}
-            <!-- Add Members -->
-            <button on:click={show_add_member_modal} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
-        {/if}
-    </div>
 </div>
 
-<div bind:this={add_member_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <!-- Modal header -->
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    Select Thread Members
-                </h3>
-                <button on:click={hide_add_member_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
-            </div>
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 space-y-4">
-                <form on:submit={add_members} class="mx-auto">
-                    {#each addable_members as member}
-                        <div class="flex items-center mb-4">
-                            <input bind:checked={member.checked} id="checkbox-{member.id}" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
-                            <label for="checkbox-1" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
-                        </div>
-                    {/each}
-                    <div class="flex justify-end">
-                        <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
 
 <div bind:this={close_thread_modal_elem} id="close-thread-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
@@ -717,60 +707,26 @@
         position: absolute;
         top: 5.25rem;
         bottom: 1rem;
-        left: 20%;
-        right: 20%;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     .thread-info
     {
         position: absolute;
         top: 0;
-        bottom: 3.5rem;
-        left: 0;
-        right: 0;
-    }
-    .thread-tabs
-    {
-        position: absolute;
-        top: 0;
-        height: 3.5rem;
-        left: 0;
-        right: 0;
+        bottom: 0;
+        width: 65rem;
+        display: flex;
+        flex-direction: column;
     }
     .tab-item-data
     {
-        position: absolute;
-        top: 3.5rem;
-        bottom: 0;
-        left: 0;
-        right: 0;
-    }
-    .thread-extra-button
-    {
-        position: absolute;
-        height: 3.5rem;
-        bottom: 0;
-        left: 0;
-        right: 0;
-    }
-    .list-title
-    {
-        position: absolute;
-        height: 2rem;
-        top: 0;
-        left: 0;
-        right: 0;
-    }
-    .list-elements
-    {
-        position: absolute;
-        top: 2rem;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        flex-grow: 1;
         overflow-y: auto;
-    }
-    .loader
-    {
-        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
 </style>

@@ -7,9 +7,33 @@ export class Entity
     public name: string = "";
 }
 
-export class Member
+export class FileObj
 {
-    public uid: string = "";
+    public id: string = "";
+    public name: string = "";
+    public type: string = "";
+    public status: number = -1;
+}
+
+export class MemberObj
+{
+    public id: string = "";
+    public name: string = "";
+    public role: string = "";
+    public serial: number = -1;
+    public pubkey: string = "";
+    public joined: Date = new Date();
+}
+
+export class AddableMemberObj
+{
+    public id: string = "";
     public name: string = "";
     public checked: boolean = false;
+}
+
+export class Tab
+{
+    public name: string = "";
+    public active: boolean = false;
 }
