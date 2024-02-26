@@ -242,6 +242,64 @@
             member_count=response_obj.org_detail.f_member_count;
         });
     }
+    function get_files(): void
+    {
+        let request_obj: any = {
+            orgid: id,
+        };
+
+        common_fetch(
+        "/api/org/getfiles",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
+
+            if (response_obj === null) {
+            return;
+            }
+            console.log(response_obj);
+            files = new Array(response_obj.length);
+
+            for(let i: number = 0; i < response_obj.length; ++i)
+            {
+                files[i] = new FileObj();
+                files[i].id = response_obj[i].f_fileid;
+                files[i].name = response_obj[i].f_filename;
+                files[i].type = response_obj[i].f_file_extension;
+            }
+            console.log(files)
+            files_loaded = true;
+        });
+    }
+    function get_members(): void
+    {
+        let request_obj: any = {
+            orgid: id,
+        };
+
+        common_fetch(
+        "/api/org/getmembers",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
+
+            if (response_obj === null) {
+            return;
+            }
+            console.log(response_obj)
+            members = new Array(response_obj.length);
+
+            for(let i: number = 0; i < response_obj.length; ++i)
+            {
+                members[i] = new MemberObj();
+                members[i].id = response_obj[i].f_userid;
+                members[i].name = response_obj[i].f_username;
+            }
+
+            members_loaded = true;
+        });
+    }
+
 
     function get_notices(): void
     {
@@ -284,39 +342,13 @@
 
         id = $page.params.id;
 
-        get_teams();
         get_org_details();
+        get_teams();
         get_notices();
         get_addable_members();
+        get_files();
+        get_members();
 
-        {
-            let test_count: number = 10;
-            files = new Array(test_count);
-
-            for(let i: number = 0; i < test_count; ++i)
-            {
-                files[i] = new FileObj();
-                files[i].id = (i + 1).toString();
-                files[i].name = "File " + (i + 1);
-                files[i].type = "png";
-            }
-
-            files_loaded = true;
-        }
-
-        {
-            let test_count: number = 10;
-            members = new Array(test_count);
-
-            for(let i: number = 0; i < test_count; ++i)
-            {
-                members[i] = new MemberObj();
-                members[i].id = (i + 1).toString();
-                members[i].name = "Member " + (i + 1);
-            }
-
-            members_loaded = true;
-        }
     });
 </script>
 
