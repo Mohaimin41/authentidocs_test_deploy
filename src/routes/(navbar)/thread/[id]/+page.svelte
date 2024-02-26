@@ -125,7 +125,7 @@
         });
     }
 
-    async function get_addable_members(): Promise<AddableMemberObj[]>
+    async function get_addable_members(id:string): Promise<AddableMemberObj[]>
     {
         let response: Response = await fetch("/api/thread/getaddablemembers",
         {
@@ -152,8 +152,35 @@
         return addable_members;
     }
 
-    function add_member(id: string, members: AddableMemberObj[]): any
+    async function add_member(id: string, members: AddableMemberObj[]): Promise<any>
     {
+        let adding_members = []
+        let count = 0 ;
+        for(let i=0;i<members.length;i++)
+        {
+            if(members[i].checked)
+            {
+                adding_members[count++]=members[i].id
+            }
+        }
+        let response: Response = await fetch(
+                    "/api/thread/addmember",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                           uid_list:adding_members,
+                           threadid:id,
+                        })
+                    }
+                );
+               
+                let response_obj: any = await response.json();
+
+                console.log(response_obj);
+
         
     }
 
@@ -432,14 +459,13 @@
         });
 
         get_members();
-        get_addable_members();
     }
     
     onMount((): void =>
     {
         initModals();
 
-        // id = $page.params.id;
+        id = $page.params.id;
         close_thread_modal = new Modal(close_thread_modal_elem);
         file_uploading_modal = new Modal(file_uploading_modal_elem);
 

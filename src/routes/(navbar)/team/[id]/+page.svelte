@@ -207,7 +207,7 @@
         });
     }
 
-    async function get_addable_members(): Promise<AddableMemberObj[]>
+    async function get_addable_members(id:string): Promise<AddableMemberObj[]>
     {
         let response: Response = await fetch("/api/team/getaddablemembers",
         {
@@ -218,7 +218,7 @@
             },
             body: JSON.stringify(
             {
-                given_threadid: id
+                teamid: id
             })
         });
         let response_obj: any = await response.json();
@@ -234,8 +234,35 @@
         return addable_members;
     }
 
-    function add_member(id: string, members: AddableMemberObj[]): any
+    async function add_member(id: string, members: AddableMemberObj[]): Promise<any>
     {
+        let adding_members = []
+        let count = 0 ;
+        for(let i=0;i<members.length;i++)
+        {
+            if(members[i].checked)
+            {
+                adding_members[count++]=members[i].id
+            }
+        }
+        let response: Response = await fetch(
+                    "/api/team/addmember",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                           uid_list:adding_members,
+                           teamid:id,
+                        })
+                    }
+                );
+               
+                let response_obj: any = await response.json();
+
+                console.log(response_obj);
+
         
     }
 
@@ -251,7 +278,6 @@
         get_threads();
         get_team_details();
         get_notices();
-        get_addable_members();
         get_members();
         get_files();
     });
