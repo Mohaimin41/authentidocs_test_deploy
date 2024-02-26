@@ -183,6 +183,28 @@
 
         
     }
+    async function send_notice_request(id: string, subject: string, content: string): Promise<any>
+    {
+        let response: Response = await fetch(
+                    "/api/notice/addnotice",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            hierarchy_level:'org',
+                            hierarchy_level_id:id,
+                            content:content,
+                            subject:subject,
+                        })
+                    }
+                );
+               
+                let response_obj: any = await response.json();
+
+                console.log(response_obj);
+    }
 
     function add_file(): void
     {
