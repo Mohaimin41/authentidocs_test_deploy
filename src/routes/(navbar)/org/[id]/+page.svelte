@@ -407,7 +407,7 @@
                 <List loaded={files_loaded} empty={files_empty}>
                     {#each files as file}
                         <li>
-                            <FileCard file_name={file.name} file_type={file.type} file_status={file.status}/>
+                            <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
                         </li>
                     {/each}
                 </List>
