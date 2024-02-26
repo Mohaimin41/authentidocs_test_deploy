@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from "$app/stores";
+    import AddMember from "$lib/components/add-member.svelte";
     import List from "$lib/components/list.svelte";
     import FileCard from "$lib/components/thread/file-card.svelte";
     import MemberCard from "$lib/components/thread/member-card.svelte";
@@ -33,7 +34,6 @@
     let time_text: string;
     let files: FileObj[] = [];
     let members: MemberObj[] = [];
-    let addable_members: AddableMemberObj[] = [];
     let is_active: boolean;
     let can_forward: boolean;
     let can_close: boolean;
@@ -44,7 +44,6 @@
     let file_count: number;
     let files_empty: boolean;
     let close_thread_modal_elem: HTMLDivElement;
-    let add_member_modal_elem: HTMLDivElement;
     let file_uploading_modal_elem: HTMLDivElement;
     let file_upload_progress: HTMLDivElement;
     let close_thread_modal: Modal;
@@ -126,9 +125,9 @@
         });
     }
 
-    function get_addable_members(): void
+    async function get_addable_members(): Promise<AddableMemberObj[]>
     {
-        fetch("/api/thread/getaddablemembers",
+        let response: Response = await fetch("/api/thread/getaddablemembers",
         {
             method: "POST",
             headers:
@@ -139,53 +138,23 @@
             {
                 given_threadid: id
             })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
-            addable_members = new Array(response_obj.length);
-
-            for(let i: number = 0; i < addable_members.length; ++i)
-            {
-                addable_members[i] = new AddableMemberObj();
-                addable_members[i].id = response_obj[i].f_userid;
-                addable_members[i].name = response_obj[i].f_username;
-            }
         });
-    }
-
-    function add_members(): void
-    {
-        let addable_member_ids: string[] = [];
+        let response_obj: any = await response.json();
+        let addable_members: AddableMemberObj[] = new Array(response_obj.length);
 
         for(let i: number = 0; i < addable_members.length; ++i)
         {
-            if(addable_members[i].checked)
-            {
-                addable_member_ids.push(addable_members[i].id);
-            }
+            addable_members[i] = new AddableMemberObj();
+            addable_members[i].id = response_obj[i].f_userid;
+            addable_members[i].name = response_obj[i].f_username;
         }
 
-        fetch("/api/thread/addmember",
-        {
-            method: "POST",
-            headers:
-            {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify(
-            {
-                threadid: id,
-                uid_list: addable_member_ids
-            })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
+        return addable_members;
+    }
 
-            console.log(response_obj);
-            add_member_modal.hide();
-            get_members();
-            get_addable_members();
-        });
+    function add_member(id: string, members: AddableMemberObj[]): any
+    {
+        console.log(members);
     }
 
     function add_file(): void
@@ -293,16 +262,6 @@
     function hide_close_thread_modal(): void
     {
         close_thread_modal.hide();
-    }
-
-    function show_add_member_modal(): void
-    {
-        add_member_modal.show();
-    }
-
-    function hide_add_member_modal(): void
-    {
-        add_member_modal.hide();
     }
 
     function close_thread(): void
@@ -482,7 +441,6 @@
 
         // id = $page.params.id;
         close_thread_modal = new Modal(close_thread_modal_elem);
-        add_member_modal = new Modal(add_member_modal_elem);
         file_uploading_modal = new Modal(file_uploading_modal_elem);
 
         init();
@@ -492,6 +450,7 @@
 <svelte:head>
     <title>{thread_name} preview</title> 
 </svelte:head>
+
 <div class="pg-center flex justify-between">
     <!-- svelte-ignore a11y-invalid-attribute -->
     <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
@@ -591,45 +550,13 @@
                 <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
             {:else if tabs[2].active}
                 <!-- Add Members -->
-                <button on:click={show_add_member_modal} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
+                <button on:click={() => {add_member_modal.show();}} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>
             {/if}
         </div>
     </div>
 </div>
 
-<div bind:this={add_member_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <!-- Modal header -->
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    Select Thread Members
-                </h3>
-                <button on:click={hide_add_member_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
-            </div>
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 space-y-4">
-                <form on:submit={add_members} class="mx-auto">
-                    {#each addable_members as member}
-                        <div class="flex items-center mb-4">
-                            <input bind:checked={member.checked} id="checkbox-{member.id}" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
-                            <label for="checkbox-1" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
-                        </div>
-                    {/each}
-                    <div class="flex justify-end">
-                        <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<AddMember bind:modal={add_member_modal} id={id} get_addable_members={get_addable_members} add_member={add_member} />
 
 <div bind:this={close_thread_modal_elem} id="close-thread-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
