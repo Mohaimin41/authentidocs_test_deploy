@@ -1,64 +1,76 @@
 <script lang="ts">
-	import { common_fetch } from '$lib/fetch_func';
     import { onMount } from "svelte";
-    import ThreadCard from "$lib/components/team/thread-card.svelte";
-    import { Modal, initModals } from "flowbite";
+    import { Modal } from "flowbite";
     import { page } from "$app/stores";
-    import { Entity, type Member } from '$lib/containers';
+    import { AddableMemberObj, Entity, FileObj, MemberObj, Tab } from '$lib/containers';
+    import { common_fetch } from "$lib/fetch_func";
+    import List from "$lib/components/list.svelte";
+    import MemberCard from "$lib/components/team/member-card.svelte";
+    import FileCard from "$lib/components/team/file-card.svelte";
+    import ThreadCard from "$lib/components/team/thread-card.svelte";
 
-    class AddableMemberObj
-    {
-        public id: string = "";
-        public name: string = "";
-        public checked: boolean = false;
-    }
-    let threads: Entity[] = [];
-    let id: string;
-    let thread_name_input: string;
-    let thread_description_input: string;
-    let create_thread_modal_elem: HTMLDivElement;
-    let create_thread_modal: Modal;
-    let team_info: any;
-    let team_name:string;
-    let team_leader:string;
-    let addable_members: AddableMemberObj[] = [];
-    let thread_count:number = 0;
-    let member_count:number = 0;
-    let file_count:number = 0;
-
-    function create_thread(): void
-    {
-        let temp_desc: string | undefined = thread_description_input;
-
-        if(temp_desc === undefined)
+    let tabs: Tab[] =
+    [
         {
-            temp_desc = "";
+            name: "Details",
+            active: true
+        },
+        {
+            name: "Threads",
+            active: false
+        },
+        {
+            name: "Files",
+            active: false
+        },
+        {
+            name: "Members",
+            active: false
         }
+    ];
+    let threads: Entity[] = [];
+    let notices: Entity[] = [];
+    let id: string;
+    let team_name_input: string;
+    let team_description_input: string;
+    let team_name:string = "স্বদীপের team";  // remove the names, আপাতত এমনে দিসি কারণ undefined লেখা দেখলে কেমন জানি লাগে :3
+    let team_leader:string = "স্বদীপ আহমেদ";
+    let create_team_modal: Modal;
+    let addable_members: AddableMemberObj[] = [];
+    let files: FileObj[] = [];
+    let members: MemberObj[] = [];
+    let threads_loaded: boolean = false;
+    let files_loaded: boolean = false;
+    let members_loaded: boolean = false;
+    let thread_count:number=0;
+    let file_count: number;
+    let thread_empty: boolean;
+    let member_count:number=0;
+    let files_empty: boolean;
+    let members_empty: boolean;
 
-        fetch("/api/thread/createthread",
-        {
-            method: "POST",
-            headers:
-            {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify(
-            {
-                given_parent_teamid: id,
-                given_threadname: thread_name_input,
-                description: temp_desc
-            })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
+    $: thread_empty = threads.length === 0;
+    $: files_empty = files.length === 0;
+    $: members_empty = members.length === 0;
 
-            create_thread_modal.hide();
-            get_threads();
-        });
+    function reset_tabs(): void
+    {
+        for(let i: number = 0; i < tabs.length; ++i)
+        {
+            tabs[i].active = false;
+        }
     }
+
+    function show_tab(idx: number): void
+    {
+        reset_tabs();
+
+        tabs[idx].active = true;
+    }
+
     function get_addable_members(): void
     {
-        fetch("/api/team/getaddablemembers",
+        fetch("/api/org/getaddablemembers",
         {
             method: "POST",
             headers:
@@ -67,11 +79,11 @@
             },
             body: JSON.stringify(
             {
-                teamid: id
+                orgid: id
             })
         }).then(async (response: Response): Promise<void> =>
         {
-            let response_obj: any = await response.json();
+            let response_obj: any = await response.json();            
             addable_members = new Array(response_obj.length);
 
             for(let i: number = 0; i < addable_members.length; ++i)
@@ -80,11 +92,11 @@
                 addable_members[i].id = response_obj[i].f_userid;
                 addable_members[i].name = response_obj[i].f_username;
             }
-            //console.log(addable_members);
+            console.log(addable_members)
         });
     }
 
-    function add_members(): void
+    function add_member(): void
     {
         let addable_member_ids: string[] = [];
 
@@ -96,7 +108,7 @@
             }
         }
 
-        fetch("/api/team/addmember",
+        fetch("/api/org/addmember",
         {
             method: "POST",
             headers:
@@ -105,7 +117,7 @@
             },
             body: JSON.stringify(
             {
-                teamid: id,
+                orgid: id,
                 uid_list: addable_member_ids
             })
         }).then(async (response: Response): Promise<void> =>
@@ -115,224 +127,216 @@
             console.log(response_obj);
             get_addable_members();
         });
-    }
-    function show_create_thread_modal(): void
-    {
-        create_thread_modal.show();
-    }
-
-    function hide_create_thread_modal(): void
-    {
-        create_thread_modal.hide();
+        
     }
 
     function get_threads(): void
     {
-        fetch("/api/team/getthreads",
-        {
-            method: "POST",
-            headers:
-            {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify(
-            {
-                teamid: id
-            })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
-            console.log(response_obj);
-            threads = new Array(response_obj.length);
+        // fetch("/api/org/getteams",
+        // {
+        //     method: "POST",
+        //     headers:
+        //     {
+        //         "content-type": "application/json"
+        //     },
+        //     body: JSON.stringify(
+        //     {
+        //         orgid: id
+        //     })
+        // }).then(async (response: Response): Promise<void> =>
+        // {
+        //     let response_obj: any = await response.json();
+        //     teams = new Array(response_obj.length);
+        //     console.log(response_obj)
 
-            for(let i: number = 0; i < threads.length; ++i)
-            {
-                threads[i] = new Entity();
-                threads[i].uid = response_obj[i].f_threadid;
-                threads[i].name = response_obj[i].f_threadname;
-            }
-        });
+        //     for(let i: number = 0; i < teams.length; ++i)
+        //     {
+        //         teams[i] = new Entity();
+        //         teams[i].uid = response_obj[i].f_teamid;
+        //         teams[i].name = response_obj[i].f_team_name;
+        //     }
+
+        //     // delete everything below this when connecting api
+        //     // let test_count = 10;
+        //     // teams = new Array(test_count);
+
+        //     // for(let i = 0; i < test_count; ++i)
+        //     // {
+        //     //     teams[i] = new Entity();
+        //     //     teams[i].name = "Team " + (i + 1);
+        //     //     teams[i].uid = (i + 1).toString();
+        //     // }
+
+        //     threads_loaded = true;
+        // });
     }
-    function get_team_details(): void {
-    let request_obj: any = {
-      teamid: id,
-    };
 
-    common_fetch(
-      "/api/team/getdetails",
-      request_obj,
-      async (response: Response): Promise<void> => {
-        let response_obj: any = await response.json();
+    function get_team_details(): void
+    {
+        // let request_obj: any = {
+        //     orgid: id,
+        // };
 
-        if (response_obj === null) {
-          return;
-        }
+        // common_fetch(
+        // "/api/org/getdetails",
+        // request_obj,
+        // async (response: Response): Promise<void> => {
+        //     let response_obj: any = await response.json();
 
-        team_info=response_obj;
-        console.log(team_info);
-        team_name=team_info.team_detail.f_team_name;
-        team_leader=team_info.team_mod_detail.f_username;
-        member_count=team_info.team_detail.f_member_count;
-        thread_count=team_info.team_detail.f_thread_count;
-        file_count=team_info.team_detail.f_file_count;
-      }
-    );
-  }
+        //     if (response_obj === null) {
+        //     return;
+        //     }
+        //     console.log(response_obj)
+        //     team_name=response_obj.org_detail.f_org_name;
+        //     team_leader=response_obj.org_mod_detail.f_username;
+        //     thread_count=response_obj.org_detail.f_team_count;
+        //     member_count=response_obj.org_detail.f_member_count;
+        // });
+    }
+
+    function get_notices(): void
+    {
+        // let request_obj: any = {
+        //     orgid: id,
+        // };
+
+        // common_fetch(
+        // "/api/org/getnotices",
+        // request_obj,
+        // async (response: Response): Promise<void> => {
+        //     let response_obj: any = await response.json();
+
+        //     if (response_obj === null) {
+        //     return;
+        //     }
+        //     console.log(response_obj)
+        //     notices = new Array((response_obj.length));
+        //     for(let i = 0; i < notices.length; ++i)
+        //     {
+        //         notices[i] = new Entity();
+        //         notices[i].uid = response_obj[i].f_noticeid;
+        //         notices[i].name = response_obj[i].f_content;
+        //         if(notices[i].name.length>10) notices[i].name = notices[i].name.substring(0,10) + "...."
+        //     }
+        // });
+    }
+
     onMount((): void =>
     {
-
-        create_thread_modal = new Modal(create_thread_modal_elem);
-
-        initModals();
-
         id = $page.params.id;
 
         get_threads();
         get_team_details();
+        get_notices();
         get_addable_members();
 
-        
+        {
+            let test_count: number = 10;
+            files = new Array(test_count);
+
+            for(let i: number = 0; i < test_count; ++i)
+            {
+                files[i] = new FileObj();
+                files[i].id = (i + 1).toString();
+                files[i].name = "File " + (i + 1);
+                files[i].type = "png";
+            }
+
+            files_loaded = true;
+        }
+
+        {
+            let test_count: number = 10;
+            members = new Array(test_count);
+
+            for(let i: number = 0; i < test_count; ++i)
+            {
+                members[i] = new MemberObj();
+                members[i].id = (i + 1).toString();
+                members[i].name = "Member " + (i + 1);
+            }
+
+            members_loaded = true;
+        }
     });
 </script>
-<svelte:head>
-    <title>{team_name} preview</title>
-</svelte:head>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
+<svelte:head>
+    <title>{team_name} preview</title> 
+</svelte:head>
 <div class="pg-center flex justify-between">
-    <div class="team-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <div class="flex m-6">
-            <div class="grow">
-                <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-2">{team_name}</p>
-                <div class="grid grid-cols-4 gap-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Leader</p>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Members</p>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Threads</p>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Files</p>
-                    <div class="flex flex-wrap items-center">
-                        <img class="w-6 h-6 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-sm font-medium text-gray-700">{team_leader}</p>
-                    </div>
-                    <div class="flex -space-x-4 rtl:space-x-reverse">
-                        <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <img class="w-6 h-6 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <a class="flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="#">{member_count}</a>
-                    </div>
-                    <div class="flex flex-wrap items-center">
-                        <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8"/>
-                        </svg>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
-                    </div>
-                    <div class="flex flex-wrap items-center">
-                        <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
-                        </svg>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="flex flex-wrap items-end">
-                <!-- add member -->
-                <button data-modal-target="add-member-modal" data-modal-toggle="add-member-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-2 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12h4m-2 2v-4M4 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1c0 .6-.4 1-1 1H5a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                    </svg>
-                </button>
-                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-2 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.8 5.5 10.4 3m.4 2.4a5.3 5.3 0 0 1 6 4.3l.4 1.8c.4 2.3 2.4 2.6 2.6 3.7.1.6.2 1.2-.3 1.3L6.8 19c-.5 0-.7-.5-.8-1.1-.2-1.2 1.5-2.1 1.1-4.4l-.3-1.8a5.3 5.3 0 0 1 4-6.2Zm-7 4.4a8 8 0 0 1 2-4.9m2.7 13.7a3.5 3.5 0 0 0 6.7-.8l.1-.5-6.8 1.3Z"/>
-                    </svg>
-                </button>
-                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-2 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3c.6 0 1 .4 1 1v15c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V5c0-.6.4-1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-    <div class="thread-list-card block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mt-2">
-        <p class="thread-list-title text-2xl font-semibold text-gray-700 mx-6 mt-6">Threads</p>
-        <ul class="thread-elements space-y-2 mt-2 pb-1 mx-6 mb-6">
-            {#each threads as thread}
-                <li>
-                    <ThreadCard thread_id={thread.uid} thread_name={thread.name} />
-                </li>
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
+        <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+            {#each tabs as tab, index}
+                <li class="mx-1">
+                    {#if tab.active}
+                        <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">{tab.name}</a>
+                    {:else}
+                        <a on:click={() => {show_tab(index)}} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">{tab.name}</a>
+                    {/if}
+                </li>    
             {/each}
         </ul>
-    </div>
-    <div class="thread-button flex justify-end items-end">
-        <button on:click={show_create_thread_modal} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Create Thread</button>
-    </div>
-</div>
-
-<div bind:this={create_thread_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <!-- Modal header -->
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    Create Thread
-                </h3>
-                <button on:click={hide_create_thread_modal} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
-            </div>
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 space-y-4">
-                <form on:submit={create_thread} class="mx-auto">
-                    <div class="mb-5">
-                      <label for="create-thread-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Thread Name</label>
-                      <input bind:value={thread_name_input} type="text" id="create-thread-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off" required>
+        <div class="tab-item-data">
+            {#if tabs[0].active}
+                <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{team_name}</p>
+                <div class="grid grid-cols-3 mb-4">
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Started At</p>
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
+                        <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
                     </div>
-                    <label for="create-thread-description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Thread Description</label>
-                    <textarea bind:value={thread_description_input} id="create-thread-description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"></textarea>
-                    <div class="flex justify-end">
-                        <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                            <span>__date__</span>
+                        </p>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="add-member-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <!-- Modal header -->
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    Add Member
-                </h3>
-                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="add-member-modal">
-                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
-            </div>
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 space-y-4">
-                <form on:submit={add_members} class="mx-auto">
-                    {#each addable_members as member}
-                        <div class="flex items-center mb-4">
-                            <input bind:checked={member.checked} id="checkbox-{member.id}" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
-                            <label for="checkbox-1" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>
-                        </div>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
+                    </div>
+                </div>
+                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
+                <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
+            {:else if tabs[1].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Teams</p>
+                <List loaded={threads_loaded} empty={thread_empty}>
+                    {#each threads as thread}
+                        <li>
+                            <ThreadCard id={thread.uid} name={thread.name} />
+                        </li>
                     {/each}
-                    <div class="flex justify-end">
-                        <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
-                    </div>
-                </form>
-            </div>
+                </List>
+            {:else if tabs[2].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
+                <List loaded={files_loaded} empty={files_empty}>
+                    {#each files as file}
+                        <li>
+                            <FileCard file_name={file.name} file_type={file.type} file_status={file.status}/>
+                        </li>
+                    {/each}
+                </List>
+            {:else if tabs[3].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Members</p>
+                <List loaded={members_loaded} empty={members_empty}>
+                    {#each members as member}
+                        <li>
+                            <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial} />
+                        </li>
+                    {/each}
+                </List>
+            {/if}
         </div>
     </div>
 </div>
@@ -343,48 +347,26 @@
         position: absolute;
         top: 5.25rem;
         bottom: 1rem;
-        left: 20%;
-        right: 20%;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
-    .team-info
+    .thread-info
     {
         position: absolute;
         top: 0;
-        height: 10rem;
-        left: 0;
-        right: 0;
-    }
-    .thread-list-card
-    {
-        position: absolute;
-        top: 10rem;
-        bottom: 3.5rem;
-        left: 0;
-        right: 0;
-    }
-    .thread-list-title
-    {
-        position: absolute;
-        top: 0;
-        height: 2rem;
-        left: 0;
-        right: 0;
-    }
-    .thread-button
-    {
-        position: absolute;
-        height: 3.5rem;
         bottom: 0;
-        left: 0;
-        right: 0;
+        width: 65rem;
+        display: flex;
+        flex-direction: column;
     }
-    .thread-elements
+    .tab-item-data
     {
-        position: absolute;
-        top: 3.5rem;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        flex-grow: 1;
         overflow-y: auto;
+        display: flex;
+        flex-direction: column;
     }
 </style>

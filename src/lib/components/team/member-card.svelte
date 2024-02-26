@@ -2,10 +2,10 @@
     import { initModals } from "flowbite";
     import { onMount } from "svelte";
 
-    let id: number;
-    let name: string = "Member 1";
-    let type: string = "Member"
-    let serial: number = 69;
+    export let id: string;
+    export let name: string;
+    export let type: string;
+    export let serial: number;
     let pubkey: string = "0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa";
 
     onMount((): void =>

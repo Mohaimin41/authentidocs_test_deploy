@@ -2,18 +2,12 @@
     import { onMount } from "svelte";
     import { Modal, initModals } from "flowbite";
     import { page } from "$app/stores";
-    import { AddableMemberObj, Entity, FileObj, MemberObj } from '$lib/containers';
+    import { AddableMemberObj, Entity, FileObj, MemberObj, Tab } from '$lib/containers';
     import { common_fetch } from "$lib/fetch_func";
     import List from "$lib/components/list.svelte";
     import MemberCard from "$lib/components/org/member-card.svelte";
     import FileCard from "$lib/components/org/file-card.svelte";
     import TeamCard from "$lib/components/org/team-card.svelte";
-
-    class Tab
-    {
-        public name: string = "";
-        public active: boolean = false;
-    }
 
     let tabs: Tab[] =
     [
