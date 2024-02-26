@@ -154,7 +154,7 @@
 
     function add_member(id: string, members: AddableMemberObj[]): any
     {
-        console.log(members);
+        
     }
 
     function add_file(): void

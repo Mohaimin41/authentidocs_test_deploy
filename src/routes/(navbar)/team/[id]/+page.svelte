@@ -9,6 +9,7 @@
     import FileCard from "$lib/components/team/file-card.svelte";
     import ThreadCard from "$lib/components/team/thread-card.svelte";
     import SendNotice from "$lib/components/send-notice.svelte";
+    import AddMember from "$lib/components/add-member.svelte";
 
     let tabs: Tab[] =
     [
@@ -36,8 +37,7 @@
     let team_description_input: string;
     let team_name:string = "স্বদীপের team";  // remove the names, আপাতত এমনে দিসি কারণ undefined লেখা দেখলে কেমন জানি লাগে :3
     let team_leader:string = "স্বদীপ আহমেদ";
-    let create_team_modal: Modal;
-    let addable_members: AddableMemberObj[] = [];
+    let add_member_modal: Modal;
     let files: FileObj[] = [];
     let members: MemberObj[] = [];
     let threads_loaded: boolean = false;
@@ -68,68 +68,6 @@
         reset_tabs();
 
         tabs[idx].active = true;
-    }
-
-    function get_addable_members(): void
-    {
-        fetch("/api/org/getaddablemembers",
-        {
-            method: "POST",
-            headers:
-            {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify(
-            {
-                orgid: id
-            })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();            
-            addable_members = new Array(response_obj.length);
-
-            for(let i: number = 0; i < addable_members.length; ++i)
-            {
-                addable_members[i] = new AddableMemberObj();
-                addable_members[i].id = response_obj[i].f_userid;
-                addable_members[i].name = response_obj[i].f_username;
-            }
-            console.log(addable_members)
-        });
-    }
-
-    function add_member(): void
-    {
-        let addable_member_ids: string[] = [];
-
-        for(let i: number = 0; i < addable_members.length; ++i)
-        {
-            if(addable_members[i].checked)
-            {
-                addable_member_ids.push(addable_members[i].id);
-            }
-        }
-
-        fetch("/api/org/addmember",
-        {
-            method: "POST",
-            headers:
-            {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify(
-            {
-                orgid: id,
-                uid_list: addable_member_ids
-            })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
-
-            console.log(response_obj);
-            get_addable_members();
-        });
-        
     }
 
     function get_threads(): void
@@ -269,6 +207,37 @@
         });
     }
 
+    async function get_addable_members(): Promise<AddableMemberObj[]>
+    {
+        let response: Response = await fetch("/api/team/getaddablemembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_threadid: id
+            })
+        });
+        let response_obj: any = await response.json();
+        let addable_members: AddableMemberObj[] = new Array(response_obj.length);
+
+        for(let i: number = 0; i < addable_members.length; ++i)
+        {
+            addable_members[i] = new AddableMemberObj();
+            addable_members[i].id = response_obj[i].f_userid;
+            addable_members[i].name = response_obj[i].f_username;
+        }
+
+        return addable_members;
+    }
+
+    function add_member(id: string, members: AddableMemberObj[]): any
+    {
+        
+    }
 
     function send_notice_request(id: string, subject: string, content: string): any
     {
@@ -340,7 +309,7 @@
                         <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
                     </div>
                     <div class="flex justify-end">
-                        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
+                        <button on:click={() => {add_member_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
                         <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
                     </div>
                 </div>
@@ -377,6 +346,7 @@
 </div>
 
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
+<AddMember bind:modal={add_member_modal} id={id} get_addable_members={get_addable_members} add_member={add_member} />
 
 <style>
     .pg-center
