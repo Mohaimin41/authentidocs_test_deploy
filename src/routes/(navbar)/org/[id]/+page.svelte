@@ -8,6 +8,7 @@
     import MemberCard from "$lib/components/org/member-card.svelte";
     import FileCard from "$lib/components/org/file-card.svelte";
     import TeamCard from "$lib/components/org/team-card.svelte";
+    import SendNotice from "$lib/components/send-notice.svelte";
 
     let tabs: Tab[] =
     [

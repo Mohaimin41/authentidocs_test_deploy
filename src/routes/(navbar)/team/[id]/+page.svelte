@@ -8,6 +8,7 @@
     import MemberCard from "$lib/components/team/member-card.svelte";
     import FileCard from "$lib/components/team/file-card.svelte";
     import ThreadCard from "$lib/components/team/thread-card.svelte";
+    import SendNotice from "$lib/components/send-notice.svelte";
 
     let tabs: Tab[] =
     [
@@ -48,6 +49,7 @@
     let member_count:number=0;
     let files_empty: boolean;
     let members_empty: boolean;
+    let send_notice_modal: Modal;
 
     $: thread_empty = threads.length === 0;
     $: files_empty = files.length === 0;
@@ -210,6 +212,11 @@
         // });
     }
 
+    function send_notice_request(id: string, subject: string, content: string): any
+    {
+        
+    }
+
     onMount((): void =>
     {
         id = $page.params.id;
@@ -269,35 +276,43 @@
         </ul>
         <div class="tab-item-data">
             {#if tabs[0].active}
-                <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{team_name}</p>
-                <div class="grid grid-cols-3 mb-4">
-                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
-                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Started At</p>
-                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
-                        </svg>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
-                        <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
+                <div class="details">
+                    <div>
+                        <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{team_name}</p>
+                        <div class="grid grid-cols-3 mb-4">
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Started At</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
+                                <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                                    <span>__date__</span>
+                                </p>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
+                            </div>
+                        </div>
+                        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
                     </div>
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
-                        </svg>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
-                            <span>__date__</span>
-                        </p>
-                    </div>
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                        </svg>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
+                    <div class="flex justify-end">
+                        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
+                        <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
                     </div>
                 </div>
-                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
-                <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
             {:else if tabs[1].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Threads</p>
                 <List loaded={threads_loaded} empty={thread_empty}>
@@ -330,6 +345,8 @@
     </div>
 </div>
 
+<SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
+
 <style>
     .pg-center
     {
@@ -357,6 +374,13 @@
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+    }
+    .details
+    {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
     @media(max-width: 1099px)
     {
