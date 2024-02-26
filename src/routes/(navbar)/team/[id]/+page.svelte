@@ -11,6 +11,7 @@
     import SendNotice from "$lib/components/send-notice.svelte";
     import AddMember from "$lib/components/add-member.svelte";
     import Notice from "$lib/components/notice.svelte";
+    import Create from "$lib/components/create.svelte"
 
     let tabs: Tab[] =
     [
@@ -60,6 +61,7 @@
     let team_creation_date:Date;
     let team_description:string;
     let date_text:string;
+    let create_thread_modal: Modal;
 
     $: thread_empty = threads.length === 0;
     $: files_empty = files.length === 0;
@@ -194,14 +196,8 @@
             files_loaded = true;
         });
     }
-    function create_thread(): void
+    function create_thread(id:string,name:string,description:string): void
     {
-        let temp_desc: string | undefined = team_description_input;
-
-        if(temp_desc === undefined)
-        {
-            temp_desc = "";
-        }
 
         fetch("/api/thread/createthread",
         {
@@ -213,13 +209,13 @@
             body: JSON.stringify(
             {
                 given_parent_teamid: id,
-                given_threadname: thread_name_input,
-                description: thread_desc
+                given_threadname: name,
+                description: description
             })
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            create_team_modal.hide();
+            create_thread_modal.hide();
             get_threads();
         });
     }
@@ -418,6 +414,9 @@
                         </li>
                     {/each}
                 </List>
+                <div class="flex justify-end">
+                    <button on:click={() => {create_thread_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Create Thread</button>
+                    </div>
             {:else if tabs[2].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
                 <List loaded={files_loaded} empty={files_empty}>
@@ -458,6 +457,7 @@
 
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
+<Create bind:modal={create_thread_modal} id={id} creation_request={create_thread} />
 
 <style>
     .pg-center
