@@ -55,10 +55,6 @@
                 {file_type.toUpperCase()}
             </p>
         </div>
-        <div class="flex flex-row-reverse items-end">
-            <p class="text-base text-{file_status_color}-500 dark:text-{file_status_color}-400">
-                {file_status_text}
-            </p>
-        </div>
+       
     </div>                  
 </a>
