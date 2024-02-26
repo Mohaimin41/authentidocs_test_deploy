@@ -31,3 +31,9 @@ export class AddableMemberObj
     public name: string = "";
     public checked: boolean = false;
 }
+
+export class Tab
+{
+    public name: string = "";
+    public active: boolean = false;
+}

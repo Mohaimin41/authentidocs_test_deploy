@@ -2,18 +2,12 @@
     import { onMount } from "svelte";
     import { Modal, initModals } from "flowbite";
     import { page } from "$app/stores";
-    import { AddableMemberObj, Entity, FileObj, MemberObj } from '$lib/containers';
+    import { AddableMemberObj, Entity, FileObj, MemberObj, Tab } from '$lib/containers';
     import { common_fetch } from "$lib/fetch_func";
     import List from "$lib/components/list.svelte";
     import MemberCard from "$lib/components/org/member-card.svelte";
     import FileCard from "$lib/components/org/file-card.svelte";
     import TeamCard from "$lib/components/org/team-card.svelte";
-
-    class Tab
-    {
-        public name: string = "";
-        public active: boolean = false;
-    }
 
     let tabs: Tab[] =
     [
@@ -131,7 +125,6 @@
                 addable_members[i].id = response_obj[i].f_userid;
                 addable_members[i].name = response_obj[i].f_username;
             }
-            console.log(addable_members)
         });
     }
 
@@ -459,5 +452,17 @@
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+    }
+    @media(max-width: 1099px)
+    {
+        .pg-center
+        {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+        .thread-info
+        {
+            width: 100%;
+        }
     }
 </style>
