@@ -12,6 +12,7 @@
   import { onMount } from "svelte";
 
   import { Entity, type Member } from '$lib/containers';
+    import List from '$lib/components/list.svelte';
 
 
   let file_input_elem: HTMLInputElement;
@@ -672,25 +673,24 @@
               <ThreadCard thread_name={thread.name} thread_id={thread.id} />
             </li>
           {/each}
-<
-        </ul>
-      </div>
+        </List>
       {:else if tab_index === 4}
-      <div class="list-container m-6">
-        <p
-          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
-        >
-          Notices
-        </p>
-        <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
-          {#each notices as notice}
-              <li>
-                  <Notice uid={notice.uid} title={notice.name} />
-              </li>
-          {/each}
-      </ul>
-      </div>
-    {/if}
+        <div class="list-container m-6">
+          <p
+            class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+          >
+            Notices
+          </p>
+          <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
+            {#each notices as notice}
+                <li>
+                    <Notice uid={notice.uid} title={notice.name} />
+                </li>
+            {/each}
+          </ul>
+        </div>
+      {/if}
+    </div>
   </div>
 </div>
 <div
