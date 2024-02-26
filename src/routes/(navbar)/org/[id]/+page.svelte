@@ -125,7 +125,6 @@
                 addable_members[i].id = response_obj[i].f_userid;
                 addable_members[i].name = response_obj[i].f_username;
             }
-            console.log(addable_members)
         });
     }
 
@@ -421,5 +420,17 @@
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+    }
+    @media(max-width: 1099px)
+    {
+        .pg-center
+        {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+        .thread-info
+        {
+            width: 100%;
+        }
     }
 </style>

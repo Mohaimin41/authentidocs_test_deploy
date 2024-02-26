@@ -132,66 +132,55 @@
 
     function get_threads(): void
     {
-        // fetch("/api/org/getteams",
-        // {
-        //     method: "POST",
-        //     headers:
-        //     {
-        //         "content-type": "application/json"
-        //     },
-        //     body: JSON.stringify(
-        //     {
-        //         orgid: id
-        //     })
-        // }).then(async (response: Response): Promise<void> =>
-        // {
-        //     let response_obj: any = await response.json();
-        //     teams = new Array(response_obj.length);
-        //     console.log(response_obj)
+        fetch("/api/team/getthreads",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                teamid: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            threads = new Array(response_obj.length);
 
-        //     for(let i: number = 0; i < teams.length; ++i)
-        //     {
-        //         teams[i] = new Entity();
-        //         teams[i].uid = response_obj[i].f_teamid;
-        //         teams[i].name = response_obj[i].f_team_name;
-        //     }
+            for(let i: number = 0; i < threads.length; ++i)
+            {
+                threads[i] = new Entity();
+                threads[i].uid = response_obj[i].f_threadid;
+                threads[i].name = response_obj[i].f_threadname;
+            }
 
-        //     // delete everything below this when connecting api
-        //     // let test_count = 10;
-        //     // teams = new Array(test_count);
-
-        //     // for(let i = 0; i < test_count; ++i)
-        //     // {
-        //     //     teams[i] = new Entity();
-        //     //     teams[i].name = "Team " + (i + 1);
-        //     //     teams[i].uid = (i + 1).toString();
-        //     // }
-
-        //     threads_loaded = true;
-        // });
+            threads_loaded = true;
+        });
     }
 
-    function get_team_details(): void
-    {
-        // let request_obj: any = {
-        //     orgid: id,
-        // };
+    function get_team_details(): void {
+        let request_obj: any = {
+            teamid: id
+        };
 
-        // common_fetch(
-        // "/api/org/getdetails",
-        // request_obj,
-        // async (response: Response): Promise<void> => {
-        //     let response_obj: any = await response.json();
+        common_fetch(
+        "/api/team/getdetails",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
 
-        //     if (response_obj === null) {
-        //     return;
-        //     }
-        //     console.log(response_obj)
-        //     team_name=response_obj.org_detail.f_org_name;
-        //     team_leader=response_obj.org_mod_detail.f_username;
-        //     thread_count=response_obj.org_detail.f_team_count;
-        //     member_count=response_obj.org_detail.f_member_count;
-        // });
+            if (response_obj === null) {
+            return;
+            }
+
+            let team_info=response_obj;
+            team_name=team_info.team_detail.f_team_name;
+            team_leader=team_info.team_mod_detail.f_username;
+            member_count=team_info.team_detail.f_member_count;
+            thread_count=team_info.team_detail.f_thread_count;
+            file_count=team_info.team_detail.f_file_count;
+        });
     }
 
     function get_notices(): void
@@ -310,7 +299,7 @@
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
             {:else if tabs[1].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Teams</p>
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Threads</p>
                 <List loaded={threads_loaded} empty={thread_empty}>
                     {#each threads as thread}
                         <li>
@@ -368,5 +357,17 @@
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+    }
+    @media(max-width: 1099px)
+    {
+        .pg-center
+        {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+        .thread-info
+        {
+            width: 100%;
+        }
     }
 </style>
