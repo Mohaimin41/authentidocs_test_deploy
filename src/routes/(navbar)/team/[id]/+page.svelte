@@ -10,6 +10,7 @@
     import ThreadCard from "$lib/components/team/thread-card.svelte";
     import SendNotice from "$lib/components/send-notice.svelte";
     import AddMember from "$lib/components/add-member.svelte";
+    import Notice from "$lib/components/notice.svelte";
 
     let tabs: Tab[] =
     [
@@ -28,6 +29,10 @@
         {
             name: "Members",
             active: false
+        },
+        {
+            name: "Notices",
+            active: false
         }
     ];
     let threads: Entity[] = [];
@@ -43,17 +48,20 @@
     let threads_loaded: boolean = false;
     let files_loaded: boolean = false;
     let members_loaded: boolean = false;
+    let notices_loaded: boolean = false;
     let thread_count:number=0;
     let file_count: number;
     let thread_empty: boolean;
     let member_count:number=0;
     let files_empty: boolean;
     let members_empty: boolean;
+    let notices_empty: boolean;
     let send_notice_modal: Modal;
 
     $: thread_empty = threads.length === 0;
     $: files_empty = files.length === 0;
     $: members_empty = members.length === 0;
+    $: notices_empty = notices.length === 0;
 
     function reset_tabs(): void
     {
@@ -125,29 +133,29 @@
 
     function get_notices(): void
     {
-        // let request_obj: any = {
-        //     orgid: id,
-        // };
+        let request_obj: any = {
+            teamid: id,
+        };
 
-        // common_fetch(
-        // "/api/org/getnotices",
-        // request_obj,
-        // async (response: Response): Promise<void> => {
-        //     let response_obj: any = await response.json();
+        common_fetch(
+        "/api/team/getnotices",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
 
-        //     if (response_obj === null) {
-        //     return;
-        //     }
-        //     console.log(response_obj)
-        //     notices = new Array((response_obj.length));
-        //     for(let i = 0; i < notices.length; ++i)
-        //     {
-        //         notices[i] = new Entity();
-        //         notices[i].uid = response_obj[i].f_noticeid;
-        //         notices[i].name = response_obj[i].f_content;
-        //         if(notices[i].name.length>10) notices[i].name = notices[i].name.substring(0,10) + "...."
-        //     }
-        // });
+            if (response_obj === null) {
+            return;
+            }
+            console.log(response_obj)
+            notices = new Array((response_obj.length));
+            for(let i = 0; i < notices.length; ++i)
+            {
+                notices[i] = new Entity();
+                notices[i].uid = response_obj[i].f_noticeid;
+                notices[i].name = response_obj[i].f_subject;
+            }
+            notices_loaded=true;
+        });
     }
     function get_files(): void
     {
@@ -382,6 +390,15 @@
                     {#each members as member}
                         <li>
                             <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial} />
+                        </li>
+                    {/each}
+                </List>
+                {:else if tabs[4].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
+                <List loaded={notices_loaded} empty={notices_empty}>
+                    {#each notices as notice}
+                        <li>
+                            <Notice uid={notice.uid} title={notice.name}/>
                         </li>
                     {/each}
                 </List>

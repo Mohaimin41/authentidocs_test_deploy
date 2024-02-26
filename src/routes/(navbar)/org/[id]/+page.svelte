@@ -10,6 +10,7 @@
     import TeamCard from "$lib/components/org/team-card.svelte";
     import SendNotice from "$lib/components/send-notice.svelte";
     import AddMember from "$lib/components/add-member.svelte";
+    import Notice from "$lib/components/notice.svelte";
 
     let tabs: Tab[] =
     [
@@ -27,6 +28,10 @@
         },
         {
             name: "Members",
+            active: false
+        },
+        {
+            name: "Notices",
             active: false
         }
     ];
@@ -48,17 +53,20 @@
     let teams_loaded: boolean = false;
     let files_loaded: boolean = false;
     let members_loaded: boolean = false;
+    let notices_loaded:boolean = false;
     let team_count:number=0;
     let file_count: number;
     let teams_empty: boolean;
     let member_count:number=0;
     let files_empty: boolean;
     let members_empty: boolean;
+    let notices_empty: boolean;
     let send_notice_modal: Modal;
 
     $: teams_empty = teams.length === 0;
     $: files_empty = files.length === 0;
     $: members_empty = members.length === 0;
+    $: notices_empty = notices.length === 0;
 
     function reset_tabs(): void
     {
@@ -316,9 +324,9 @@
             {
                 notices[i] = new Entity();
                 notices[i].uid = response_obj[i].f_noticeid;
-                notices[i].name = response_obj[i].f_content;
-                if(notices[i].name.length>10) notices[i].name = notices[i].name.substring(0,10) + "...."
+                notices[i].name = response_obj[i].f_subject;
             }
+            notices_loaded=true;
         });
     }
              
@@ -443,13 +451,24 @@
                         </li>
                     {/each}
                 </List>
+                {:else if tabs[4].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
+                <List loaded={notices_loaded} empty={notices_empty}>
+                    {#each notices as notice}
+                        <li>
+                            <Notice uid={notice.uid} title={notice.name}/>
+                        </li>
+                    {/each}
+                </List>
             {/if}
         </div>
     </div>
 </div>
 
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
+
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
+
 
 <style>
     .pg-center

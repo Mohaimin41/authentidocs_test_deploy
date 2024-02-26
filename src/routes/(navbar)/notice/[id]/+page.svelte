@@ -28,8 +28,6 @@
             content = response_obj.f_content;
             subject =response_obj.f_subject;
             sender =response_obj.f_creator_name;
-            title = content;
-            if(content.length > 10) title = title.substring(0,10)+"....";
         });
     }
 
@@ -43,9 +41,8 @@ onMount((): void =>
 <div class="notice-root">
     <div class="notice-root-card block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <div class="notice-card-content">
-            <p class="text-3xl font-bold text-gray-700 dark:text-gray-200">{title}</p>
-            <p class="text-gray-500 dark:text-gray-400 mb-2">Sent By: {sender}</p>
-            <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-4">Subject: {subject}</p>
+            <p class="text-3xl font-bold text-gray-700 dark:text-gray-200">{subject}</p>
+            <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-4">Sent By: {sender}</p>
         </div>
         <div class="notice-message">
             <p class="text-gray-700 dark:text-gray-200 mb-4">{content}</p>

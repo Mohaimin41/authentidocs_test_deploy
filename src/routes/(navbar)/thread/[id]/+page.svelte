@@ -2,11 +2,14 @@
     import { page } from "$app/stores";
     import AddMember from "$lib/components/add-member.svelte";
     import List from "$lib/components/list.svelte";
+    import {Entity} from '$lib/containers';
     import FileCard from "$lib/components/thread/file-card.svelte";
     import MemberCard from "$lib/components/thread/member-card.svelte";
     import { MemberObj, AddableMemberObj, FileObj, Tab } from "$lib/containers";
     import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
+    import Notice from "$lib/components/notice.svelte";
+    import { common_fetch } from "$lib/fetch_func";
 
     let tabs: Tab[] =
     [
@@ -20,6 +23,10 @@
         },
         {
             name: "Members",
+            active: false
+        },
+        {
+            name: "Notices",
             active: false
         }
     ];
@@ -52,6 +59,10 @@
     let details_loading: boolean;
     let files_loaded: boolean = false;
     let members_loading: boolean;
+    let notices_loaded: boolean = false;
+    let notices_empty: boolean;
+    let notices: Entity[] = [];
+
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -66,6 +77,7 @@
     $: members_empty = members.length === 0;
     $: file_count = files.length;
     $: member_count = members.length;
+    $: notices_empty = notices.length === 0;
 
     function reset_tabs(): void
     {
@@ -204,6 +216,32 @@
                 let response_obj: any = await response.json();
 
                 console.log(response_obj);
+    }
+    function get_notices(): void
+    {
+        let request_obj: any = {
+            threadid: id,
+        };
+
+        common_fetch(
+        "/api/thread/getnotices",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
+
+            if (response_obj === null) {
+            return;
+            }
+            console.log(response_obj)
+            notices = new Array((response_obj.length));
+            for(let i = 0; i < notices.length; ++i)
+            {
+                notices[i] = new Entity();
+                notices[i].uid = response_obj[i].f_noticeid;
+                notices[i].name = response_obj[i].f_subject;
+            }
+            notices_loaded=true;
+        });
     }
 
     function add_file(): void
@@ -481,6 +519,7 @@
         });
 
         get_members();
+        get_notices();
     }
     
     onMount((): void =>
@@ -584,6 +623,15 @@
                     {#each members as member}
                         <li>
                             <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial}  joined={member.joined} />
+                        </li>
+                    {/each}
+                </List>
+                {:else if tabs[3].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
+                <List loaded={notices_loaded} empty={notices_empty}>
+                    {#each notices as notice}
+                        <li>
+                            <Notice uid={notice.uid} title={notice.name}/>
                         </li>
                     {/each}
                 </List>
