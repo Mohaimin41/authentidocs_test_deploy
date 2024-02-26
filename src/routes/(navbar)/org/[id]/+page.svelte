@@ -75,9 +75,9 @@
         tabs[idx].active = true;
     }
 
-    async function get_addable_members(): Promise<AddableMemberObj[]>
+    async function get_addable_members(id: string): Promise<AddableMemberObj[]>
     {
-        let response: Response = await fetch("/api/team/getaddablemembers",
+        let response: Response = await fetch("/api/org/getaddablemembers",
         {
             method: "POST",
             headers:
@@ -86,7 +86,7 @@
             },
             body: JSON.stringify(
             {
-                given_threadid: id
+                orgid: id
             })
         });
         let response_obj: any = await response.json();
@@ -310,7 +310,6 @@
         get_org_details();
         get_teams();
         get_notices();
-        get_addable_members();
         get_files();
         get_members();
 
@@ -406,7 +405,7 @@
 </div>
 
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
-<AddMember bind:modal={add_member_modal} id={id} get_addable_members={get_addable_members} add_member={add_member} />
+<AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
 
 <style>
     .pg-center

@@ -1,9 +1,10 @@
 <script lang="ts">
+    import { page } from "$app/stores";
     import type { AddableMemberObj } from "$lib/containers";
     import { Modal } from "flowbite";
     import { onMount } from "svelte";
 
-    export let id: string;
+    let id: string;
     let modal_elem: HTMLDivElement;
     let addable_members: AddableMemberObj[] = [];
     export let modal: Modal;
@@ -12,6 +13,7 @@
 
     onMount((): void =>
     {
+        id = $page.params.id;
         modal = new Modal(modal_elem);
 
         get_addable_members(id).then((value: AddableMemberObj[]): void =>

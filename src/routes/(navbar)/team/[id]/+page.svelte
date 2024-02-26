@@ -346,7 +346,7 @@
 </div>
 
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
-<AddMember bind:modal={add_member_modal} id={id} get_addable_members={get_addable_members} add_member={add_member} />
+<AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
 
 <style>
     .pg-center
