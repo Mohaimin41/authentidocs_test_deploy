@@ -38,8 +38,8 @@
     let threads: Entity[] = [];
     let notices: Entity[] = [];
     let id: string;
-    let team_name_input: string;
-    let team_description_input: string;
+    let thread_name_input: string;
+    let thread_description_input: string;
     let team_name:string = "স্বদীপের team";  // remove the names, আপাতত এমনে দিসি কারণ undefined লেখা দেখলে কেমন জানি লাগে :3
     let team_leader:string = "স্বদীপ আহমেদ";
     let add_member_modal: Modal;
@@ -57,6 +57,9 @@
     let members_empty: boolean;
     let notices_empty: boolean;
     let send_notice_modal: Modal;
+    let team_creation_date:Date;
+    let team_description:string;
+    let date_text:string;
 
     $: thread_empty = threads.length === 0;
     $: files_empty = files.length === 0;
@@ -123,11 +126,16 @@
             }
 
             let team_info=response_obj;
+            console.log(team_info);
             team_name=team_info.team_detail.f_team_name;
             team_leader=team_info.team_mod_detail.f_username;
             member_count=team_info.team_detail.f_member_count;
             thread_count=team_info.team_detail.f_thread_count;
             file_count=team_info.team_detail.f_file_count;
+            team_description=team_info.team_detail.f_description;
+            team_creation_date=new Date(team_info.team_detail.f_created_at);
+            date_text = team_creation_date.toLocaleDateString();
+
         });
     }
 
@@ -184,6 +192,35 @@
             }
             console.log(files)
             files_loaded = true;
+        });
+    }
+    function create_thread(): void
+    {
+        let temp_desc: string | undefined = team_description_input;
+
+        if(temp_desc === undefined)
+        {
+            temp_desc = "";
+        }
+
+        fetch("/api/thread/createthread",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_parent_teamid: id,
+                given_threadname: thread_name_input,
+                description: thread_desc
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            create_team_modal.hide();
+            get_threads();
         });
     }
     function get_members(): void
@@ -332,10 +369,19 @@
                 <div class="details">
                     <div>
                         <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{team_name}</p>
-                        <div class="grid grid-cols-3 mb-4">
+                        <div class="grid grid-cols-4 mb-4">
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
                             <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
-                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Started At</p>
                             <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Threads</p>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                                    <span>{date_text}</span>
+                                </p>
+                            </div>
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
@@ -343,28 +389,25 @@
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
                                 <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
                             </div>
-                            <div class="flex items-center">
-                                <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
-                                </svg>
-                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
-                                    <span>__date__</span>
-                                </p>
-                            </div>
+                            
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                                 </svg>
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
                             </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
+                                <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
+                            </div>
                         </div>
                         <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{team_description}</p>
                     </div>
-                    <div class="flex justify-end">
-                        <button on:click={() => {add_member_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
-                        <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
-                    </div>
+                    
                 </div>
             {:else if tabs[1].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Threads</p>
@@ -393,6 +436,9 @@
                         </li>
                     {/each}
                 </List>
+                <div class="flex justify-end">
+                <button on:click={() => {add_member_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
+                </div>
                 {:else if tabs[4].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
                 <List loaded={notices_loaded} empty={notices_empty}>
@@ -402,7 +448,10 @@
                         </li>
                     {/each}
                 </List>
-            {/if}
+                <div class="flex justify-end">
+                <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
+                </div>
+                {/if}
         </div>
     </div>
 </div>
