@@ -513,6 +513,7 @@
         init();
     });
 </script>
+
 <svelte:head>
     <title>{thread_name} preview</title> 
 </svelte:head>
