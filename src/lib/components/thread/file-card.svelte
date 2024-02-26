@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { file_preview_mode } from "$lib/stores";
     import { gen_random_color } from "$lib/helpers";
     import { onMount } from "svelte";
 
@@ -12,6 +13,7 @@
 
     onMount(() : void =>
     {
+        file_preview_mode.set(1);
         color = gen_random_color();
 
         if(file_status === "not_viewed_by_custodian")

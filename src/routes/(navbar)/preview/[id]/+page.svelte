@@ -4,7 +4,7 @@
     import { common_fetch } from "$lib/fetch_func";
     import { Modal, initModals } from "flowbite";
     import { onMount } from "svelte";
-    import { logged_in_store, priv_key, uid, useremail } from "$lib/stores";
+    import { logged_in_store, priv_key, uid, useremail,file_preview_mode } from "$lib/stores";
     import { jsPDF } from "jspdf";
     import { get } from "svelte/store";
 
@@ -194,6 +194,7 @@
 
     function init(): void
     {
+        //console.log("file preview Mode: "+String($file_preview_mode));
         id = $page.params.id;
 
         initModals();
@@ -301,8 +302,9 @@
                 certificates.push(new_certificate);
             }
         });
-
-        common_fetch("/api/thread/getfilenotes",
+        if($file_preview_mode == 1 )
+        {
+            common_fetch("/api/thread/getfilenotes",
         {
             fileid: id
         }, async (response: Response): Promise<void> =>
@@ -324,7 +326,6 @@
             }
             
         });
-
         common_fetch("/api/thread/getfilehistory",
         {
             fileid: id
@@ -346,6 +347,11 @@
            
         });
     }
+
+        }
+        
+
+        
 
     onMount(async (): Promise<void> =>
     {
@@ -454,7 +460,7 @@
                     </div>
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploaded On</p>
-                    </div>
+                    </div>  
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Custody</p>
                     </div>
@@ -468,6 +474,7 @@
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
                         <p class="text-xs font-medium text-gray-900 dark:text-white">{uploader}</p>
                     </div>
+                    {#if $file_preview_mode == 1}
                     <div class="flex -space-x-2 rtl:space-x-reverse items-center">
                         <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                         <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
@@ -475,19 +482,35 @@
                         <!-- svelte-ignore a11y-invalid-attribute -->
                         <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
                     </div>
+                    {:else}
+                    <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
+                    {/if}
                     <div class="flex flex-col justify-center">
                         <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_date}</p>
                         <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_time}</p>
                     </div>
+
                     <div class="flex items-center">
+                        {#if $file_preview_mode == 1}
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
                         <p class="text-xs font-medium text-gray-900 dark:text-white">{current_custody}</p>
+                        {:else}
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">N/A</p>
+                        {/if}
                     </div>
                     <div class="flex items-center">
+                        {#if $file_preview_mode == 1}
                         <p class="text-xs font-medium text-gray-900 dark:text-white">{current_state}</p>
+                        {:else}
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">N/A</p>
+                        {/if}
                     </div>
                     <div class="flex items-center">
+                        {#if $file_preview_mode == 1}
                         <p class="text-xs font-medium text-gray-900 dark:text-white">Thread 2 @ Team 4</p>
+                        {:else}
+                        <p class="text-xs font-medium text-gray-900 dark:text-white">N/A</p>
+                        {/if}
                     </div>
                 </div>
             </div>
@@ -544,15 +567,16 @@
             </div>
         {/if}
         <div class="flex justify-end mt-3">
-            {#if file_status !== "personal"}
-                <!-- View Note -->
-                <button on:click={show_view_notes_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Notes</button>
-                <!-- Add Note -->
-                <button on:click={show_add_note_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Add Note</button>
-                <!-- Mark as Viewed -->
-                <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Mark as Viewed</button>
-                <!-- File History -->
-                <button on:click={show_history_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
+            {#if file_status === "personal"}
+            
+            <!-- View Note -->
+            <button on:click={show_view_notes_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Notes</button>
+            <!-- Add Note -->
+            <button on:click={show_add_note_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Add Note</button>
+            <!-- Mark as Viewed -->
+            <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Mark as Viewed</button>
+            <!-- File History -->
+            <button on:click={show_history_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
             {/if}
             <!-- certificate button -->
             <button data-modal-target="cert-modal" data-modal-toggle="cert-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Certificate</button>
