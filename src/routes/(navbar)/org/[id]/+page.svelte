@@ -7,8 +7,33 @@
     import List from "$lib/components/list.svelte";
     import MemberCard from "$lib/components/org/member-card.svelte";
     import FileCard from "$lib/components/org/file-card.svelte";
+    import TeamCard from "$lib/components/org/team-card.svelte";
 
-    let tab_active: boolean[] = [true, false, false];
+    class Tab
+    {
+        public name: string = "";
+        public active: boolean = false;
+    }
+
+    let tabs: Tab[] =
+    [
+        {
+            name: "Details",
+            active: true
+        },
+        {
+            name: "Teams",
+            active: false
+        },
+        {
+            name: "Files",
+            active: false
+        },
+        {
+            name: "Members",
+            active: false
+        }
+    ];
     let teams: Entity[] = [];
     let notices: Entity[] = [];
     let id: string;
@@ -23,44 +48,33 @@
     let addable_members: AddableMemberObj[] = [];
     let files: FileObj[] = [];
     let members: MemberObj[] = [];
+    let teams_loaded: boolean = false;
     let files_loaded: boolean = false;
     let members_loaded: boolean = false;
     let team_count:number=0;
     let file_count: number;
+    let teams_empty: boolean;
     let member_count:number=0;
     let files_empty: boolean;
     let members_empty: boolean;
 
+    $: teams_empty = teams.length === 0;
     $: files_empty = files.length === 0;
     $: members_empty = members.length === 0;
 
     function reset_tabs(): void
     {
-        for(let i: number = 0; i < tab_active.length; ++i)
+        for(let i: number = 0; i < tabs.length; ++i)
         {
-            tab_active[i] = false;
+            tabs[i].active = false;
         }
     }
 
-    function show_tab1(): void
+    function show_tab(idx: number): void
     {
         reset_tabs();
 
-        tab_active[0] = true;
-    }
-
-    function show_tab2(): void
-    {
-        reset_tabs();
-
-        tab_active[1] = true;
-    }
-
-    function show_tab3(): void
-    {
-        reset_tabs();
-
-        tab_active[2] = true;
+        tabs[idx].active = true;
     }
 
     function create_team(): void
@@ -190,17 +204,20 @@
                 teams[i].uid = response_obj[i].f_teamid;
                 teams[i].name = response_obj[i].f_team_name;
             }
+
+            // delete everything below this when connecting api
+            // let test_count = 10;
+            // teams = new Array(test_count);
+
+            // for(let i = 0; i < test_count; ++i)
+            // {
+            //     teams[i] = new Entity();
+            //     teams[i].name = "Team " + (i + 1);
+            //     teams[i].uid = (i + 1).toString();
+            // }
+
+            teams_loaded = true;
         });
-
-        // // delete everything below this when connecting api
-        // teams = new Array(10);
-
-        // for(let i = 0; i < 10; ++i)
-        // {
-        //     teams[i] = new Entity();
-        //     teams[i].name = "Team " + (i + 1);
-        //     teams[i].uid = (i + 1).toString();
-        // }
     }
 
     function get_org_details(): void
@@ -310,30 +327,18 @@
     <!-- svelte-ignore a11y-invalid-attribute -->
     <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
         <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
-            <li class="me-2">
-                {#if tab_active[0]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Details</a>
-                {:else}
-                    <a on:click={show_tab1} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Details</a>
-                {/if}
-            </li>
-            <li class="me-2">
-                {#if tab_active[1]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Files</a>
-                {:else}
-                    <a on:click={show_tab2} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Files</a>
-                {/if}
-            </li>
-            <li class="me-2">
-                {#if tab_active[2]}
-                    <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">Members</a>
-                {:else}
-                    <a on:click={show_tab3} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">Members</a>
-                {/if}
-            </li>
+            {#each tabs as tab, index}
+                <li class="mx-1">
+                    {#if tab.active}
+                        <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">{tab.name}</a>
+                    {:else}
+                        <a on:click={() => {show_tab(index)}} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">{tab.name}</a>
+                    {/if}
+                </li>    
+            {/each}
         </ul>
         <div class="tab-item-data">
-            {#if tab_active[0]}
+            {#if tabs[0].active}
                 <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{org_name}</p>
                 <div class="grid grid-cols-3 mb-4">
                     <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
@@ -363,7 +368,16 @@
                 </div>
                 <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
-            {:else if tab_active[1]}
+            {:else if tabs[1].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Teams</p>
+                <List loaded={teams_loaded} empty={teams_empty}>
+                    {#each teams as team}
+                        <li>
+                            <TeamCard uid={team.uid} name={team.name} />
+                        </li>
+                    {/each}
+                </List>
+            {:else if tabs[2].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
                 <List loaded={files_loaded} empty={files_empty}>
                     {#each files as file}
@@ -372,7 +386,7 @@
                         </li>
                     {/each}
                 </List>
-            {:else if tab_active[2]}
+            {:else if tabs[3].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Members</p>
                 <List loaded={members_loaded} empty={members_empty}>
                     {#each members as member}
