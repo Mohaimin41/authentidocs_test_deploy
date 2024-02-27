@@ -8,15 +8,17 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to add top level post");
+    return new (error as any)(
+      401,
+      "You must be logged in to add top level post"
+    );
   }
 
-  
   const post_info = await request.json();
-  
+
   let given_content = post_info.conent;
   let given_creator_id = session.user.name;
-  let given_title = post_info.title;
+  let given_title = "";
   let given_forumid = post_info.thread_name;
 
   if (
@@ -30,7 +32,7 @@ export async function POST({
     given_forumid === null
   ) {
     console.error(
-      "ERROR @api/forum/addtopposts:33: invalid user input error:\n",
+      "ERROR @api/forum/addtopposts:35: invalid user input error:\n",
       post_info
     );
     return new (error as any)(
@@ -40,16 +42,16 @@ export async function POST({
   }
 
   let { data: result, error: _error } = await supabase.rpc("add_top_post", {
-    given_content, 
-    given_creator_id, 
-    given_forumid, 
-    given_title
+    given_content,
+    given_creator_id,
+    given_forumid,
+    given_title,
   });
 
   // console.log("add key rps result",result)
   if (_error) {
     console.error(
-      "ERROR @api/forum/addtopposts:52: supabase making top level post error\n",
+      "ERROR @api/forum/addtopposts:54: supabase making top level post error\n",
       _error
     );
     return new (error as any)(
