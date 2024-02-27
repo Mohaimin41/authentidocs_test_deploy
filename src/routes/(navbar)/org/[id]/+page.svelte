@@ -291,6 +291,10 @@
                 members[i] = new MemberObj();
                 members[i].id = response_obj[i].f_userid;
                 members[i].name = response_obj[i].f_username;
+                members[i].role = response_obj[i].f_user_role;
+                members[i].serial = response_obj[i].f_signing_serial;
+                members[i].pubkey = response_obj[i].f_publickey;
+                members[i].joined = new Date(response_obj[i].f_joined_at);
             }
 
             members_loaded = true;
@@ -458,7 +462,7 @@
                 <List loaded={members_loaded} empty={members_empty}>
                     {#each members as member}
                         <li>
-                            <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial}  joined={member.joined} />
+                            <MemberCard id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey}/>
                         </li>
                     {/each}
                 </List>
