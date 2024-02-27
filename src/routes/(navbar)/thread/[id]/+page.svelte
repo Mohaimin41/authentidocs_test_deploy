@@ -10,6 +10,7 @@
     import { onMount } from "svelte";
     import Notice from "$lib/components/notice.svelte";
     import { common_fetch } from "$lib/fetch_func";
+    import SendNotice from "$lib/components/send-notice.svelte";
 
     let tabs: Tab[] =
     [
@@ -62,6 +63,7 @@
     let notices_loaded: boolean = false;
     let notices_empty: boolean;
     let notices: Entity[] = [];
+    let send_notice_modal: Modal;
 
 
     $: date_text = started_at?.toLocaleDateString();
@@ -205,7 +207,7 @@
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            hierarchy_level:'org',
+                            hierarchy_level:'thread',
                             hierarchy_level_id:id,
                             content:content,
                             subject:subject,
@@ -216,6 +218,8 @@
                 let response_obj: any = await response.json();
 
                 console.log(response_obj);
+                send_notice_modal.hide();
+                get_notices();
     }
     function get_notices(): void
     {
@@ -381,6 +385,7 @@
             init();
         });
     }
+    
 
     function init(): void
     {
@@ -635,6 +640,9 @@
                         </li>
                     {/each}
                 </List>
+                <div class="flex justify-end">
+                    <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
+                    </div>
             {/if}
         </div>
         <div class="thread-extra-button flex justify-end items-end mt-2">
@@ -653,7 +661,7 @@
 </div>
 
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
-
+<SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
 <div bind:this={close_thread_modal_elem} id="close-thread-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
         <!-- Modal content -->
