@@ -130,6 +130,8 @@
   function hide_modal(): void {
     modal_obj.hide();
   }
+  let notice_loaded: boolean = false;
+  let notice_empty: boolean;
   let notices: Entity[] = [];
   function get_notices(): void
     {
@@ -152,11 +154,12 @@
         {
             notices[i] = new Entity();
             notices[i].uid = response_obj[i].f_noticeid;
-            notices[i].name = response_obj[i].f_content;
-            if(notices[i].name.length>10) notices[i].name = notices[i].name.substring(0,10) + "...."
+            notices[i].name = response_obj[i].f_subject;
         }
+        notice_loaded = true;
     });
     }
+    $: notice_empty = notices.length === 0;
   function get_personal_files(): void {
     personal_files_loaded = false;
     let request_obj: any = {
@@ -260,14 +263,14 @@
         }
 
         // these should stay for testing
-        let test_count = 10;
-        act_threads = new Array(test_count);
+        // let test_count = 10;
+        // act_threads = new Array(test_count);
 
-        for (let i: number = 0; i < test_count; ++i) {
-          act_threads[i] = new Thread();
-          act_threads[i].id = (i + 1).toString();
-          act_threads[i].name = "Thread " + (i + 1);
-        }
+        // for (let i: number = 0; i < test_count; ++i) {
+        //   act_threads[i] = new Thread();
+        //   act_threads[i].id = (i + 1).toString();
+        //   act_threads[i].name = "Thread " + (i + 1);
+        // }
 
         act_thread_loaded = true;
       },
@@ -298,14 +301,14 @@
         }
 
         // these should stay for testing
-        let test_count = 10;
-        arch_threads = new Array(test_count);
+        // let test_count = 10;
+        // arch_threads = new Array(test_count);
 
-        for (let i: number = 0; i < test_count; ++i) {
-          arch_threads[i] = new Thread();
-          arch_threads[i].id = (i + 1).toString();
-          arch_threads[i].name = "Thread " + (i + 1);
-        }
+        // for (let i: number = 0; i < test_count; ++i) {
+        //   arch_threads[i] = new Thread();
+        //   arch_threads[i].id = (i + 1).toString();
+        //   arch_threads[i].name = "Thread " + (i + 1);
+        // }
 
         arch_thread_loaded = true;
       },
@@ -675,20 +678,18 @@
           {/each}
         </List>
       {:else if tab_index === 4}
-        <div class="list-container m-6">
           <p
             class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
           >
             Notices
           </p>
-          <ul class="list-elements space-y-2 pb-2" style="overflow-y: auto;">
+          <List loaded={notice_loaded} empty={notice_empty}>
             {#each notices as notice}
                 <li>
                     <Notice uid={notice.uid} title={notice.name} />
                 </li>
             {/each}
-          </ul>
-        </div>
+            </List>
       {/if}
     </div>
   </div>

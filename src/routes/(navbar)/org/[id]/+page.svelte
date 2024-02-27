@@ -11,6 +11,7 @@
     import SendNotice from "$lib/components/send-notice.svelte";
     import AddMember from "$lib/components/add-member.svelte";
     import Notice from "$lib/components/notice.svelte";
+    import Create from "$lib/components/create.svelte"
 
     let tabs: Tab[] =
     [
@@ -42,6 +43,7 @@
     let team_description_input: string;
     let org_name:string = "স্বদীপের org";  // remove the names, আপাতত এমনে দিসি কারণ undefined লেখা দেখলে কেমন জানি লাগে :3
     let org_leader:string = "স্বদীপ আহমেদ";
+    let org_description:string = "demo description"
     let add_member_modal: Modal;
     let create_team_modal_elem: HTMLDivElement;
     let notifications_modal_elem: HTMLDivElement;
@@ -58,10 +60,14 @@
     let file_count: number;
     let teams_empty: boolean;
     let member_count:number=0;
+    let thread_count:number=0;
     let files_empty: boolean;
     let members_empty: boolean;
     let notices_empty: boolean;
     let send_notice_modal: Modal;
+    let org_creation_date:Date;
+    let date_text:string;
+    let is_admin:boolean = false;
 
     $: teams_empty = teams.length === 0;
     $: files_empty = files.length === 0;
@@ -141,15 +147,8 @@
 
         
     }
-    function create_team(): void
+    function create_team(id:string,name:string,description:string): void
     {
-        let temp_desc: string | undefined = team_description_input;
-
-        if(temp_desc === undefined)
-        {
-            temp_desc = "";
-        }
-
         fetch("/api/team/createteam",
         {
             method: "POST",
@@ -160,8 +159,8 @@
             body: JSON.stringify(
             {
                 parentorgid: id,
-                teamname: team_name_input,
-                description: temp_desc
+                teamname: name,
+                description: description
             })
         }).then(async (response: Response): Promise<void> =>
         {
@@ -171,15 +170,6 @@
         });
     }
 
-    function show_create_team_modal(): void
-    {
-        create_team_modal.show();
-    }
-
-    function hide_create_thread_modal(): void
-    {
-        create_team_modal.hide();
-    }
 
     function get_teams(): void
     {
@@ -242,6 +232,12 @@
             org_leader=response_obj.org_mod_detail.f_username;
             team_count=response_obj.org_detail.f_team_count;
             member_count=response_obj.org_detail.f_member_count;
+            org_description=response_obj.org_detail.f_description;
+            team_count=response_obj.org_detail.f_team_count;
+            thread_count=response_obj.org_detail.f_thread_count;
+            file_count = response_obj.org_detail.f_file_count;
+            org_creation_date = new Date(response_obj.org_detail.f_created_at);
+            date_text = org_creation_date.toLocaleDateString();
         });
     }
     function get_files(): void
@@ -296,6 +292,10 @@
                 members[i] = new MemberObj();
                 members[i].id = response_obj[i].f_userid;
                 members[i].name = response_obj[i].f_username;
+                members[i].role = response_obj[i].f_user_role;
+                members[i].serial = response_obj[i].f_signing_serial;
+                members[i].pubkey = response_obj[i].f_publickey;
+                members[i].joined = new Date(response_obj[i].f_joined_at);
             }
 
             members_loaded = true;
@@ -352,6 +352,25 @@
 
                 console.log(response_obj);
     }
+    async function check_admin(): Promise<void> {
+    let response: Response = await fetch(
+                    "/api/user/isadmin",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            level:'thread',
+                            level_id:id,
+                            id:$page.data.session?.user?.name,
+                        })
+                    }
+                );
+                let response_obj: any = await response.json();
+                console.log(response_obj)
+                is_admin=response_obj;   
+  }
 
     onMount((): void =>
     {
@@ -364,6 +383,7 @@
         get_notices();
         get_files();
         get_members();
+        check_admin()
 
     });
 </script>
@@ -390,10 +410,20 @@
                 <div class="details">
                     <div>
                         <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{org_name}</p>
-                        <div class="grid grid-cols-3 mb-4">
+                        <div class="grid grid-cols-5 mb-4">
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
                             <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
-                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Started At</p>
                             <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Teams</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Threads</p>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                                    <span>{date_text}</span>
+                                </p>
+                            </div>
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
@@ -401,27 +431,30 @@
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
                                 <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
                             </div>
-                            <div class="flex items-center">
-                                <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
-                                </svg>
-                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
-                                    <span>__date__</span>
-                                </p>
-                            </div>
+         
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                                 </svg>
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
                             </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M10 2a3 3 0 0 0-3 3v1H5a3 3 0 0 0-3 3v2.4l1.4.7a7.7 7.7 0 0 0 .7.3 21 21 0 0 0 16.4-.3l1.5-.7V9a3 3 0 0 0-3-3h-2V5a3 3 0 0 0-3-3h-4Zm5 4V5c0-.6-.4-1-1-1h-4a1 1 0 0 0-1 1v1h6Zm6.4 7.9.6-.3V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-5.4l.6.3a10 10 0 0 0 .7.3 23 23 0 0 0 18-.3h.1L21 13l.4.9ZM12 10a1 1 0 1 0 0 2 1 1 0 1 0 0-2Z" clip-rule="evenodd"/>
+                                  </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{team_count}</p>
+                                <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M10 2a3 3 0 0 0-3 3v1H5a3 3 0 0 0-3 3v2.4l1.4.7a7.7 7.7 0 0 0 .7.3 21 21 0 0 0 16.4-.3l1.5-.7V9a3 3 0 0 0-3-3h-2V5a3 3 0 0 0-3-3h-4Zm5 4V5c0-.6-.4-1-1-1h-4a1 1 0 0 0-1 1v1h6Zm6.4 7.9.6-.3V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-5.4l.6.3a10 10 0 0 0 .7.3 23 23 0 0 0 18-.3h.1L21 13l.4.9ZM12 10a1 1 0 1 0 0 2 1 1 0 1 0 0-2Z" clip-rule="evenodd"/>
+                                  </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
+                                <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
+                            </div>
                         </div>
                         <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
-                    </div>
-                    <div class="flex justify-end">
-                        <button on:click={() => {add_member_modal.show()}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
-                        <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{org_description}</p>
                     </div>
                 </div>
             {:else if tabs[1].active}
@@ -433,6 +466,9 @@
                         </li>
                     {/each}
                 </List>
+                <div class="flex justify-end">
+                    <button on:click={() => {create_team_modal.show()}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Create Team</button>
+                    </div>
             {:else if tabs[2].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
                 <List loaded={files_loaded} empty={files_empty}>
@@ -447,10 +483,13 @@
                 <List loaded={members_loaded} empty={members_empty}>
                     {#each members as member}
                         <li>
-                            <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial}  joined={member.joined} />
+                            <MemberCard org_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
                         </li>
                     {/each}
                 </List>
+                <div class="flex justify-end">
+                <button on:click={() => {add_member_modal.show()}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
+                </div>
                 {:else if tabs[4].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
                 <List loaded={notices_loaded} empty={notices_empty}>
@@ -460,7 +499,10 @@
                         </li>
                     {/each}
                 </List>
-            {/if}
+                <div class="flex justify-end">
+                <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
+                </div>
+                {/if}
         </div>
     </div>
 </div>
@@ -468,6 +510,8 @@
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
 
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
+
+<Create bind:modal={create_team_modal} id={id} creation_request={create_team} />
 
 
 <style>

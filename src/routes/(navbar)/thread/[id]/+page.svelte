@@ -10,6 +10,8 @@
     import { onMount } from "svelte";
     import Notice from "$lib/components/notice.svelte";
     import { common_fetch } from "$lib/fetch_func";
+    import SendNotice from "$lib/components/send-notice.svelte";
+    import { Dropdown, DropdownItem, DropdownDivider, DropdownHeader,Button } from 'flowbite-svelte';
 
     let tabs: Tab[] =
     [
@@ -62,6 +64,10 @@
     let notices_loaded: boolean = false;
     let notices_empty: boolean;
     let notices: Entity[] = [];
+    let send_notice_modal: Modal;
+    let forwardable_members: AddableMemberObj[] = [];
+    let selected_memberid: String;
+    let is_admin:boolean =  false;
 
 
     $: date_text = started_at?.toLocaleDateString();
@@ -78,6 +84,10 @@
     $: file_count = files.length;
     $: member_count = members.length;
     $: notices_empty = notices.length === 0;
+    // $:
+    // {
+    //     console.log(selected_memberid);
+    // }
 
     function reset_tabs(): void
     {
@@ -86,7 +96,6 @@
             tabs[i].active = false;
         }
     }
-
     function show_tab(idx: number): void
     {
         reset_tabs();
@@ -136,7 +145,54 @@
             members_loading = false;
         });
     }
+    async function get_forwardable_members(): Promise<void>
+    {
+        let response: Response = await fetch("/api/thread/getforwardablemembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_threadid: id
+            })
+        });
+        let response_obj: any = await response.json();
+        //console.log(response_obj)
+        forwardable_members = new Array(response_obj.length);
+        for(let i: number = 0; i < forwardable_members.length; ++i)
+        {
+            forwardable_members[i] = new AddableMemberObj();
+            forwardable_members[i].id = response_obj[i].f_user_id;
+            forwardable_members[i].name = response_obj[i].f_username;
+        }
+        //console.log(forwardable_members)
+        
+    }
+    function flex_forward(): void
+    {
+        fetch("/api/thread/flexforward",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                threadid: id,
+                targetid: selected_memberid,
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
 
+            console.log(response_obj);
+            init();
+        });
+    }
     async function get_addable_members(id:string): Promise<AddableMemberObj[]>
     {
         let response: Response = await fetch("/api/thread/getaddablemembers",
@@ -163,6 +219,7 @@
 
         return addable_members;
     }
+   
 
     async function add_member(id: string, members: AddableMemberObj[]): Promise<any>
     {
@@ -191,7 +248,7 @@
                
                 let response_obj: any = await response.json();
 
-                console.log(response_obj);
+                //console.log(response_obj);
 
         
     }
@@ -205,7 +262,7 @@
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            hierarchy_level:'org',
+                            hierarchy_level:'thread',
                             hierarchy_level_id:id,
                             content:content,
                             subject:subject,
@@ -215,7 +272,9 @@
                
                 let response_obj: any = await response.json();
 
-                console.log(response_obj);
+                //console.log(response_obj);
+                send_notice_modal.hide();
+                get_notices();
     }
     function get_notices(): void
     {
@@ -232,7 +291,7 @@
             if (response_obj === null) {
             return;
             }
-            console.log(response_obj)
+            //console.log(response_obj)
             notices = new Array((response_obj.length));
             for(let i = 0; i < notices.length; ++i)
             {
@@ -283,10 +342,10 @@
 
                 let response_obj: any = await response.json();
 
-                console.log(response_obj);
+                //console.log(response_obj);
 
                 if (response_obj.success === false) {
-                    console.error("dhuru");
+                    //console.error("dhuru");
 
                     success = false;
 
@@ -336,7 +395,7 @@
         {
             let response_obj: any = await response.json();
 
-            console.log(response_obj);
+            //console.log(response_obj);
             init();
         });
     }
@@ -376,11 +435,30 @@
         {
             let response_obj: any = await response.json();
 
-            console.log(response_obj);
+            //console.log(response_obj);
             close_thread_modal.hide();
             init();
         });
     }
+    async function check_admin(): Promise<void> {
+    let response: Response = await fetch(
+                    "/api/user/isadmin",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            level:'thread',
+                            level_id:id,
+                            id:$page.data.session?.user?.name,
+                        })
+                    }
+                );
+                let response_obj: any = await response.json();
+                //console.log(response_obj)
+                is_admin=response_obj;   
+  }
 
     function init(): void
     {
@@ -480,6 +558,7 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            console.log(response_obj);
             can_forward = response_obj;
         });
 
@@ -520,6 +599,8 @@
 
         get_members();
         get_notices();
+        get_forwardable_members();
+        check_admin()
     }
     
     onMount((): void =>
@@ -622,7 +703,7 @@
                 <List loaded={!members_loading} empty={members_empty}>
                     {#each members as member}
                         <li>
-                            <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial}  joined={member.joined} />
+                            <MemberCard thread_id={id} id={member.id} name={member.name} serial={member.serial} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
                         </li>
                     {/each}
                 </List>
@@ -635,12 +716,39 @@
                         </li>
                     {/each}
                 </List>
+                <div class="flex justify-end">
+                    <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
+                    </div>
             {/if}
         </div>
         <div class="thread-extra-button flex justify-end items-end mt-2">
             {#if tabs[0].active}
                 <button on:click={forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Forward</button>
                 <button on:click={show_close_thread_modal} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" disabled={!can_close}>Close Thread</button>
+                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward} >Flex-Forward</button>
+                <Dropdown>
+                    {#each forwardable_members as member}
+                      <DropdownItem key={member.id}>
+                        <input
+                          type="radio"
+                          name="selectedMember"
+                          value={member.id}
+                          bind:group={selected_memberid}
+                          id={"checkbox-" + member.id}
+                          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label for={"checkbox-" + member.id} class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                          {member.name}
+                        </label>
+                      </DropdownItem>
+                    {/each}
+                    <DropdownItem>
+                    <button on:click={flex_forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" >Forward</button>
+                </DropdownItem>  
+                </Dropdown>
+                  
+                
+
             {:else if tabs[1].active}
                 <!-- Add File -->
                 <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
@@ -653,7 +761,7 @@
 </div>
 
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
-
+<SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
 <div bind:this={close_thread_modal_elem} id="close-thread-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
         <!-- Modal content -->
