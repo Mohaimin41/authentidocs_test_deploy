@@ -62,6 +62,7 @@
     let team_description:string;
     let date_text:string;
     let create_thread_modal: Modal;
+    let is_admin:boolean = false;
 
     $: thread_empty = threads.length === 0;
     $: files_empty = files.length === 0;
@@ -333,6 +334,25 @@
 
                 //console.log(response_obj);
     }
+    async function check_admin(): Promise<void> {
+    let response: Response = await fetch(
+                    "/api/user/isadmin",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            level:'thread',
+                            level_id:id,
+                            id:$page.data.session?.user?.name,
+                        })
+                    }
+                );
+                let response_obj: any = await response.json();
+                console.log(response_obj)
+                is_admin=response_obj;   
+  }
 
 
     onMount((): void =>
@@ -344,6 +364,7 @@
         get_notices();
         get_members();
         get_files();
+        check_admin();
     });
 </script>
 
@@ -435,7 +456,7 @@
                 <List loaded={members_loaded} empty={members_empty}>
                     {#each members as member}
                         <li>
-                            <MemberCard team_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey}/>
+                            <MemberCard team_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
                         </li>
                     {/each}
                 </List>

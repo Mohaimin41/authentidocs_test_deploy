@@ -14,6 +14,7 @@ export async function POST({
   const thread_info = await request.json();
   // console.log("inside add key",key_info);
   let given_threadid = thread_info.given_threadid;
+  let given_userid = session.user.name;
 
   if (given_threadid === undefined || given_threadid === null) {
     console.log(
@@ -26,12 +27,11 @@ export async function POST({
     );
   }
 
-  let { data: result, error: _error } = await supabase.rpc(
-    "can_forward_thread",
-    {
-      given_threadid,
-    }
-  );
+  let { data:result, error:_error } = await supabase
+  .rpc('can_forward_thread2', {
+    given_threadid, 
+    given_userid
+  })
 
   // console.log("add key rps result",result)
   if (_error) {

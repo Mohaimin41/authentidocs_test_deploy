@@ -67,6 +67,7 @@
     let send_notice_modal: Modal;
     let forwardable_members: AddableMemberObj[] = [];
     let selected_memberid: String;
+    let is_admin:boolean =  false;
 
 
     $: date_text = started_at?.toLocaleDateString();
@@ -439,7 +440,25 @@
             init();
         });
     }
-    
+    async function check_admin(): Promise<void> {
+    let response: Response = await fetch(
+                    "/api/user/isadmin",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            level:'thread',
+                            level_id:id,
+                            id:$page.data.session?.user?.name,
+                        })
+                    }
+                );
+                let response_obj: any = await response.json();
+                //console.log(response_obj)
+                is_admin=response_obj;   
+  }
 
     function init(): void
     {
@@ -539,6 +558,7 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            console.log(response_obj);
             can_forward = response_obj;
         });
 
@@ -580,6 +600,7 @@
         get_members();
         get_notices();
         get_forwardable_members();
+        check_admin()
     }
     
     onMount((): void =>
@@ -682,7 +703,7 @@
                 <List loaded={!members_loading} empty={members_empty}>
                     {#each members as member}
                         <li>
-                            <MemberCard thread_id={id} id={member.id} name={member.name} serial={member.serial} type={member.role} joined_at={member.joined} pub_key={member.pubkey}/>
+                            <MemberCard thread_id={id} id={member.id} name={member.name} serial={member.serial} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
                         </li>
                     {/each}
                 </List>
@@ -704,7 +725,7 @@
             {#if tabs[0].active}
                 <button on:click={forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Forward</button>
                 <button on:click={show_close_thread_modal} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" disabled={!can_close}>Close Thread</button>
-                <Button>Select Forward Person</Button>
+                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward} >Flex-Forward</button>
                 <Dropdown>
                     {#each forwardable_members as member}
                       <DropdownItem key={member.id}>
@@ -721,8 +742,11 @@
                         </label>
                       </DropdownItem>
                     {/each}
-                  </Dropdown>
-                  <button on:click={flex_forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Flex-forward</button>
+                    <DropdownItem>
+                    <button on:click={flex_forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" >Forward</button>
+                </DropdownItem>  
+                </Dropdown>
+                  
                 
 
             {:else if tabs[1].active}
