@@ -435,7 +435,7 @@
                 <List loaded={members_loaded} empty={members_empty}>
                     {#each members as member}
                         <li>
-                            <MemberCard id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey}/>
+                            <MemberCard team_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey}/>
                         </li>
                     {/each}
                 </List>

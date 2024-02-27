@@ -11,6 +11,7 @@
     import Notice from "$lib/components/notice.svelte";
     import { common_fetch } from "$lib/fetch_func";
     import SendNotice from "$lib/components/send-notice.svelte";
+    import { Dropdown, DropdownItem, DropdownDivider, DropdownHeader,Button } from 'flowbite-svelte';
 
     let tabs: Tab[] =
     [
@@ -64,6 +65,8 @@
     let notices_empty: boolean;
     let notices: Entity[] = [];
     let send_notice_modal: Modal;
+    let forwardable_members: AddableMemberObj[] = [];
+    let selected_memberid: String;
 
 
     $: date_text = started_at?.toLocaleDateString();
@@ -80,6 +83,10 @@
     $: file_count = files.length;
     $: member_count = members.length;
     $: notices_empty = notices.length === 0;
+    // $:
+    // {
+    //     console.log(selected_memberid);
+    // }
 
     function reset_tabs(): void
     {
@@ -88,7 +95,6 @@
             tabs[i].active = false;
         }
     }
-
     function show_tab(idx: number): void
     {
         reset_tabs();
@@ -138,7 +144,54 @@
             members_loading = false;
         });
     }
+    async function get_forwardable_members(): Promise<void>
+    {
+        let response: Response = await fetch("/api/thread/getforwardablemembers",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_threadid: id
+            })
+        });
+        let response_obj: any = await response.json();
+        //console.log(response_obj)
+        forwardable_members = new Array(response_obj.length);
+        for(let i: number = 0; i < forwardable_members.length; ++i)
+        {
+            forwardable_members[i] = new AddableMemberObj();
+            forwardable_members[i].id = response_obj[i].f_user_id;
+            forwardable_members[i].name = response_obj[i].f_username;
+        }
+        //console.log(forwardable_members)
+        
+    }
+    function flex_forward(): void
+    {
+        fetch("/api/thread/flexforward",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                threadid: id,
+                targetid: selected_memberid,
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
 
+            console.log(response_obj);
+            init();
+        });
+    }
     async function get_addable_members(id:string): Promise<AddableMemberObj[]>
     {
         let response: Response = await fetch("/api/thread/getaddablemembers",
@@ -165,6 +218,7 @@
 
         return addable_members;
     }
+   
 
     async function add_member(id: string, members: AddableMemberObj[]): Promise<any>
     {
@@ -193,7 +247,7 @@
                
                 let response_obj: any = await response.json();
 
-                console.log(response_obj);
+                //console.log(response_obj);
 
         
     }
@@ -217,7 +271,7 @@
                
                 let response_obj: any = await response.json();
 
-                console.log(response_obj);
+                //console.log(response_obj);
                 send_notice_modal.hide();
                 get_notices();
     }
@@ -236,7 +290,7 @@
             if (response_obj === null) {
             return;
             }
-            console.log(response_obj)
+            //console.log(response_obj)
             notices = new Array((response_obj.length));
             for(let i = 0; i < notices.length; ++i)
             {
@@ -287,10 +341,10 @@
 
                 let response_obj: any = await response.json();
 
-                console.log(response_obj);
+                //console.log(response_obj);
 
                 if (response_obj.success === false) {
-                    console.error("dhuru");
+                    //console.error("dhuru");
 
                     success = false;
 
@@ -340,7 +394,7 @@
         {
             let response_obj: any = await response.json();
 
-            console.log(response_obj);
+            //console.log(response_obj);
             init();
         });
     }
@@ -380,7 +434,7 @@
         {
             let response_obj: any = await response.json();
 
-            console.log(response_obj);
+            //console.log(response_obj);
             close_thread_modal.hide();
             init();
         });
@@ -525,6 +579,7 @@
 
         get_members();
         get_notices();
+        get_forwardable_members();
     }
     
     onMount((): void =>
@@ -627,7 +682,7 @@
                 <List loaded={!members_loading} empty={members_empty}>
                     {#each members as member}
                         <li>
-                            <MemberCard id={member.id} name={member.name} serial={member.serial} type={member.role} joined_at={member.joined} pub_key={member.pubkey}/>
+                            <MemberCard thread_id={id} id={member.id} name={member.name} serial={member.serial} type={member.role} joined_at={member.joined} pub_key={member.pubkey}/>
                         </li>
                     {/each}
                 </List>
@@ -649,6 +704,27 @@
             {#if tabs[0].active}
                 <button on:click={forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Forward</button>
                 <button on:click={show_close_thread_modal} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" disabled={!can_close}>Close Thread</button>
+                <Button>Select Forward Person</Button>
+                <Dropdown>
+                    {#each forwardable_members as member}
+                      <DropdownItem key={member.id}>
+                        <input
+                          type="radio"
+                          name="selectedMember"
+                          value={member.id}
+                          bind:group={selected_memberid}
+                          id={"checkbox-" + member.id}
+                          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label for={"checkbox-" + member.id} class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                          {member.name}
+                        </label>
+                      </DropdownItem>
+                    {/each}
+                  </Dropdown>
+                  <button on:click={flex_forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Flex-forward</button>
+                
+
             {:else if tabs[1].active}
                 <!-- Add File -->
                 <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
