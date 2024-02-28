@@ -6,12 +6,13 @@
     export let id: string;
     export let content: string;
     export let seen: boolean;
-    export let thread_id: string;
+    export let level_id: string;
+    export let level:string;
 
     function goto_thread(): void
     {
         $update_thread = true;
-        goto("/thread/" + thread_id);
+        goto("/"+level+"/" + level_id);
     }
 
     function read(): void
