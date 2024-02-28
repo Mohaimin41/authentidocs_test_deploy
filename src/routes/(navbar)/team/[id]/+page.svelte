@@ -10,6 +10,8 @@
     import ThreadCard from "$lib/components/team/thread-card.svelte";
     import SendNotice from "$lib/components/send-notice.svelte";
     import AddMember from "$lib/components/add-member.svelte";
+    import Notice from "$lib/components/notice.svelte";
+    import Create from "$lib/components/create.svelte"
 
     let tabs: Tab[] =
     [
@@ -28,13 +30,17 @@
         {
             name: "Members",
             active: false
+        },
+        {
+            name: "Notices",
+            active: false
         }
     ];
     let threads: Entity[] = [];
     let notices: Entity[] = [];
     let id: string;
-    let team_name_input: string;
-    let team_description_input: string;
+    let thread_name_input: string;
+    let thread_description_input: string;
     let team_name:string = "স্বদীপের team";  // remove the names, আপাতত এমনে দিসি কারণ undefined লেখা দেখলে কেমন জানি লাগে :3
     let team_leader:string = "স্বদীপ আহমেদ";
     let add_member_modal: Modal;
@@ -43,17 +49,25 @@
     let threads_loaded: boolean = false;
     let files_loaded: boolean = false;
     let members_loaded: boolean = false;
+    let notices_loaded: boolean = false;
     let thread_count:number=0;
     let file_count: number;
     let thread_empty: boolean;
     let member_count:number=0;
     let files_empty: boolean;
     let members_empty: boolean;
+    let notices_empty: boolean;
     let send_notice_modal: Modal;
+    let team_creation_date:Date;
+    let team_description:string;
+    let date_text:string;
+    let create_thread_modal: Modal;
+    let is_admin:boolean = false;
 
     $: thread_empty = threads.length === 0;
     $: files_empty = files.length === 0;
     $: members_empty = members.length === 0;
+    $: notices_empty = notices.length === 0;
 
     function reset_tabs(): void
     {
@@ -115,39 +129,44 @@
             }
 
             let team_info=response_obj;
+            //console.log(team_info);
             team_name=team_info.team_detail.f_team_name;
             team_leader=team_info.team_mod_detail.f_username;
             member_count=team_info.team_detail.f_member_count;
             thread_count=team_info.team_detail.f_thread_count;
             file_count=team_info.team_detail.f_file_count;
+            team_description=team_info.team_detail.f_description;
+            team_creation_date=new Date(team_info.team_detail.f_created_at);
+            date_text = team_creation_date.toLocaleDateString();
+
         });
     }
 
     function get_notices(): void
     {
-        // let request_obj: any = {
-        //     orgid: id,
-        // };
+        let request_obj: any = {
+            teamid: id,
+        };
 
-        // common_fetch(
-        // "/api/org/getnotices",
-        // request_obj,
-        // async (response: Response): Promise<void> => {
-        //     let response_obj: any = await response.json();
+        common_fetch(
+        "/api/team/getnotices",
+        request_obj,
+        async (response: Response): Promise<void> => {
+            let response_obj: any = await response.json();
 
-        //     if (response_obj === null) {
-        //     return;
-        //     }
-        //     console.log(response_obj)
-        //     notices = new Array((response_obj.length));
-        //     for(let i = 0; i < notices.length; ++i)
-        //     {
-        //         notices[i] = new Entity();
-        //         notices[i].uid = response_obj[i].f_noticeid;
-        //         notices[i].name = response_obj[i].f_content;
-        //         if(notices[i].name.length>10) notices[i].name = notices[i].name.substring(0,10) + "...."
-        //     }
-        // });
+            if (response_obj === null) {
+            return;
+            }
+            //console.log(response_obj)
+            notices = new Array((response_obj.length));
+            for(let i = 0; i < notices.length; ++i)
+            {
+                notices[i] = new Entity();
+                notices[i].uid = response_obj[i].f_noticeid;
+                notices[i].name = response_obj[i].f_subject;
+            }
+            notices_loaded=true;
+        });
     }
     function get_files(): void
     {
@@ -164,7 +183,7 @@
             if (response_obj === null) {
             return;
             }
-            console.log(response_obj);
+            //console.log(response_obj);
             files = new Array(response_obj.length);
 
             for(let i: number = 0; i < response_obj.length; ++i)
@@ -174,8 +193,31 @@
                 files[i].name = response_obj[i].f_filename;
                 files[i].type = response_obj[i].f_file_extension;
             }
-            console.log(files)
+            //console.log(files)
             files_loaded = true;
+        });
+    }
+    function create_thread(id:string,name:string,description:string): void
+    {
+
+        fetch("/api/thread/createthread",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                given_parent_teamid: id,
+                given_threadname: name,
+                description: description
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            create_thread_modal.hide();
+            get_threads();
         });
     }
     function get_members(): void
@@ -201,13 +243,17 @@
                 members[i] = new MemberObj();
                 members[i].id = response_obj[i].f_userid;
                 members[i].name = response_obj[i].f_username;
+                members[i].role = response_obj[i].f_user_role;
+                members[i].serial = response_obj[i].f_signing_serial;
+                members[i].pubkey = response_obj[i].f_publickey;
+                members[i].joined = new Date(response_obj[i].f_joined_at);
             }
 
             members_loaded = true;
         });
     }
 
-    async function get_addable_members(): Promise<AddableMemberObj[]>
+    async function get_addable_members(id:string): Promise<AddableMemberObj[]>
     {
         let response: Response = await fetch("/api/team/getaddablemembers",
         {
@@ -218,7 +264,7 @@
             },
             body: JSON.stringify(
             {
-                given_threadid: id
+                teamid: id
             })
         });
         let response_obj: any = await response.json();
@@ -234,15 +280,80 @@
         return addable_members;
     }
 
-    function add_member(id: string, members: AddableMemberObj[]): any
+    async function add_member(id: string, members: AddableMemberObj[]): Promise<any>
     {
+        let adding_members = []
+        let count = 0 ;
+        for(let i=0;i<members.length;i++)
+        {
+            if(members[i].checked)
+            {
+                adding_members[count++]=members[i].id
+            }
+        }
+        let response: Response = await fetch(
+                    "/api/team/addmember",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                           uid_list:adding_members,
+                           teamid:id,
+                        })
+                    }
+                );
+               
+                let response_obj: any = await response.json();
+
+                //console.log(response_obj);
+
         
     }
 
-    function send_notice_request(id: string, subject: string, content: string): any
+    async function send_notice_request(id: string, subject: string, content: string): Promise<any>
     {
-        
+        let response: Response = await fetch(
+                    "/api/notice/addnotice",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            hierarchy_level:'team',
+                            hierarchy_level_id:id,
+                            content:content,
+                            subject:subject,
+                        })
+                    }
+                );
+               
+                let response_obj: any = await response.json();
+
+                //console.log(response_obj);
     }
+    async function check_admin(): Promise<void> {
+    let response: Response = await fetch(
+                    "/api/user/isadmin",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            level:'thread',
+                            level_id:id,
+                            id:$page.data.session?.user?.name,
+                        })
+                    }
+                );
+                let response_obj: any = await response.json();
+                console.log(response_obj)
+                is_admin=response_obj;   
+  }
+
 
     onMount((): void =>
     {
@@ -251,9 +362,9 @@
         get_threads();
         get_team_details();
         get_notices();
-        get_addable_members();
         get_members();
         get_files();
+        check_admin();
     });
 </script>
 
@@ -279,10 +390,19 @@
                 <div class="details">
                     <div>
                         <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{team_name}</p>
-                        <div class="grid grid-cols-3 mb-4">
+                        <div class="grid grid-cols-4 mb-4">
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
                             <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
-                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Started At</p>
                             <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Threads</p>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                                    <span>{date_text}</span>
+                                </p>
+                            </div>
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
@@ -290,28 +410,25 @@
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
                                 <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
                             </div>
-                            <div class="flex items-center">
-                                <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
-                                </svg>
-                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
-                                    <span>__date__</span>
-                                </p>
-                            </div>
+                            
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                                 </svg>
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
                             </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M10 2a3 3 0 0 0-3 3v1H5a3 3 0 0 0-3 3v2.4l1.4.7a7.7 7.7 0 0 0 .7.3 21 21 0 0 0 16.4-.3l1.5-.7V9a3 3 0 0 0-3-3h-2V5a3 3 0 0 0-3-3h-4Zm5 4V5c0-.6-.4-1-1-1h-4a1 1 0 0 0-1 1v1h6Zm6.4 7.9.6-.3V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-5.4l.6.3a10 10 0 0 0 .7.3 23 23 0 0 0 18-.3h.1L21 13l.4.9ZM12 10a1 1 0 1 0 0 2 1 1 0 1 0 0-2Z" clip-rule="evenodd"/>
+                                  </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
+                                <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
+                            </div>
                         </div>
                         <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
-                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">__description__</p>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{team_description}</p>
                     </div>
-                    <div class="flex justify-end">
-                        <button on:click={() => {add_member_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
-                        <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
-                    </div>
+                    
                 </div>
             {:else if tabs[1].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Threads</p>
@@ -322,6 +439,9 @@
                         </li>
                     {/each}
                 </List>
+                <div class="flex justify-end">
+                    <button on:click={() => {create_thread_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Create Thread</button>
+                    </div>
             {:else if tabs[2].active}
                 <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
                 <List loaded={files_loaded} empty={files_empty}>
@@ -336,17 +456,33 @@
                 <List loaded={members_loaded} empty={members_empty}>
                     {#each members as member}
                         <li>
-                            <MemberCard id={member.id} name={member.name} type={member.role} serial={member.serial} />
+                            <MemberCard team_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
                         </li>
                     {/each}
                 </List>
-            {/if}
+                <div class="flex justify-end">
+                <button on:click={() => {add_member_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
+                </div>
+                {:else if tabs[4].active}
+                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
+                <List loaded={notices_loaded} empty={notices_empty}>
+                    {#each notices as notice}
+                        <li>
+                            <Notice uid={notice.uid} title={notice.name}/>
+                        </li>
+                    {/each}
+                </List>
+                <div class="flex justify-end">
+                <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
+                </div>
+                {/if}
         </div>
     </div>
 </div>
 
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
+<Create bind:modal={create_thread_modal} id={id} creation_request={create_thread} />
 
 <style>
     .pg-center
