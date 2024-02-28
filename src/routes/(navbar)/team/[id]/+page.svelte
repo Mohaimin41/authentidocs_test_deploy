@@ -81,10 +81,10 @@
   let file_upload_progress: HTMLDivElement;
   let file_uploading_modal: Modal;
 
-  $: thread_empty = threads.length === 0;
-  $: files_empty = files.length === 0;
-  $: members_empty = members.length === 0;
-  $: notices_empty = notices.length === 0;
+  $: thread_empty = threads_filtered.length === 0;
+  $: files_empty = files_filtered.length === 0;
+  $: members_empty = members_filtered.length === 0;
+  $: notices_empty = notices_filtered.length === 0;
   $:
   {
     if(files_filter !== null && files_filter !== undefined && files_filter.length > 0)
@@ -194,6 +194,8 @@
       }
 
       threads_loaded = true;
+      threads_filtered = Array.from(threads);
+      threads_filter = "";
     });
   }
 
@@ -248,6 +250,8 @@
           notices[i].name = response_obj[i].f_subject;
         }
         notices_loaded = true;
+        notices_filtered = Array.from(notices);
+        notices_filter = "";
       }
     );
   }
@@ -276,6 +280,8 @@
         }
         //console.log(files)
         files_loaded = true;
+        files_filtered = Array.from(files);
+        files_filter = "";
       }
     );
   }

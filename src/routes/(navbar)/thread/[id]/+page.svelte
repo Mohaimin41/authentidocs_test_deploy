@@ -41,8 +41,12 @@
     let started_at: Date;
     let date_text: string;
     let time_text: string;
+    let files_filter: string;
     let files: FileObj[] = [];
+    let files_filtered: FileObj[] = [];
+    let members_filter: string;
     let members: MemberObj[] = [];
+    let members_filtered: MemberObj[] = [];
     let is_active: boolean;
     let can_forward: boolean;
     let can_close: boolean;
@@ -63,7 +67,9 @@
     let members_loading: boolean;
     let notices_loaded: boolean = false;
     let notices_empty: boolean;
+    let notices_filter: string;
     let notices: Entity[] = [];
+    let notices_filtered: Entity[] = [];
     let send_notice_modal: Modal;
     let forwardable_members: AddableMemberObj[] = [];
     let selected_memberid: String;
@@ -79,11 +85,49 @@
         init();
     }
 
-    $: files_empty = files.length === 0;
-    $: members_empty = members.length === 0;
+    $: files_empty = files_filtered.length === 0;
+    $: members_empty = members_filtered.length === 0;
     $: file_count = files.length;
     $: member_count = members.length;
-    $: notices_empty = notices.length === 0;
+    $: notices_empty = notices_filtered.length === 0;
+    $:
+    {
+        if(files_filter !== null && files_filter !== undefined && files_filter.length > 0)
+        {
+            files_filtered = [];
+
+            for(let i: number = 0; i < files.length; ++i)
+            {
+                if(files[i].name.match(files_filter))
+                {
+                    files_filtered.push(files[i]);
+                }
+            }
+        }
+        else
+        {
+            files_filtered = Array.from(files);
+        }
+    }
+    $:
+    {
+        if(members_filter !== null && members_filter !== undefined && members_filter.length > 0)
+        {
+            members_filtered = [];
+
+            for(let i: number = 0; i < members.length; ++i)
+            {
+                if(members[i].name.match(members_filter))
+                {
+                    members_filtered.push(members[i]);
+                }
+            }
+        }
+        else
+        {
+            members_filtered = Array.from(members);
+        }
+    }
 
     function reset_tabs(): void
     {
@@ -139,6 +183,8 @@
             // }
 
             members_loading = false;
+            members_filtered = Array.from(members);
+            members_filter = "";
         });
     }
     async function get_forwardable_members(): Promise<void>
@@ -296,6 +342,8 @@
                 notices[i].name = response_obj[i].f_subject;
             }
             notices_loaded=true;
+            notices_filtered = Array.from(notices);
+            notices_filter = "";
         });
     }
 
@@ -437,24 +485,24 @@
         });
     }
     async function check_admin(): Promise<void> {
-    let response: Response = await fetch(
-                    "/api/user/isadmin",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            level:'thread',
-                            level_id:id,
-                            id:$page.data.session?.user?.name,
-                        })
-                    }
-                );
-                let response_obj: any = await response.json();
-                //console.log(response_obj)
-                is_admin=response_obj;   
-  }
+        let response: Response = await fetch(
+        "/api/user/isadmin",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                level:'thread',
+                level_id:id,
+                id:$page.data.session?.user?.name,
+            })
+        });
+
+        let response_obj: any = await response.json();
+        //console.log(response_obj)
+        is_admin=response_obj;   
+    }
 
     function init(): void
     {
@@ -537,6 +585,8 @@
                 // }
 
                 files_loaded = true;
+                files_filtered = Array.from(files);
+                files_filter = "";
             });
         });
 
@@ -698,11 +748,11 @@
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                             </svg>
                         </div>
-                        <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                        <input bind:value={files_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
                     </div>
                 </div>
                 <List loaded={files_loaded} empty={files_empty}>
-                    {#each files as file}
+                    {#each files_filtered as file}
                         <li>
                             <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status.toString()}/>
                         </li>
@@ -721,11 +771,11 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                         </svg>
                     </div>
-                    <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    <input bind:value={members_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
                     </div>
                 </div>
                 <List loaded={!members_loading} empty={members_empty}>
-                    {#each members as member}
+                    {#each members_filtered as member}
                         <li>
                             <MemberCard thread_id={id} id={member.id} name={member.name} serial={member.serial} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
                         </li>
@@ -744,11 +794,11 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                         </svg>
                     </div>
-                    <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    <input bind:value={notices_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
                     </div>
                 </div>
                 <List loaded={notices_loaded} empty={notices_empty}>
-                    {#each notices as notice}
+                    {#each notices_filtered as notice}
                         <li>
                             <Notice uid={notice.uid} title={notice.name}/>
                         </li>
