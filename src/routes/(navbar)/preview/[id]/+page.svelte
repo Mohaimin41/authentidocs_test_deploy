@@ -38,7 +38,7 @@
     let history: History[] = [];
     let file_name: string = "";
     let file_type: number = 0;
-    let file_status: string = "personal";
+    let file_status: string = "";
     let download_anchor: HTMLAnchorElement;
     let file_view_link: string;
     let file_download_link: string;
@@ -568,6 +568,7 @@
         {/if}
         <div class="flex justify-end mt-3">
             {#if file_status !== "personal"}
+            {#if file_status !== "closed"}
             
             <!-- View Note -->
             <button on:click={show_view_notes_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Notes</button>
@@ -577,6 +578,7 @@
             <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Mark as Viewed</button>
             <!-- File History -->
             <button on:click={show_history_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
+            {/if}
             {/if}
             <!-- certificate button -->
             <button data-modal-target="cert-modal" data-modal-toggle="cert-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Certificate</button>

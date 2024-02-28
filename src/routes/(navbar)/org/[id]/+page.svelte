@@ -13,6 +13,8 @@
     import Notice from "$lib/components/notice.svelte";
     import Create from "$lib/components/create.svelte"
 
+    import { priv_key } from "$lib/stores";
+    import { get } from "svelte/store";
     let tabs: Tab[] =
     [
         {
@@ -68,6 +70,10 @@
     let org_creation_date:Date;
     let date_text:string;
     let is_admin:boolean = false;
+
+  let file_uploading_modal_elem: HTMLDivElement;
+  let file_upload_progress: HTMLDivElement;
+  let file_uploading_modal: Modal;
 
     $: teams_empty = teams.length === 0;
     $: files_empty = files.length === 0;
@@ -361,7 +367,7 @@
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            level:'thread',
+                            level:'org',
                             level_id:id,
                             id:$page.data.session?.user?.name,
                         })
@@ -372,11 +378,126 @@
                 is_admin=response_obj;   
   }
 
+  function add_file(): void {
+    let file_input_elem: HTMLInputElement = document.createElement("input");
+    file_input_elem.type = "file";
+
+    file_input_elem.onchange = async (event: Event): Promise<void> => {
+      file_uploading_modal.show();
+
+      let file: File | null | undefined = file_input_elem.files?.item(0);
+
+      if (file === null || file === undefined) {
+        return;
+      }
+
+      let file_buffer: ArrayBuffer = await file.arrayBuffer();
+      let success: boolean = true;
+      let file_success_response_obj: any = {};
+
+      for (let i: number = 0; i < file_buffer.byteLength; i += 1048576) {
+        file_upload_progress.style.width =
+          Math.round((i * 100) / file_buffer.byteLength) + "%";
+        let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
+        let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
+        let response: Response = await fetch(
+          "/api/org/addorgchunkfile/continue?filename=" + file.name,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              data: small_array,
+            }),
+          }
+        );
+
+        let response_obj: any = await response.json();
+
+        //console.log(response_obj);
+
+        if (response_obj.success === false) {
+          //console.error("dhuru");
+
+          success = false;
+
+          break;
+        }
+      }
+
+      if (success) {
+        file_upload_progress.style.width = "100%";
+
+        await fetch(
+          "/api/org/addorgchunkfile/finish?filename=" +
+            file.name +
+            "&orgid=" +
+            id,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}),
+          }
+        ).then(async (response: Response): Promise<void> => {
+          file_success_response_obj = await response.json();
+
+          file_uploading_modal.hide();
+          get_files();
+        });
+        let subtle_crypto = window.crypto.subtle;
+        let temp_priv_key = get(priv_key);
+
+        if (temp_priv_key) {
+          let signature: ArrayBuffer = await subtle_crypto.sign(
+            {
+              name: "ECDSA",
+              hash: { name: "SHA-384" },
+            },
+            temp_priv_key,
+            file_buffer
+          );
+
+          let signature_hex: string = [...new Uint8Array(signature)]
+            .map((x) => x.toString(16).padStart(2, "0"))
+            .join("");
+          let pubkey_json: string | null = localStorage.getItem("pub_key");
+          if (pubkey_json) {
+            let request_obj: any = {
+              fileid: file_success_response_obj.fileid,
+              signature: signature_hex,
+              key: pubkey_json,
+              userid: $page.data.session?.user?.name,
+            };
+
+            common_fetch(
+              "/api/files/addfilesignature",
+              request_obj,
+              async (response: Response): Promise<void> => {
+                let response_obj: any = await response.json();
+
+                console.log(response_obj);
+              }
+            );
+          }
+        }
+      } else {
+        file_uploading_modal.hide();
+      }
+    };
+
+    file_input_elem.click();
+  }
+
     onMount((): void =>
     {
         initModals();
 
         id = $page.params.id;
+
+        file_uploading_modal = new Modal(file_uploading_modal_elem);
 
         get_org_details();
         get_teams();
@@ -503,6 +624,10 @@
                         </li>
                     {/each}
                 </List>
+                <!-- Add File -->
+                <div class="flex justify-end">
+                    <button  on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" >Add File</button>
+                    </div>
             {:else if tabs[3].active}
                 <div class="mb-2">
                     <p
@@ -566,6 +691,34 @@
 
 <Create bind:modal={create_team_modal} id={id} creation_request={create_team} />
 
+<div
+  bind:this={file_uploading_modal_elem}
+  data-modal-backdrop="static"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <div
+        class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
+      >
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+          Uploading...
+        </h3>
+      </div>
+      <div class="p-4 md:p-5 space-y-4">
+        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+          <div
+            bind:this={file_upload_progress}
+            class="bg-blue-600 h-2.5 rounded-full"
+            style="width: 0%"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <style>
     .pg-center
