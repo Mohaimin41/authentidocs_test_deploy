@@ -18,7 +18,6 @@
   let file_input_elem: HTMLInputElement;
   let modal_elem: HTMLDivElement;
   let modal_obj: Modal;
-  let modal_show: boolean = false;
   let uploading: boolean = false;
   let upload_progress_elem: HTMLDivElement;
 
@@ -83,11 +82,33 @@
     public type!: string;
   }
 
+  let personal_files_filter: string;
   let personal_files: File[] = [];
+  let personal_files_filtered: File[] = [];
   let personal_files_empty: boolean;
   let personal_files_loaded: boolean = false;
 
-  $: personal_files_empty = personal_files.length === 0;
+  $: personal_files_empty = personal_files_filtered.length === 0;
+
+  $:
+  {
+    if(personal_files_filter !== null && personal_files_filter !== undefined && personal_files_filter.length > 0)
+    {
+      personal_files_filtered = [];
+
+      for(let i: number = 0; i < personal_files.length; ++i)
+      {
+        if(personal_files[i].name.match(personal_files_filter))
+        {
+          personal_files_filtered.push(personal_files[i]);
+        }
+      }
+    }
+    else
+    {
+      personal_files_filtered = Array.from(personal_files);
+    }
+  }
 
   /**
    * team list element data object
@@ -97,11 +118,32 @@
     public id!: string;
   }
 
+  let teams_filter: string;
   let teams: Team[] = [];
+  let teams_filtered: Team[] = [];
   let teams_loaded: boolean = false;
   let teams_empty: boolean;
 
-  $: teams_empty = teams.length === 0;
+  $: teams_empty = teams_filtered.length === 0;
+  $:
+  {
+    if(teams_filter !== null && teams_filter !== undefined && teams_filter.length > 0)
+    {
+      teams_filtered = [];
+
+      for(let i: number = 0; i < teams.length; ++i)
+      {
+        if(teams[i].name.match(teams_filter))
+        {
+          teams_filtered.push(teams[i]);
+        }
+      }
+    }
+    else
+    {
+      teams_filtered = Array.from(teams);
+    }
+  }
 
   /**
    * thread list item
@@ -111,17 +153,59 @@
     public id!: string;
   }
 
+  let act_threads_filter: string;
   let act_threads: Thread[] = [];
-  let act_thread_loaded: boolean = false;
-  let act_thread_empty: boolean;
+  let act_threads_filtered: Thread[] = [];
+  let act_threads_loaded: boolean = false;
+  let act_threads_empty: boolean;
 
-  $: act_thread_empty = act_threads.length === 0;
+  $: act_threads_empty = act_threads_filtered.length === 0;
+  $:
+  {
+    if(act_threads_filter !== null && act_threads_filter !== undefined && act_threads_filter.length > 0)
+    {
+      act_threads_filtered = [];
 
+      for(let i: number = 0; i < act_threads.length; ++i)
+      {
+        if(act_threads[i].name.match(act_threads_filter))
+        {
+          act_threads_filtered.push(act_threads[i]);
+        }
+      }
+    }
+    else
+    {
+      act_threads_filtered = Array.from(act_threads);
+    }
+  }
+
+  let arch_threads_filter: string;
   let arch_threads: Thread[] = [];
+  let arch_threads_filtered: Thread[] = [];
   let arch_thread_loaded: boolean = false;
   let arch_thread_empty: boolean;
 
-  $: arch_thread_empty = arch_threads.length === 0;
+  $: arch_thread_empty = arch_threads_filtered.length === 0;
+  $:
+  {
+    if(arch_threads_filter !== null && arch_threads_filter !== undefined && arch_threads_filter.length > 0)
+    {
+      arch_threads_filtered = [];
+
+      for(let i: number = 0; i < arch_threads.length; ++i)
+      {
+        if(arch_threads[i].name.match(arch_threads_filter))
+        {
+          arch_threads_filtered.push(arch_threads[i]);
+        }
+      }
+    }
+    else
+    {
+      arch_threads_filtered = Array.from(arch_threads);
+    }
+  }
 
   function show_modal(): void {
     modal_obj.show();
@@ -143,21 +227,21 @@
         "/api/user/getnotices",
         request_obj,
         async (response: Response): Promise<void> => {
-            let response_obj: any = await response.json();
+          let response_obj: any = await response.json();
 
-            if (response_obj === null) {
+          if (response_obj === null) {
             return;
-            }
-            console.log(response_obj)
-            notices = new Array((response_obj.length));
-            for(let i = 0; i < notices.length; ++i)
-        {
-            notices[i] = new Entity();
-            notices[i].uid = response_obj[i].f_noticeid;
-            notices[i].name = response_obj[i].f_subject;
-        }
-        notice_loaded = true;
-    });
+          }
+          notices = new Array((response_obj.length));
+
+          for(let i = 0; i < notices.length; ++i)
+          {
+              notices[i] = new Entity();
+              notices[i].uid = response_obj[i].f_noticeid;
+              notices[i].name = response_obj[i].f_subject;
+          }
+          notice_loaded = true;
+        });
     }
     $: notice_empty = notices.length === 0;
   function get_personal_files(): void {
@@ -197,6 +281,8 @@
         // }
 
         personal_files_loaded = true;
+        personal_files_filtered = Array.from(personal_files);
+        personal_files_filter = "";
       },
     );
   }
@@ -235,11 +321,13 @@
         // }
 
         teams_loaded = true;
+        teams_filtered = Array.from(teams);
+        teams_filter = "";
       },
     );
   }
   function get_user_active_threads(): void {
-    act_thread_loaded = false;
+    act_threads_loaded = false;
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
     };
@@ -272,7 +360,9 @@
         //   act_threads[i].name = "Thread " + (i + 1);
         // }
 
-        act_thread_loaded = true;
+        act_threads_loaded = true;
+        act_threads_filtered = Array.from(act_threads);
+        act_threads_filter = "";
       },
     );
   }
@@ -311,6 +401,8 @@
         // }
 
         arch_thread_loaded = true;
+        arch_threads_filtered = Array.from(arch_threads);
+        arch_threads_filter = "";
       },
     );
   }
@@ -624,11 +716,11 @@
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                 </svg>
             </div>
-            <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+            <input bind:value={personal_files_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
           </div>
         </div>
         <List loaded={personal_files_loaded} empty={personal_files_empty}>
-          {#each personal_files as file}
+          {#each personal_files_filtered as file}
             <li>
               <FileCard
                 file_id={file.id}
@@ -661,11 +753,11 @@
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                 </svg>
             </div>
-            <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+            <input bind:value={teams_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
           </div>
         </div>
         <List loaded={teams_loaded} empty={teams_empty}>
-          {#each teams as team}
+          {#each teams_filtered as team}
             <li>
               <TeamCard team_name={team.name} team_id={team.id} />
             </li>
@@ -687,7 +779,7 @@
             <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
           </div>
         </div>
-        <List loaded={act_thread_loaded} empty={act_thread_empty}>
+        <List loaded={act_threads_loaded} empty={act_threads_empty}>
           {#each act_threads as thread}
             <li>
               <ThreadCard thread_name={thread.name} thread_id={thread.id} />
@@ -718,11 +810,21 @@
           {/each}
         </List>
       {:else if tab_index === 4}
-        <p
-          class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
-        >
-          Notices
-        </p>
+        <div class="mb-2">
+          <p
+            class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+          >
+            Archived Threads
+          </p>
+          <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                </svg>
+            </div>
+            <input bind:value={arch_threads_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+          </div>
+        </div>
         <div class="relative">
           <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
               <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
