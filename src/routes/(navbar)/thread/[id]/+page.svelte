@@ -11,7 +11,7 @@
     import Notice from "$lib/components/notice.svelte";
     import { common_fetch } from "$lib/fetch_func";
     import SendNotice from "$lib/components/send-notice.svelte";
-    import { Dropdown, DropdownItem, DropdownDivider, DropdownHeader,Button } from 'flowbite-svelte';
+    import { Dropdown, DropdownItem } from 'flowbite-svelte';
 
     let tabs: Tab[] =
     [
@@ -751,7 +751,7 @@
 
             {:else if tabs[1].active}
                 <!-- Add File -->
-                <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
+                <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" >Add File</button>
             {:else if tabs[2].active}
                 <!-- Add Members -->
                 <button on:click={() => {add_member_modal.show();}} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>

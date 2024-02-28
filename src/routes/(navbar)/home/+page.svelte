@@ -11,7 +11,7 @@
   import { common_fetch } from "$lib/fetch_func";
   import { onMount } from "svelte";
 
-  import { Entity, type Member } from '$lib/containers';
+  import { Entity } from '$lib/containers';
     import List from '$lib/components/list.svelte';
 
 
