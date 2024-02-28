@@ -84,10 +84,6 @@
     $: file_count = files.length;
     $: member_count = members.length;
     $: notices_empty = notices.length === 0;
-    // $:
-    // {
-    //     console.log(selected_memberid);
-    // }
 
     function reset_tabs(): void
     {
@@ -690,7 +686,21 @@
                     <p class="text-base font-medium text-gray-700 dark:text-gray-200">{closing_comment}</p>
                 {/if}
             {:else if tabs[1].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Files
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={files_loaded} empty={files_empty}>
                     {#each files as file}
                         <li>
@@ -699,7 +709,21 @@
                     {/each}
                 </List>
             {:else if tabs[2].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Members</p>
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Members
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={!members_loading} empty={members_empty}>
                     {#each members as member}
                         <li>
@@ -707,8 +731,22 @@
                         </li>
                     {/each}
                 </List>
-                {:else if tabs[3].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
+            {:else if tabs[3].active}
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Notices
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={notices_loaded} empty={notices_empty}>
                     {#each notices as notice}
                         <li>
@@ -716,9 +754,9 @@
                         </li>
                     {/each}
                 </List>
-                <div class="flex justify-end">
+                <div class="flex justify-end mt-2">
                     <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
-                    </div>
+                </div>
             {/if}
         </div>
         <div class="thread-extra-button flex justify-end items-end mt-2">
