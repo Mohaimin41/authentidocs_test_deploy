@@ -803,7 +803,7 @@
           </div>
         </div>
         <List loaded={arch_thread_loaded} empty={arch_thread_empty}>
-          {#each arch_threads as thread}
+          {#each arch_threads_filtered as thread}
             <li>
               <ThreadCard thread_name={thread.name} thread_id={thread.id} />
             </li>
@@ -814,7 +814,7 @@
           <p
             class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
           >
-            Archived Threads
+            Notices
           </p>
           <div class="relative">
             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
