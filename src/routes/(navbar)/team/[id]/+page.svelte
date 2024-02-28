@@ -343,7 +343,7 @@
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            level:'thread',
+                            level:'team',
                             level_id:id,
                             id:$page.data.session?.user?.name,
                         })
