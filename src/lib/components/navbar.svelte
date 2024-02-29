@@ -8,7 +8,7 @@
     import Pfp from './pfp.svelte';
     import { Modal } from 'flowbite';
     import SearchMode from './search-mode.svelte';
-    import { goto } from '$app/navigation';
+    import { afterNavigate, goto } from '$app/navigation';
 
     let search_mode: number;
     let search_query: string;
@@ -159,6 +159,18 @@
         input_elem.click();
     }
 
+    afterNavigate((): void =>
+    {
+        let temp_mode: string | null = $page.url.searchParams.get("mode");
+        let temp_query: string | null = $page.url.searchParams.get("query");
+
+        if(temp_mode !== null && temp_query !== null)
+        {
+            search_mode = parseInt(temp_mode);
+            search_query = temp_query;
+        }
+    });
+
     onMount((): void =>
     {
         verify_modal = new Modal(verify_modal_elem);
@@ -219,8 +231,8 @@
             </div>
         {:else}
             <div class="flex">
-                <a href="/signup" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Sign Up</a>
-                <a href="/login" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Login</a>
+                <a href="/signup" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">Sign Up</a>
+                <a href="/login" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Login</a>
             </div>
         {/if}
     </div>
