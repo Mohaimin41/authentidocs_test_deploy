@@ -6,10 +6,32 @@
 
     let id: string;
     let modal_elem: HTMLDivElement;
+    let addable_members_filter: string;
     let addable_members: AddableMemberObj[] = [];
+    let addable_members_filtered: AddableMemberObj[] = [];
     export let modal: Modal;
     export let get_addable_members: (id: string) => Promise<AddableMemberObj[]>;
     export let add_member: (id: string, members: AddableMemberObj[]) => any;
+
+    $:
+    {
+        if(addable_members_filter !== null && addable_members_filter !== undefined && addable_members_filter.length > 0)
+        {
+            addable_members_filtered = [];
+
+            for(let i: number = 0; i < addable_members.length; ++i)
+            {
+                if(addable_members[i].name.match(addable_members_filter))
+                {
+                    addable_members_filtered.push(addable_members[i]);
+                }
+            }
+        }
+        else
+        {
+            addable_members_filtered = Array.from(addable_members);
+        }
+    }
 
     onMount((): void =>
     {
@@ -19,6 +41,8 @@
         get_addable_members(id).then((value: AddableMemberObj[]): void =>
         {
             addable_members = Array.from(value);
+            addable_members_filtered = Array.from(addable_members);
+            addable_members_filter = "";
         });
     });
 </script>
@@ -47,10 +71,10 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                         </svg>
                     </div>
-                    <input type="search" class="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    <input bind:value={addable_members_filter} type="search" class="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
                 </div>
                 <form on:submit={() => {add_member(id, addable_members);}} class="mx-auto">
-                    {#each addable_members as member}
+                    {#each addable_members_filtered as member}
                         <div class="flex items-center mb-4">
                             <input bind:checked={member.checked} id="checkbox-{member.id}" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" >
                             <label for="checkbox-1" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{member.name}</label>

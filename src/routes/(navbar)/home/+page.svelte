@@ -216,34 +216,55 @@
   }
   let notice_loaded: boolean = false;
   let notice_empty: boolean;
+  let notices_filter: string;
   let notices: Entity[] = [];
-  function get_notices(): void
+  let notices_filtered: Entity[] = [];
+  $: notice_empty = notices_filtered.length === 0;
+  $:
+  {
+    if(notices_filter !== null && notices_filter !== undefined && notices_filter.length > 0)
     {
-        let request_obj: any = {
-            userid: $page.data.session?.user?.name,
-        };
+      notices_filtered = [];
 
-        common_fetch(
-        "/api/user/getnotices",
-        request_obj,
-        async (response: Response): Promise<void> => {
-          let response_obj: any = await response.json();
-
-          if (response_obj === null) {
-            return;
-          }
-          notices = new Array((response_obj.length));
-
-          for(let i = 0; i < notices.length; ++i)
-          {
-              notices[i] = new Entity();
-              notices[i].uid = response_obj[i].f_noticeid;
-              notices[i].name = response_obj[i].f_subject;
-          }
-          notice_loaded = true;
-        });
+      for(let i: number = 0; i < notices.length; ++i)
+      {
+        if(notices[i].name.match(notices_filter))
+        {
+          notices_filtered.push(notices[i]);
+        }
+      }
     }
-    $: notice_empty = notices.length === 0;
+    else
+    {
+      notices_filtered = Array.from(notices);
+    }
+  }
+  function get_notices(): void
+  {
+      let request_obj: any = {
+          userid: $page.data.session?.user?.name,
+      };
+
+      common_fetch(
+      "/api/user/getnotices",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        if (response_obj === null) {
+          return;
+        }
+        notices = new Array((response_obj.length));
+
+        for(let i = 0; i < notices.length; ++i)
+        {
+            notices[i] = new Entity();
+            notices[i].uid = response_obj[i].f_noticeid;
+            notices[i].name = response_obj[i].f_subject;
+        }
+        notice_loaded = true;
+      });
+  }
   function get_personal_files(): void {
     personal_files_loaded = false;
     let request_obj: any = {
@@ -799,7 +820,7 @@
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                 </svg>
             </div>
-            <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+            <input bind:value={arch_threads_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
           </div>
         </div>
         <List loaded={arch_thread_loaded} empty={arch_thread_empty}>
@@ -822,19 +843,11 @@
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                 </svg>
             </div>
-            <input bind:value={arch_threads_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+            <input bind:value={notices_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
           </div>
-        </div>
-        <div class="relative">
-          <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-              </svg>
-          </div>
-          <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
         </div>
         <List loaded={notice_loaded} empty={notice_empty}>
-          {#each notices as notice}
+          {#each notices_filtered as notice}
               <li>
                   <Notice uid={notice.uid} title={notice.name} />
               </li>
