@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Notice from './../../../lib/components/notice.svelte';
+	import Notice from "$lib/components/notice.svelte";
   import { Modal } from "flowbite";
   import { page } from "$app/stores";
   import FileCard from "$lib/components/home/file-card.svelte";
@@ -10,9 +10,9 @@
   import { get } from "svelte/store";
   import { common_fetch } from "$lib/fetch_func";
   import { onMount } from "svelte";
-
   import { Entity } from '$lib/containers';
   import List from '$lib/components/list.svelte';
+  import OrgCard from '$lib/components/home/org-card.svelte';
 
 
   let file_input_elem: HTMLInputElement;
@@ -54,7 +54,7 @@
     public callback!: () => void;
   }
 
-  let tabs: Tab[] = new Array(5);
+  let tabs: Tab[] = new Array(6);
 
   for (let i: number = 0; i < tabs.length; ++i) {
     tabs[i] = new Tab();
@@ -67,11 +67,12 @@
     };
   }
 
-  tabs[0].name = "My Personal Files";
-  tabs[1].name = "My Teams";
-  tabs[2].name = "Active Threads";
-  tabs[3].name = "Archived Threads";
-  tabs[4].name = "Notices";
+  tabs[0].name = "Personal Files";
+  tabs[1].name = "Organisations";
+  tabs[2].name = "My Teams";
+  tabs[3].name = "Active Threads";
+  tabs[4].name = "Archived Threads";
+  tabs[5].name = "Notices";
 
   /**
    * file list element data object
@@ -214,6 +215,11 @@
   function hide_modal(): void {
     modal_obj.hide();
   }
+
+  let orgs_filter: string;
+  let orgs: Entity[] = [];
+  let orgs_filtered: Entity[] = [];
+  let orgs_loaded: boolean = false;
   let notice_loaded: boolean = false;
   let notice_empty: boolean;
   let notices_filter: string;
@@ -239,31 +245,51 @@
       notices_filtered = Array.from(notices);
     }
   }
+  $:
+  {
+    if(orgs_filter !== null && orgs_filter !== undefined && orgs_filter.length > 0)
+    {
+      orgs_filtered = [];
+
+      for(let i: number = 0; i < orgs.length; ++i)
+      {
+        if(orgs[i].name.match(orgs_filter))
+        {
+          orgs_filtered.push(orgs[i]);
+        }
+      }
+    }
+    else
+    {
+      orgs_filtered = Array.from(orgs);
+    }
+  }
+
   function get_notices(): void
   {
-      let request_obj: any = {
-          userid: $page.data.session?.user?.name,
-      };
+    let request_obj: any = {
+        userid: $page.data.session?.user?.name,
+    };
 
-      common_fetch(
-      "/api/user/getnotices",
-      request_obj,
-      async (response: Response): Promise<void> => {
-        let response_obj: any = await response.json();
+    common_fetch(
+    "/api/user/getnotices",
+    request_obj,
+    async (response: Response): Promise<void> => {
+      let response_obj: any = await response.json();
 
-        if (response_obj === null) {
-          return;
-        }
-        notices = new Array((response_obj.length));
+      if (response_obj === null) {
+        return;
+      }
+      notices = new Array((response_obj.length));
 
-        for(let i = 0; i < notices.length; ++i)
-        {
-            notices[i] = new Entity();
-            notices[i].uid = response_obj[i].f_noticeid;
-            notices[i].name = response_obj[i].f_subject;
-        }
-        notice_loaded = true;
-      });
+      for(let i = 0; i < notices.length; ++i)
+      {
+          notices[i] = new Entity();
+          notices[i].uid = response_obj[i].f_noticeid;
+          notices[i].name = response_obj[i].f_subject;
+      }
+      notice_loaded = true;
+    });
   }
   function get_personal_files(): void {
     personal_files_loaded = false;
@@ -307,6 +333,34 @@
       },
     );
   }
+
+  function get_organisations(): void
+  {
+    orgs_loaded = false;
+
+    common_fetch(
+      "/api/user/getorgs",
+      {
+        given_userid: $page.data.session?.user?.name
+      },
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+        orgs = new Array(response_obj.length);
+
+        for(let i: number = 0; i < orgs.length; ++i)
+        {
+          orgs[i] = new Entity();
+          orgs[i].uid = response_obj[i].f_orgid;
+          orgs[i].name = response_obj[i].f_org_name;
+        }
+
+        orgs_loaded = true;
+        orgs_filtered = Array.from(orgs);
+        orgs_filter = "";
+      },
+    );
+  }
+
   function get_user_teams(): void {
     teams_loaded = false;
     let request_obj: any = {
@@ -471,8 +525,6 @@
       console.log(response_obj);
 
       if (response_obj.success === false) {
-        console.error("dhuru");
-
         success = false;
 
         break;
@@ -552,6 +604,7 @@
     }
 
     get_personal_files();
+    get_organisations();
     get_user_teams();
     get_user_active_threads();
     get_user_archive_threads();
@@ -597,7 +650,25 @@
               <p
                 class="text-2xl font-semibold text-gray-700 dark:text-gray-200"
               >
-                My Personal Files
+                Personal Files
+              </p>
+            </a>
+          </li>
+          <!-- Orgs -->
+          <li>
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            <a
+              href="javascript:"
+              class="flex {color[1]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[1].callback}
+            >
+            <svg class="w-8 h-8 text-purple-500 dark:text-purple-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
+            </svg>
+              <p
+                class="text-2xl font-semibold text-gray-700 dark:text-gray-200"
+              >
+                Organisations
               </p>
             </a>
           </li>
@@ -606,8 +677,8 @@
             <!-- svelte-ignore a11y-invalid-attribute -->
             <a
               href="javascript:"
-              class="flex {color[1]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-              on:click={tabs[1].callback}
+              class="flex {color[2]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[2].callback}
             >
               <svg
                 class="w-8 h-8 text-green-500 dark:text-green-400 me-2"
@@ -635,8 +706,8 @@
             <!-- svelte-ignore a11y-invalid-attribute -->
             <a
               href="javascript:"
-              class="flex {color[2]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-              on:click={tabs[2].callback}
+              class="flex {color[3]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[3].callback}
             >
               <svg
                 class="w-8 h-8 text-indigo-500 dark:text-indigo-400 me-2"
@@ -665,8 +736,8 @@
             <!-- svelte-ignore a11y-invalid-attribute -->
             <a
               href="javascript:"
-              class="flex {color[3]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-              on:click={tabs[3].callback}
+              class="flex {color[4]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[4].callback}
             >
               <svg
                 class="w-8 h-8 text-yellow-500 dark:text-yellow-400 me-2"
@@ -695,8 +766,8 @@
             <!-- svelte-ignore a11y-invalid-attribute -->
             <a
               href="javascript:"
-              class="flex {color[4]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-              on:click={tabs[4].callback}
+              class="flex {color[5]} items-center block p-6 border border-gray-200 rounded-lg shadow dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              on:click={tabs[5].callback}
             >
               <svg
                 class="w-8 h-8 text-red-500 dark:text-red-400 me-2"
@@ -766,6 +837,29 @@
           <p
             class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
           >
+            Organisations
+          </p>
+          <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                </svg>
+            </div>
+            <input type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+          </div>
+        </div>
+        <List loaded={orgs_loaded} empty={orgs_filtered.length === 0}>
+          {#each orgs_filtered as org}
+            <li>
+              <OrgCard uid={org.uid} name={org.name} />
+            </li>
+          {/each}
+        </List>
+      {:else if tab_index === 2}
+        <div class="mb-2">
+          <p
+            class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+          >
             My Teams
           </p>
           <div class="relative">
@@ -784,7 +878,7 @@
             </li>
           {/each}
         </List>
-      {:else if tab_index === 2}
+      {:else if tab_index === 3}
         <div class="mb-2">
           <p
             class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
@@ -807,7 +901,7 @@
             </li>
           {/each}
         </List>
-      {:else if tab_index === 3}
+      {:else if tab_index === 4}
         <div class="mb-2">
           <p
             class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
@@ -830,7 +924,7 @@
             </li>
           {/each}
         </List>
-      {:else if tab_index === 4}
+      {:else if tab_index === 5}
         <div class="mb-2">
           <p
             class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"

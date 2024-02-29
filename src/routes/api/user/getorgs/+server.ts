@@ -29,8 +29,6 @@ export async function POST({
     );
   }
 
-
-
   let { data:result, error:_error } = await supabase
   .rpc('get_user_orgs_userid', {
     given_userid
