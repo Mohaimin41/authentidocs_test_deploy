@@ -11,7 +11,7 @@
     import Notice from "$lib/components/notice.svelte";
     import { common_fetch } from "$lib/fetch_func";
     import SendNotice from "$lib/components/send-notice.svelte";
-    import { Dropdown, DropdownItem, DropdownDivider, DropdownHeader,Button } from 'flowbite-svelte';
+    import { Dropdown, DropdownItem } from 'flowbite-svelte';
 
     let tabs: Tab[] =
     [
@@ -41,8 +41,12 @@
     let started_at: Date;
     let date_text: string;
     let time_text: string;
+    let files_filter: string;
     let files: FileObj[] = [];
+    let files_filtered: FileObj[] = [];
+    let members_filter: string;
     let members: MemberObj[] = [];
+    let members_filtered: MemberObj[] = [];
     let is_active: boolean;
     let can_forward: boolean;
     let can_close: boolean;
@@ -63,7 +67,9 @@
     let members_loading: boolean;
     let notices_loaded: boolean = false;
     let notices_empty: boolean;
+    let notices_filter: string;
     let notices: Entity[] = [];
+    let notices_filtered: Entity[] = [];
     let send_notice_modal: Modal;
     let forwardable_members: AddableMemberObj[] = [];
     let selected_memberid: String;
@@ -79,15 +85,49 @@
         init();
     }
 
-    $: files_empty = files.length === 0;
-    $: members_empty = members.length === 0;
+    $: files_empty = files_filtered.length === 0;
+    $: members_empty = members_filtered.length === 0;
     $: file_count = files.length;
     $: member_count = members.length;
-    $: notices_empty = notices.length === 0;
-    // $:
-    // {
-    //     console.log(selected_memberid);
-    // }
+    $: notices_empty = notices_filtered.length === 0;
+    $:
+    {
+        if(files_filter !== null && files_filter !== undefined && files_filter.length > 0)
+        {
+            files_filtered = [];
+
+            for(let i: number = 0; i < files.length; ++i)
+            {
+                if(files[i].name.match(files_filter))
+                {
+                    files_filtered.push(files[i]);
+                }
+            }
+        }
+        else
+        {
+            files_filtered = Array.from(files);
+        }
+    }
+    $:
+    {
+        if(members_filter !== null && members_filter !== undefined && members_filter.length > 0)
+        {
+            members_filtered = [];
+
+            for(let i: number = 0; i < members.length; ++i)
+            {
+                if(members[i].name.match(members_filter))
+                {
+                    members_filtered.push(members[i]);
+                }
+            }
+        }
+        else
+        {
+            members_filtered = Array.from(members);
+        }
+    }
 
     function reset_tabs(): void
     {
@@ -143,6 +183,8 @@
             // }
 
             members_loading = false;
+            members_filtered = Array.from(members);
+            members_filter = "";
         });
     }
     async function get_forwardable_members(): Promise<void>
@@ -300,6 +342,8 @@
                 notices[i].name = response_obj[i].f_subject;
             }
             notices_loaded=true;
+            notices_filtered = Array.from(notices);
+            notices_filter = "";
         });
     }
 
@@ -441,24 +485,24 @@
         });
     }
     async function check_admin(): Promise<void> {
-    let response: Response = await fetch(
-                    "/api/user/isadmin",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            level:'thread',
-                            level_id:id,
-                            id:$page.data.session?.user?.name,
-                        })
-                    }
-                );
-                let response_obj: any = await response.json();
-                //console.log(response_obj)
-                is_admin=response_obj;   
-  }
+        let response: Response = await fetch(
+        "/api/user/isadmin",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                level:'thread',
+                level_id:id,
+                id:$page.data.session?.user?.name,
+            })
+        });
+
+        let response_obj: any = await response.json();
+        //console.log(response_obj)
+        is_admin=response_obj;   
+    }
 
     function init(): void
     {
@@ -541,6 +585,8 @@
                 // }
 
                 files_loaded = true;
+                files_filtered = Array.from(files);
+                files_filter = "";
             });
         });
 
@@ -690,42 +736,84 @@
                     <p class="text-base font-medium text-gray-700 dark:text-gray-200">{closing_comment}</p>
                 {/if}
             {:else if tabs[1].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Files
+                    </p>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                            </svg>
+                        </div>
+                        <input bind:value={files_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={files_loaded} empty={files_empty}>
-                    {#each files as file}
+                    {#each files_filtered as file}
                         <li>
                             <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status.toString()}/>
                         </li>
                     {/each}
                 </List>
             {:else if tabs[2].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Members</p>
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Members
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input bind:value={members_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={!members_loading} empty={members_empty}>
-                    {#each members as member}
+                    {#each members_filtered as member}
                         <li>
                             <MemberCard thread_id={id} id={member.id} name={member.name} serial={member.serial} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
                         </li>
                     {/each}
                 </List>
-                {:else if tabs[3].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
+            {:else if tabs[3].active}
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Notices
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input bind:value={notices_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={notices_loaded} empty={notices_empty}>
-                    {#each notices as notice}
+                    {#each notices_filtered as notice}
                         <li>
                             <Notice uid={notice.uid} title={notice.name}/>
                         </li>
                     {/each}
                 </List>
-                <div class="flex justify-end">
+                <div class="flex justify-end mt-2">
                     <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
-                    </div>
+                </div>
             {/if}
         </div>
         <div class="thread-extra-button flex justify-end items-end mt-2">
             {#if tabs[0].active}
                 <button on:click={forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward}>Forward</button>
+                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward} >Flex Forward</button>
                 <button on:click={show_close_thread_modal} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" disabled={!can_close}>Close Thread</button>
-                <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" disabled={!can_forward} >Flex-Forward</button>
                 <Dropdown>
                     {#each forwardable_members as member}
                       <DropdownItem key={member.id}>
@@ -743,15 +831,12 @@
                       </DropdownItem>
                     {/each}
                     <DropdownItem>
-                    <button on:click={flex_forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" >Forward</button>
-                </DropdownItem>  
+                        <button on:click={flex_forward} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" >Forward</button>
+                    </DropdownItem>
                 </Dropdown>
-                  
-                
-
             {:else if tabs[1].active}
                 <!-- Add File -->
-                <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" disabled={!can_add_file}>Add File</button>
+                <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" >Add File</button>
             {:else if tabs[2].active}
                 <!-- Add Members -->
                 <button on:click={() => {add_member_modal.show();}} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Member</button>

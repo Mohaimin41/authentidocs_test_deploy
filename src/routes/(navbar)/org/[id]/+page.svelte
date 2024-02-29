@@ -13,6 +13,8 @@
     import Notice from "$lib/components/notice.svelte";
     import Create from "$lib/components/create.svelte"
 
+    import { priv_key } from "$lib/stores";
+    import { get } from "svelte/store";
     let tabs: Tab[] =
     [
         {
@@ -36,22 +38,24 @@
             active: false
         }
     ];
+    let teams_filter: string;
     let teams: Entity[] = [];
+    let teams_filtered: Entity[] = [];
+    let notices_filter: string;
     let notices: Entity[] = [];
+    let notices_filtered: Entity[] = [];
     let id: string;
-    let team_name_input: string;
-    let team_description_input: string;
-    let org_name:string = "স্বদীপের org";  // remove the names, আপাতত এমনে দিসি কারণ undefined লেখা দেখলে কেমন জানি লাগে :3
-    let org_leader:string = "স্বদীপ আহমেদ";
-    let org_description:string = "demo description"
+    let org_name:string;
+    let org_leader:string;
+    let org_description:string;
     let add_member_modal: Modal;
-    let create_team_modal_elem: HTMLDivElement;
-    let notifications_modal_elem: HTMLDivElement;
     let create_team_modal: Modal;
-    let notifications_modal: Modal;
-    let addable_members: AddableMemberObj[] = [];
+    let files_filter: string;
     let files: FileObj[] = [];
+    let files_filtered: FileObj[] = [];
+    let members_filter: string;
     let members: MemberObj[] = [];
+    let members_filtered: MemberObj[] = [];
     let teams_loaded: boolean = false;
     let files_loaded: boolean = false;
     let members_loaded: boolean = false;
@@ -68,11 +72,90 @@
     let org_creation_date:Date;
     let date_text:string;
     let is_admin:boolean = false;
+    let file_uploading_modal_elem: HTMLDivElement;
+    let file_upload_progress: HTMLDivElement;
+    let file_uploading_modal: Modal;
 
-    $: teams_empty = teams.length === 0;
-    $: files_empty = files.length === 0;
-    $: members_empty = members.length === 0;
-    $: notices_empty = notices.length === 0;
+    $: teams_empty = teams_filtered.length === 0;
+    $: files_empty = files_filtered.length === 0;
+    $: members_empty = members_filtered.length === 0;
+    $: notices_empty = notices_filtered.length === 0;
+    $:
+    {
+        if(files_filter !== null && files_filter !== undefined && files_filter.length > 0)
+        {
+            files_filtered = [];
+
+        for(let i: number = 0; i < files.length; ++i)
+        {
+            if(files[i].name.match(files_filter))
+            {
+                files_filtered.push(files[i]);
+            }
+        }
+        }
+        else
+        {
+            files_filtered = Array.from(files);
+        }
+    }
+    $:
+    {
+        if(members_filter !== null && members_filter !== undefined && members_filter.length > 0)
+        {
+            members_filtered = [];
+
+        for(let i: number = 0; i < members.length; ++i)
+        {
+            if(members[i].name.match(members_filter))
+            {
+                members_filtered.push(members[i]);
+            }
+        }
+        }
+        else
+        {
+            members_filtered = Array.from(members);
+        }
+    }
+    $:
+    {
+        if(teams_filter !== null && teams_filter !== undefined && teams_filter.length > 0)
+        {
+            teams_filtered = [];
+
+        for(let i: number = 0; i < teams.length; ++i)
+        {
+            if(teams[i].name.match(teams_filter))
+            {
+                teams_filtered.push(teams[i]);
+            }
+        }
+        }
+        else
+        {
+            teams_filtered = Array.from(teams);
+        }
+    }
+    $:
+    {
+        if(notices_filter !== null && notices_filter !== undefined && notices_filter.length > 0)
+        {
+            notices_filtered = [];
+
+        for(let i: number = 0; i < notices.length; ++i)
+        {
+            if(notices[i].name.match(notices_filter))
+            {
+                notices_filtered.push(notices[i]);
+            }
+        }
+        }
+        else
+        {
+            notices_filtered = Array.from(notices);
+        }
+    }
 
     function reset_tabs(): void
     {
@@ -128,24 +211,21 @@
             }
         }
         let response: Response = await fetch(
-                    "/api/org/addmember",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                           uid_list:adding_members,
-                           orgid:id,
-                        })
-                    }
-                );
-               
-                let response_obj: any = await response.json();
+        "/api/org/addmember",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                uid_list:adding_members,
+                orgid:id,
+            })
+        });
+    
+        let response_obj: any = await response.json();
 
-                console.log(response_obj);
-
-        
+        console.log(response_obj);
     }
     function create_team(id:string,name:string,description:string): void
     {
@@ -209,6 +289,8 @@
             // }
 
             teams_loaded = true;
+            teams_filtered = Array.from(teams);
+            teams_filter = "";
         });
     }
 
@@ -265,8 +347,10 @@
                 files[i].name = response_obj[i].f_filename;
                 files[i].type = response_obj[i].f_file_extension;
             }
-            console.log(files)
+            // console.log(files)
             files_loaded = true;
+            files_filtered = Array.from(files);
+            files_filter = "";
         });
     }
     function get_members(): void
@@ -299,6 +383,8 @@
             }
 
             members_loaded = true;
+            members_filtered = Array.from(members);
+            members_filter = "";
         });
     }
 
@@ -327,6 +413,8 @@
                 notices[i].name = response_obj[i].f_subject;
             }
             notices_loaded=true;
+            notices_filtered = Array.from(notices);
+            notices_filter = "";
         });
     }
              
@@ -354,22 +442,131 @@
     }
     async function check_admin(): Promise<void> {
     let response: Response = await fetch(
-                    "/api/user/isadmin",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            level:'thread',
-                            level_id:id,
-                            id:$page.data.session?.user?.name,
-                        })
-                    }
-                );
+    "/api/user/isadmin",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            level:'org',
+            level_id:id,
+            id:$page.data.session?.user?.name,
+        })
+    });
+    let response_obj: any = await response.json();
+    console.log(response_obj)
+    is_admin=response_obj;   
+  }
+
+  function add_file(): void {
+    let file_input_elem: HTMLInputElement = document.createElement("input");
+    file_input_elem.type = "file";
+
+    file_input_elem.onchange = async (event: Event): Promise<void> => {
+      file_uploading_modal.show();
+
+      let file: File | null | undefined = file_input_elem.files?.item(0);
+
+      if (file === null || file === undefined) {
+        return;
+      }
+
+      let file_buffer: ArrayBuffer = await file.arrayBuffer();
+      let success: boolean = true;
+      let file_success_response_obj: any = {};
+
+      for (let i: number = 0; i < file_buffer.byteLength; i += 1048576) {
+        file_upload_progress.style.width =
+          Math.round((i * 100) / file_buffer.byteLength) + "%";
+        let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
+        let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
+        let response: Response = await fetch(
+          "/api/org/addorgchunkfile/continue?filename=" + file.name,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              data: small_array,
+            }),
+          }
+        );
+
+        let response_obj: any = await response.json();
+
+        if (response_obj.success === false) {
+
+          success = false;
+
+          break;
+        }
+      }
+
+      if (success) {
+        file_upload_progress.style.width = "100%";
+
+        await fetch(
+          "/api/org/addorgchunkfile/finish?filename=" +
+            file.name +
+            "&orgid=" +
+            id,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}),
+          }
+        ).then(async (response: Response): Promise<void> => {
+          file_success_response_obj = await response.json();
+
+          file_uploading_modal.hide();
+          get_files();
+        });
+        let subtle_crypto = window.crypto.subtle;
+        let temp_priv_key = get(priv_key);
+
+        if (temp_priv_key) {
+          let signature: ArrayBuffer = await subtle_crypto.sign(
+            {
+              name: "ECDSA",
+              hash: { name: "SHA-384" },
+            },
+            temp_priv_key,
+            file_buffer
+          );
+
+          let signature_hex: string = [...new Uint8Array(signature)]
+            .map((x) => x.toString(16).padStart(2, "0"))
+            .join("");
+          let pubkey_json: string | null = localStorage.getItem("pub_key");
+          if (pubkey_json) {
+            let request_obj: any = {
+              fileid: file_success_response_obj.fileid,
+              signature: signature_hex,
+              key: pubkey_json,
+              userid: $page.data.session?.user?.name,
+            };
+
+            common_fetch(
+              "/api/files/addfilesignature",
+              request_obj,
+              async (response: Response): Promise<void> => {
                 let response_obj: any = await response.json();
-                console.log(response_obj)
-                is_admin=response_obj;   
+
+                console.log(response_obj);
+              }
+            );
+          }
+        }
+      } else {
+        file_uploading_modal.hide();
+      }
+    };
+
+    file_input_elem.click();
   }
 
     onMount((): void =>
@@ -377,6 +574,8 @@
         initModals();
 
         id = $page.params.id;
+
+        file_uploading_modal = new Modal(file_uploading_modal_elem);
 
         get_org_details();
         get_teams();
@@ -429,28 +628,25 @@
                                     <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
                                 </svg>
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
-                                <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
                             </div>
          
                             <div class="flex items-center">
-                                <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                                 </svg>
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
                             </div>
                             <div class="flex items-center">
-                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                    <path fill-rule="evenodd" d="M10 2a3 3 0 0 0-3 3v1H5a3 3 0 0 0-3 3v2.4l1.4.7a7.7 7.7 0 0 0 .7.3 21 21 0 0 0 16.4-.3l1.5-.7V9a3 3 0 0 0-3-3h-2V5a3 3 0 0 0-3-3h-4Zm5 4V5c0-.6-.4-1-1-1h-4a1 1 0 0 0-1 1v1h6Zm6.4 7.9.6-.3V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-5.4l.6.3a10 10 0 0 0 .7.3 23 23 0 0 0 18-.3h.1L21 13l.4.9ZM12 10a1 1 0 1 0 0 2 1 1 0 1 0 0-2Z" clip-rule="evenodd"/>
-                                  </svg>
+                                <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
+                                </svg>
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{team_count}</p>
-                                <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
                             </div>
                             <div class="flex items-center">
-                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                    <path fill-rule="evenodd" d="M10 2a3 3 0 0 0-3 3v1H5a3 3 0 0 0-3 3v2.4l1.4.7a7.7 7.7 0 0 0 .7.3 21 21 0 0 0 16.4-.3l1.5-.7V9a3 3 0 0 0-3-3h-2V5a3 3 0 0 0-3-3h-4Zm5 4V5c0-.6-.4-1-1-1h-4a1 1 0 0 0-1 1v1h6Zm6.4 7.9.6-.3V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-5.4l.6.3a10 10 0 0 0 .7.3 23 23 0 0 0 18-.3h.1L21 13l.4.9ZM12 10a1 1 0 1 0 0 2 1 1 0 1 0 0-2Z" clip-rule="evenodd"/>
-                                  </svg>
+                                <svg class="w-6 h-6 text-purple-500 dark:text-purple-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
+                                </svg>
                                 <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
-                                <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
                             </div>
                         </div>
                         <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
@@ -458,51 +654,111 @@
                     </div>
                 </div>
             {:else if tabs[1].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Teams</p>
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Teams
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input bind:value={teams_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={teams_loaded} empty={teams_empty}>
-                    {#each teams as team}
+                    {#each teams_filtered as team}
                         <li>
                             <TeamCard uid={team.uid} name={team.name} />
                         </li>
                     {/each}
                 </List>
-                <div class="flex justify-end">
+                <div class="flex justify-end mt-2">
                     <button on:click={() => {create_team_modal.show()}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Create Team</button>
-                    </div>
+                </div>
             {:else if tabs[2].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Files</p>
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Files
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input bind:value={files_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={files_loaded} empty={files_empty}>
-                    {#each files as file}
+                    {#each files_filtered as file}
                         <li>
                             <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
                         </li>
                     {/each}
                 </List>
+                <!-- Add File -->
+                <div class="flex justify-end">
+                    <button  on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" >Add File</button>
+                    </div>
             {:else if tabs[3].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Members</p>
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Members
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input bind:value={members_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={members_loaded} empty={members_empty}>
-                    {#each members as member}
+                    {#each members_filtered as member}
                         <li>
                             <MemberCard org_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
                         </li>
                     {/each}
                 </List>
-                <div class="flex justify-end">
-                <button on:click={() => {add_member_modal.show()}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
+                <div class="flex justify-end mt-2">
+                    <button on:click={() => {add_member_modal.show()}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Add Member</button>
                 </div>
-                {:else if tabs[4].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Notices</p>
+            {:else if tabs[4].active}
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Notices
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input bind:value={notices_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
                 <List loaded={notices_loaded} empty={notices_empty}>
-                    {#each notices as notice}
+                    {#each notices_filtered as notice}
                         <li>
                             <Notice uid={notice.uid} title={notice.name}/>
                         </li>
                     {/each}
                 </List>
-                <div class="flex justify-end">
-                <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
+                <div class="flex justify-end mt-2">
+                    <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
                 </div>
-                {/if}
+            {/if}
         </div>
     </div>
 </div>
@@ -513,6 +769,34 @@
 
 <Create bind:modal={create_team_modal} id={id} creation_request={create_team} />
 
+<div
+  bind:this={file_uploading_modal_elem}
+  data-modal-backdrop="static"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <div
+        class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
+      >
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+          Uploading...
+        </h3>
+      </div>
+      <div class="p-4 md:p-5 space-y-4">
+        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+          <div
+            bind:this={file_upload_progress}
+            class="bg-blue-600 h-2.5 rounded-full"
+            style="width: 0%"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <style>
     .pg-center
