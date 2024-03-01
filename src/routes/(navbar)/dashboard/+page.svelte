@@ -224,7 +224,7 @@
         if (response_obj === null) {
           return;
         }
-        console.log(response_obj);
+        // console.log(response_obj);
         for (let i: number = 0; i < response_obj.length; ++i) {
           teams[i] = new Team();
           teams[i].name = response_obj[i].f_team_name;
