@@ -16,10 +16,15 @@ export async function POST({
 
   const post_info = await request.json();
 
-  let given_content = post_info.conent;
+  let given_content = post_info.content;
   let given_creator_id = session.user.name;
   let given_title = "";
   let given_forumid = post_info.thread_name;
+
+  console.log(given_content);
+  console.log(given_creator_id);
+  console.log(given_title);
+  console.log(given_forumid);
 
   if (
     given_content === undefined ||

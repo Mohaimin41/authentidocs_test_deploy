@@ -14,7 +14,7 @@ export async function POST({
   // console.log(session);
   const forum_info = await request.json();
   // console.log("inside add key",key_info);
-  let given_uid = forum_info.hierarchy_level_id;
+  let given_uid: string = forum_info.hierarchy_level_id;
 
   if (given_uid === undefined || given_uid === null) {
     console.error(
@@ -30,7 +30,7 @@ export async function POST({
   let { data: result, error: _error } = await supabase.rpc(
     "get_hierarchy_all_forum_metadata",
     {
-      given_uid,
+      given_uid
     }
   );
 
