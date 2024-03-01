@@ -453,7 +453,7 @@
         {#if file_loaded}
             <div class="meta-data">
                 <p class="text-2xl font-medium text-gray-900 dark:text-white mb-2">{file_name}</p>
-                <div class="grid grid-cols-6 gap-1 me-6">
+                <div class="grid grid-cols-5 gap-1 me-6">
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
                     </div>
@@ -468,9 +468,6 @@
                     </div>
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current State</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Work Thread</p>
                     </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
@@ -502,13 +499,6 @@
                     <div class="flex items-center">
                         {#if $file_preview_mode == 1}
                             <p class="text-xs font-medium text-gray-700 dark:text-white">{current_state}</p>
-                        {:else}
-                            <p class="text-xs font-medium text-gray-700 dark:text-white">N/A</p>
-                        {/if}
-                    </div>
-                    <div class="flex items-center">
-                        {#if $file_preview_mode == 1}
-                            <p class="text-xs font-medium text-gray-700 dark:text-white">Thread 2 @ Team 4</p>
                         {:else}
                             <p class="text-xs font-medium text-gray-700 dark:text-white">N/A</p>
                         {/if}
