@@ -37,3 +37,17 @@ export class Tab
     public name: string = "";
     public active: boolean = false;
 }
+
+export class ForumMessage
+{
+    public id: string = "";
+    public sender: string = "";
+    public content: string = "";
+    public created_at: Date = new Date();
+}
+
+export class ForumThread
+{
+    public id: string = "";
+    public name: string = "";
+}

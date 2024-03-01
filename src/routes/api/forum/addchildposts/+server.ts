@@ -13,7 +13,7 @@ export async function POST({
 
   const post_info = await request.json();
 
-  let given_content = post_info.conent;
+  let given_content = post_info.content;
   let given_creator_id = session.user.name;
   let given_parent_id = post_info.parent_id;
   let given_forumid = post_info.thread_name;
@@ -35,11 +35,11 @@ export async function POST({
     return new (error as any)(422, "Invalid inputs, while adding child post.");
   }
 
-  let { data: result, error: _error } = await supabase.rpc("add_top_post", {
-    given_content,
+  let { data: result, error: _error } = await supabase.rpc("add_child_post", {
     given_creator_id,
-    given_forumid,
+    given_content,
     given_parent_id,
+    given_forumid,
   });
 
   // console.log("add key rps result",result)

@@ -46,7 +46,7 @@ export async function POST({
     );
   }
   // BUGSRC
-  let response: Response = new Response((result), {
+  let response: Response = new Response(JSON.stringify(result), {
     headers: {
       "Content-Type": "application/json",
     },

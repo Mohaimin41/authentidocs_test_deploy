@@ -16,7 +16,7 @@ export async function POST({
 
   const post_info = await request.json();
 
-  let given_content = post_info.conent;
+  let given_content = post_info.content;
   let given_creator_id = session.user.name;
   let given_title = "";
   let given_forumid = post_info.thread_name;

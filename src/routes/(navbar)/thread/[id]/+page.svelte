@@ -2,16 +2,18 @@
     import { page } from "$app/stores";
     import AddMember from "$lib/components/add-member.svelte";
     import List from "$lib/components/list.svelte";
-    import {Entity} from '$lib/containers';
+    import {Entity, ForumMessage, ForumThread} from '$lib/containers';
     import FileCard from "$lib/components/thread/file-card.svelte";
     import MemberCard from "$lib/components/thread/member-card.svelte";
+    import ForumThreadCard from "$lib/components/thread/forum-thread-card.svelte";
     import { MemberObj, AddableMemberObj, FileObj, Tab } from "$lib/containers";
-    import { Modal, initModals } from "flowbite";
+    import { Modal } from "flowbite";
     import { onMount } from "svelte";
     import Notice from "$lib/components/notice.svelte";
     import { common_fetch } from "$lib/fetch_func";
     import SendNotice from "$lib/components/send-notice.svelte";
     import { Dropdown, DropdownItem } from 'flowbite-svelte';
+    import ForumPost from "$lib/components/thread/forum-post.svelte";
 
     let tabs: Tab[] =
     [
@@ -29,6 +31,10 @@
         },
         {
             name: "Notices",
+            active: false
+        },
+        {
+            name: "Forum",
             active: false
         }
     ];
@@ -72,9 +78,20 @@
     let notices_filtered: Entity[] = [];
     let send_notice_modal: Modal;
     let forwardable_members: AddableMemberObj[] = [];
-    let selected_memberid: String;
-    let is_admin:boolean =  false;
-
+    let selected_memberid: string;
+    let is_admin: boolean =  false;
+    let add_forum_thread_modal_elem: HTMLDivElement;
+    let add_forum_thread_modal: Modal;
+    let forum_thread_name: string;
+    let add_forum_thread_form: HTMLFormElement;
+    let forum_threads: ForumThread[] = [];
+    let forum_thread_selected: boolean = false;
+    let selected_forum_thread: ForumThread;
+    let forum_messages: ForumMessage[] = [];
+    let add_post_modal_elem: HTMLDivElement;
+    let add_post_modal: Modal;
+    let add_post_form: HTMLFormElement;
+    let post_text: string;
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -127,6 +144,96 @@
         {
             members_filtered = Array.from(members);
         }
+    }
+
+    function post_message(): void
+    {
+        fetch("/api/forum/addtopposts",
+        {
+            method: "POST",
+            body: JSON.stringify(
+            {
+                content: post_text,
+                thread_name: selected_forum_thread.id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            if(response.status === 200)
+            {
+                select_thread(selected_forum_thread);
+            }
+            else
+            {
+                console.error(response.status, response.statusText);
+            }
+
+            add_forum_thread_form.reset();
+            post_text = "";
+            add_post_modal.hide();
+        });
+    }
+
+    function select_thread(forum_thread: ForumThread): void
+    {
+        forum_thread_selected = true;
+        selected_forum_thread = forum_thread;
+
+        fetch("/api/forum/getforumtoplevelpost",
+        {
+            method: "POST",
+            body: JSON.stringify(
+            {
+                forum_id: selected_forum_thread.id
+            })
+        }).then(async (response: Response) =>
+        {
+            if(response.status === 200)
+            {
+                let response_obj: any = await response.json();
+                forum_messages = new Array(response_obj.length);
+
+                for(let i: number = 0; i < forum_messages.length; ++i)
+                {
+                    forum_messages[i] = new ForumMessage();
+                    forum_messages[i].id = response_obj[i].f_postid;
+                    forum_messages[i].sender = response_obj[i].f_creator_id;
+                    forum_messages[i].content = response_obj[i].f_content;
+                    forum_messages[i].created_at = new Date(response_obj[i].f_created_at);
+                }
+            }
+            else
+            {
+                console.error(response.status, response.statusText);
+            }
+        });
+    }
+
+    function add_forum_thread(): void
+    {
+        fetch("/api/forum/makethread",
+        {
+            method: "POST",
+            body: JSON.stringify(
+            {
+                hierarchy_level: "thread",
+                hierarchy_level_id: id,
+                subject: "",
+                thread_name: forum_thread_name
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            if(response.status === 200)
+            {
+                get_forum_threads();
+            }
+            else
+            {
+                console.error(response.status, response.statusText);
+            }
+
+            add_forum_thread_form.reset();
+            add_forum_thread_modal.hide();
+        });
     }
 
     function reset_tabs(): void
@@ -213,6 +320,37 @@
         //console.log(forwardable_members)
         
     }
+
+    function get_forum_threads(): void
+    {
+        fetch("/api/forum/getallforumthread",
+        {
+            method: "POST",
+            body: JSON.stringify(
+            {
+                hierarchy_level_id: id
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            if(response.status === 200)
+            {
+                let response_obj = await response.json();
+                forum_threads = new Array(response_obj.length);
+
+                for(let i: number = 0; i < forum_threads.length; ++i)
+                {
+                    forum_threads[i] = new ForumThread();
+                    forum_threads[i].id = response_obj[i].f_forumid;
+                    forum_threads[i].name = response_obj[i].f_forum_thread_name;
+                }
+            }
+            else
+            {
+                console.error(response.status, response.statusText);
+            }
+        });
+    }
+
     function flex_forward(): void
     {
         fetch("/api/thread/flexforward",
@@ -294,29 +432,29 @@
 
         
     }
+
     async function send_notice_request(id: string, subject: string, content: string): Promise<any>
     {
         let response: Response = await fetch(
-                    "/api/notice/addnotice",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            hierarchy_level:'thread',
-                            hierarchy_level_id:id,
-                            content:content,
-                            subject:subject,
-                        })
-                    }
-                );
+        "/api/notice/addnotice",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                hierarchy_level:'thread',
+                hierarchy_level_id:id,
+                content:content,
+                subject:subject,
+            })
+        });
                
-                let response_obj: any = await response.json();
+        let response_obj: any = await response.json();
 
-                //console.log(response_obj);
-                send_notice_modal.hide();
-                get_notices();
+        //console.log(response_obj);
+        send_notice_modal.hide();
+        get_notices();
     }
     function get_notices(): void
     {
@@ -372,17 +510,16 @@
                 let smallbuffer: ArrayBuffer = file_buffer.slice(i, i + 1048576);
                 let small_array: number[] = Array.from(new Uint8Array(smallbuffer));
                 let response: Response = await fetch(
-                    "/api/thread/addthreadchunkfile/continue?filename=" + file.name,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            data: small_array,
-                        })
-                    }
-                );
+                "/api/thread/addthreadchunkfile/continue?filename=" + file.name,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        data: small_array,
+                    })
+                });
 
                 let response_obj: any = await response.json();
 
@@ -604,7 +741,7 @@
         }).then(async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
-            console.log(response_obj);
+            // console.log(response_obj);
             can_forward = response_obj;
         });
 
@@ -646,16 +783,20 @@
         get_members();
         get_notices();
         get_forwardable_members();
-        check_admin()
+        get_forum_threads();
+        check_admin();
     }
     
     onMount((): void =>
     {
-        initModals();
-
         id = $page.params.id;
         close_thread_modal = new Modal(close_thread_modal_elem);
         file_uploading_modal = new Modal(file_uploading_modal_elem);
+        add_forum_thread_modal = new Modal(add_forum_thread_modal_elem,
+        {
+            backdrop: "static"
+        });
+        add_post_modal = new Modal(add_post_modal_elem);
 
         init();
     });
@@ -807,6 +948,43 @@
                 <div class="flex justify-end mt-2">
                     <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
                 </div>
+            {:else if tabs[4].active}
+                {#if forum_thread_selected}
+                    <div class="flex align-center mb-2">
+                        <button on:click={() => {forum_thread_selected = false;}} type="button" class="font-medium text-blue-600 dark:text-blue-500 me-2">
+                            <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 p-0">{selected_forum_thread.name}</p>
+                    </div>
+                    <div class="grow overflow-y-auto">
+                        <List loaded={true} empty={forum_messages.length === 0}>
+                            {#each forum_messages as message}
+                                <li class="me-1">
+                                    <ForumPost forum_id={selected_forum_thread.id} message={message} />
+                                </li>
+                            {/each}
+                        </List>
+                    </div>
+                    <div class="flex justify-end mt-2">
+                        <button on:click={() => add_post_modal.show()} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Post</button>
+                    </div>
+                {:else}
+                    <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1">Forum</p>
+                    <div class="grow overflow-y-auto">
+                        <List loaded={true} empty={forum_threads.length === 0}>
+                            {#each forum_threads as forum_thread}
+                                <li>
+                                    <ForumThreadCard forum_thread={forum_thread} select_thread={select_thread} />
+                                </li>
+                            {/each}
+                        </List>
+                    </div>
+                    <div class="flex justify-end mt-2">
+                        <button on:click={() => {add_forum_thread_modal.show();}} class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Thread</button>
+                    </div>
+                {/if}
             {/if}
         </div>
         <div class="thread-extra-button flex justify-end items-end mt-2">
@@ -890,6 +1068,63 @@
                     <div bind:this={file_upload_progress} class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
                 </div>  
             </div>
+        </div>
+    </div>
+</div>
+
+<div bind:this={add_forum_thread_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Add Thread
+                </h3>
+                <button on:click={() => {add_forum_thread_modal.hide();}} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <form bind:this={add_forum_thread_form} on:submit={add_forum_thread} action="javascript:" class="p-4 md:p-5 space-y-4">
+                <div class="mb-5">
+                    <label for="forum-thread-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Forum Thread Name</label>
+                    <input bind:value={forum_thread_name} type="text" id="forum-thread-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off" required />
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div bind:this={add_post_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Add Post
+                </h3>
+                <button on:click={() => add_post_modal.hide()} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <form bind:this={add_post_form} on:submit={post_message} action="javascript:" class="p-4 md:p-5 space-y-4">
+                <textarea bind:value={post_text} rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="What's on your mind?" required></textarea>
+                <div class="flex justify-end">
+                    <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
