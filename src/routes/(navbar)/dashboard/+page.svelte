@@ -9,7 +9,7 @@
   import { page } from "$app/stores";
   import { db, type PriveKey } from "$lib/db";
   import { logged_in_store, priv_key, uid, useremail } from "$lib/stores";
-  import { Entity, type Member } from '$lib/containers';
+  import { Entity } from '$lib/containers';
 
   /**
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"
