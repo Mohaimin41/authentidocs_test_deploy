@@ -21,11 +21,6 @@ export async function POST({
   let given_title = "";
   let given_forumid = post_info.thread_name;
 
-  console.log(given_content);
-  console.log(given_creator_id);
-  console.log(given_title);
-  console.log(given_forumid);
-
   if (
     given_content === undefined ||
     given_content === null ||

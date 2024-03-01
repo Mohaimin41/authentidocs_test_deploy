@@ -167,6 +167,8 @@
                 console.error(response.status, response.statusText);
             }
 
+            add_forum_thread_form.reset();
+            post_text = "";
             add_post_modal.hide();
         });
     }
@@ -188,9 +190,6 @@
             if(response.status === 200)
             {
                 let response_obj: any = await response.json();
-                
-                console.log(response_obj);
-
                 forum_messages = new Array(response_obj.length);
 
                 for(let i: number = 0; i < forum_messages.length; ++i)
@@ -951,7 +950,7 @@
                 </div>
             {:else if tabs[4].active}
                 {#if forum_thread_selected}
-                    <div class="flex align-center">
+                    <div class="flex align-center mb-2">
                         <button on:click={() => {forum_thread_selected = false;}} type="button" class="font-medium text-blue-600 dark:text-blue-500 me-2">
                             <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>
@@ -960,15 +959,15 @@
                         <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 p-0">{selected_forum_thread.name}</p>
                     </div>
                     <div class="grow overflow-y-auto">
-                        <List loaded={true} empty={forum_threads.length === 0}>
+                        <List loaded={true} empty={forum_messages.length === 0}>
                             {#each forum_messages as message}
-                                <li>
-                                    <ForumPost message={message} />
+                                <li class="me-1">
+                                    <ForumPost forum_id={selected_forum_thread.id} message={message} />
                                 </li>
                             {/each}
                         </List>
                     </div>
-                    <div class="flex justify-end">
+                    <div class="flex justify-end mt-2">
                         <button on:click={() => add_post_modal.show()} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Post</button>
                     </div>
                 {:else}
