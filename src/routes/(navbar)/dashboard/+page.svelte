@@ -592,11 +592,6 @@
       </ul>
       <!-- Main content of each tab -->
       <div class="tab-content">
-        <!-- <p
-          class="tab-title text-2xl font-bold text-gray-900 dark:text-white mx-6 mt-6 ps-1"
-        >
-          {tabs[tab_index].name}
-        </p> -->
         <!-- Each option of tab_index show each type of tab -->
         {#if tab_index === 0}
           <List loaded={true} empty={personal_files.length === 0}>
@@ -611,6 +606,14 @@
             {#each new Array(10) as i, idx}
               <li>
                 <FileCard file_id={(idx + 1).toString()} file_name="File {idx + 1}" file_type="png" />
+              </li>
+            {/each}
+          </List>
+        {:else if tab_index === 2}
+          <List loaded={true} empty={orgs.length === 0}>
+            {#each orgs as org}
+              <li>
+                <OrgCard org_id={org.uid} org_name={org.name} />
               </li>
             {/each}
           </List>
