@@ -1,6 +1,7 @@
 <script lang="ts">
     import { gen_random_color } from "$lib/helpers";
     import { onMount } from "svelte";
+    import { file_preview_mode } from "$lib/stores";
 
     export let file_id: string;
     export let file_name: string;
@@ -9,6 +10,7 @@
 
     onMount(() : void =>
     {
+        file_preview_mode.set(4);
         color = gen_random_color();
     });
 </script>

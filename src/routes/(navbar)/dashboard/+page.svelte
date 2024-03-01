@@ -153,6 +153,34 @@
       }
     );
   }
+  let work_files: File[] = new Array(0);
+  function get_work_files(): void {
+    let request_obj: any = {
+      given_userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/getworkfiles",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+
+        work_files = [];
+
+        if (response_obj === null) {
+          return;
+        }
+        console.log(response_obj);
+
+        for (let i: number = 0; i < response_obj.length; ++i) {
+          work_files[i] = new File();
+          work_files[i].id = response_obj[i].f_fileid;
+          work_files[i].name = response_obj[i].f_filename;
+          work_files[i].type = response_obj[i].f_file_extension;
+        }
+      }
+    );
+  }
 
   class Team {
     public name!: string;
@@ -270,6 +298,7 @@
     get_user_teams();
     get_user_all_threads();
     get_user_orgs();
+    get_work_files();
     let request_obj: any = {
       userid: $page.data.session?.user?.name,
     };
@@ -601,13 +630,13 @@
             {/each}
           </List>
         {:else if tab_index === 1}
-          <List loaded={true} empty={false}>
-            {#each new Array(10) as i, idx}
-              <li>
-                <FileCard file_id={(idx + 1).toString()} file_name="File {idx + 1}" file_type="png" />
-              </li>
-            {/each}
-          </List>
+        <List loaded={true} empty={work_files.length === 0}>
+          {#each work_files as file}
+            <li>
+              <FileCard file_id={file.id} file_name={file.name} file_type={file.type} />
+            </li>
+          {/each}
+        </List>
         {:else if tab_index === 2}
           <List loaded={true} empty={orgs.length === 0}>
             {#each orgs as org}
