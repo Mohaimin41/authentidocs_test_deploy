@@ -311,6 +311,7 @@
         }, async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            console.log(response_obj);
             if(request_obj.length !=0)
             {
             notes = new Array(response_obj.length);

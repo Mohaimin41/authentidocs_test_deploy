@@ -24,7 +24,7 @@ export async function POST({
   }
 
   let { data: result, error: _error } = await supabase.rpc(
-    "get_threadfile_notes_list",
+    "get_threadfile_notes_list2",
     {
       given_fileid,
     }
