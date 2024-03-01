@@ -85,6 +85,9 @@
     let forum_thread_name: string;
     let add_forum_thread_form: HTMLFormElement;
     let forum_threads: ForumThread[] = [];
+    let forum_thread_selected: boolean = false;
+    let selected_forum_thread: ForumThread;
+    let forum_messages: ForumMessage[] = [];
 
     $: date_text = started_at?.toLocaleDateString();
     $: time_text = started_at?.toLocaleTimeString();
@@ -137,6 +140,33 @@
         {
             members_filtered = Array.from(members);
         }
+    }
+
+    function select_thread(forum_thread: ForumThread): void
+    {
+        forum_thread_selected = true;
+        selected_forum_thread = forum_thread;
+
+        fetch("/api/forum/getforumtoplevelpost",
+        {
+            method: "POST",
+            body: JSON.stringify(
+            {
+                forum_id: selected_forum_thread.id
+            })
+        }).then(async (response: Response) =>
+        {
+            if(response.status === 200)
+            {
+                let response_obj: any = await response.json();
+                
+                console.log(response_obj);
+            }
+            else
+            {
+                console.error(response.status, response.statusText);
+            }
+        });
     }
 
     function add_forum_thread(): void
@@ -267,9 +297,6 @@
             if(response.status === 200)
             {
                 let response_obj = await response.json();
-
-                console.log(response_obj);
-
                 forum_threads = new Array(response_obj.length);
 
                 for(let i: number = 0; i < forum_threads.length; ++i)
@@ -883,19 +910,36 @@
                     <button on:click={() => {send_notice_modal.show();}} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Send Notice</button>
                 </div>
             {:else if tabs[4].active}
-                <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1">Forum</p>
-                <div class="grow overflow-y-auto">
-                    <List loaded={true} empty={forum_threads.length === 0}>
-                        {#each forum_threads as forum_thread}
-                            <li>
-                                <ForumThreadCard id={forum_thread.id} name={forum_thread.name} />
-                            </li>
-                        {/each}
-                    </List>
-                </div>
-                <div class="flex justify-end mt-2">
-                    <button on:click={() => {add_forum_thread_modal.show();}} class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Thread</button>
-                </div>
+                {#if forum_thread_selected}
+                    <div class="flex align-center">
+                        <button on:click={() => {forum_thread_selected = false;}} type="button" class="font-medium text-blue-600 dark:text-blue-500 me-2">
+                            <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 p-0">{selected_forum_thread.name}</p>
+                    </div>
+                    <div class="grow overflow-y-auto">
+
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Post</button>
+                    </div>
+                {:else}
+                    <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1">Forum</p>
+                    <div class="grow overflow-y-auto">
+                        <List loaded={true} empty={forum_threads.length === 0}>
+                            {#each forum_threads as forum_thread}
+                                <li>
+                                    <ForumThreadCard forum_thread={forum_thread} select_thread={select_thread} />
+                                </li>
+                            {/each}
+                        </List>
+                    </div>
+                    <div class="flex justify-end mt-2">
+                        <button on:click={() => {add_forum_thread_modal.show();}} class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Thread</button>
+                    </div>
+                {/if}
             {/if}
         </div>
         <div class="thread-extra-button flex justify-end items-end mt-2">
