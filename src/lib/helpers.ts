@@ -8,11 +8,21 @@ export function gen_random_color(): string
 
 export function make_date(date: Date): string
 {
+    if(date === null || date === undefined)
+    {
+        return "";
+    }
+
     return months[date.getMonth()] + " " + date.getDate().toString().padStart(2, "0") + ", " + date.getFullYear();
 }
 
 export function make_time(date: Date): string
 {
+    if(date === null || date === undefined)
+    {
+        return "";
+    }
+
     let hours: number = date.getHours();
     let ampm: string = (hours >= 12) ? " PM" : " AM";
     hours %= 12;
