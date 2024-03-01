@@ -43,7 +43,7 @@ export class ForumMessage
     public id: string = "";
     public sender: string = "";
     public content: string = "";
-    public children: ForumMessage[] = [];
+    public created_at: Date = new Date();
 }
 
 export class ForumThread

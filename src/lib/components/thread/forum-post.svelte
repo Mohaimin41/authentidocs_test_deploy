@@ -1,12 +1,19 @@
 <script lang="ts">
     import type { ForumMessage } from "$lib/containers";
-    import ForumPost from "$lib/components/forum-post.svelte";
+    import ForumPost from "$lib/components/thread/forum-post.svelte";
+    import { make_date, make_time } from "$lib/helpers";
 
     export let message: ForumMessage;
-    let children: ForumMessage[];
+    let children: ForumMessage[] = [];
     let reply_mode: boolean = false;
+    let created_date: string;
+    let created_time: string;
 
-    $: children = message.children;
+    $:
+    {
+        created_date = make_date(message.created_at);
+        created_time = make_time(message.created_at);
+    }
 </script>
 
 <div class="flex items-start gap-2.5 p-2">
@@ -15,7 +22,7 @@
         <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
             <div class="flex items-center space-x-2 rtl:space-x-reverse">
                 <span class="text-sm font-semibold text-gray-900 dark:text-white">{message.sender}</span>
-                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">11:46</span>
+                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{created_time} • {created_date}</span>
             </div>
             <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message.content}</p>
             <div class="flex justify-end">
