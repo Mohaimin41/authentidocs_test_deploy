@@ -820,7 +820,7 @@
                     {:else}
                         <a on:click={() => {show_tab(index)}} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">{tab.name}</a>
                     {/if}
-                </li>    
+                </li>
             {/each}
         </ul>
         <div class="tab-item-data">
