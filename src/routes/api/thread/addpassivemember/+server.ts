@@ -6,17 +6,16 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
-      "You must be logged in to add member to a thread."
+      "You must be logged in to add passive member to a thread."
     );
   }
 
   // console.log(session);
   const member_info = await request.json();
-  // console.log("inside add key",key_info);
   let uid_list = member_info.uid_list;
   let given_threadid = member_info.threadid;
 
@@ -26,8 +25,8 @@ export async function POST({
     given_threadid === undefined ||
     given_threadid === null
   ) {
-    console.log(
-      "ERROR @api/thread/addmember:30: invalid user input error:\n",
+    console.error(
+      "ERROR @api/thread/addpassivemember:30: invalid user input error:\n",
       member_info
     );
     return new (error as any)(
@@ -36,27 +35,27 @@ export async function POST({
     );
   }
 
-
   for (let i = 0; i < uid_list.length; i++) {
     let given_userid = uid_list[i];
     let current_userid = session.user.name;
 
-    let { data:result, error :_error } = await supabase
-  .rpc('add_thread_passive_member', {
-    current_userid, 
-    given_threadid, 
-    given_userid
-  })
+    let { data: result, error: _error } = await supabase.rpc(
+      "add_thread_passive_member",
+      {
+        current_userid,
+        given_threadid,
+        given_userid,
+      }
+    );
 
-    // console.log("add key rps result",result)
     if (_error) {
       console.log(
-        "ERROR @api/thread/addmember:76: supabase add thread member error\n",
+        "ERROR @api/thread/addpassivemember:76: supabase add passive thread member error\n",
         _error
       );
       return new (error as any)(
         500,
-        "Internal Server Error, while adding member to thread."
+        "Internal Server Error, while adding passive member to thread."
       );
     }
   }

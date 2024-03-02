@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -33,7 +33,7 @@ export async function POST({
     given_current_userid === null ||
     given_current_userid === undefined
   ) {
-    console.log(
+    console.error(
       "ERROR @api/thread/addthreadfilesignature:37: invalid user input error:\n",
       file_signature_info
     );
@@ -54,7 +54,7 @@ export async function POST({
   );
   // console.log("error @33: ", _error)
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/thread/addthreadfilesignature:58: supabase file signature insert error\n",
       _error
     );

@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to edit user pwd.");
   }
@@ -45,18 +45,15 @@ export async function POST({
     );
   }
 
-  //   console.log("api/user/editpwd/: \n", given_email, given_pfp_url, given_pwd_hash, given_userid, given_username);
-
   let { data: result, error: _error } = await supabase.rpc("edit_passwd", {
     given_new_pwd_hash,
     given_old_pwd_hash,
     given_userid,
   });
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/user/editpwd:59: supabase edit user pwd error\n",
+    console.error(
+      "ERROR @api/user/editpwd:56: supabase edit user pwd error\n",
       _error
     );
     return new (error as any)(
@@ -73,4 +70,3 @@ export async function POST({
 
   return response;
 }
-

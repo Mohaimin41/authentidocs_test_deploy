@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add child post");
   }
@@ -42,7 +42,7 @@ export async function POST({
     given_forumid,
   });
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
     console.error(
       "ERROR @api/forum/addchildposts:52: supabase making child post error\n",

@@ -4,19 +4,17 @@ import type { RequestEvent } from "./$types";
 
 export async function POST({
   request,
-  locals,
 }: RequestEvent): Promise<Response> {
-  // const session = await locals.getSession();
+  // const session = await locals.auth();
   // if (!session?.user) {
   //   return new (error as any)(401, "You must be logged in to get org details");
   // }
   // console.log(session);
   const org_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_orgid = org_info.orgid;
   if (given_orgid === undefined || given_orgid === null) {
-    console.log(
-      "ERROR @api/org/getdetails:19: invalid user input error:\n",
+    console.error(
+      "ERROR @api/org/getdetails:17: invalid user input error:\n",
       org_info
     );
     return new (error as any)(
@@ -29,10 +27,10 @@ export async function POST({
     given_orgid,
   });
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
-      "ERROR @api/org/getdetails:35: supabase getting org details error\n",
+    console.error(
+      "ERROR @api/org/getdetails:33: supabase getting org details error\n",
       _error
     );
     return new (error as any)(
@@ -48,8 +46,8 @@ export async function POST({
     }
   );
   if (error_2) {
-    console.log(
-      "ERROR @api/org/getdetails:52: supabase getting org mod details error\n",
+    console.error(
+      "ERROR @api/org/getdetails:50: supabase getting org mod details error\n",
       _error
     );
     return new (error as any)(
@@ -61,8 +59,8 @@ export async function POST({
   let result_mod = result_2[0];
 
   if (result_mod === undefined || result_mod === null) {
-    console.log(
-      "ERROR @api/org/getdetails:65: supabase getting org mod details error\n",
+    console.error(
+      "ERROR @api/org/getdetails:63: supabase getting org mod details error\n",
       result_mod
     );
     return new (error as any)(

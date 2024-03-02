@@ -6,17 +6,20 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  // const session = await locals.getSession();
+  // const session = await locals.auth();
   // if (!session?.user) {
-  //   return new (error as any)(401, "You must be logged in to get notice details");
+  //   return new (error as any)(
+  //     401,
+  //     "You must be logged in to get notice details"
+  //   );
   // }
   const notice_info = await request.json();
   //console.log(notice_info);
   let given_noticeid = notice_info.noticeid;
   //console.log(given_noticeid)
   if (given_noticeid === undefined || given_noticeid === null) {
-    console.log(
-      "ERROR @api/notice/details:19: invalid notice input error:\n",
+    console.error(
+      "ERROR @api/notice/details:22: invalid notice input error:\n",
       notice_info
     );
     return new (error as any)(
@@ -25,15 +28,16 @@ export async function POST({
     );
   }
 
-
-  let { data:result, error:_error } = await supabase
-  .rpc('get_noticedetails', {
-    given_noticeid
-  })
+  let { data: result, error: _error } = await supabase.rpc(
+    "get_noticedetails",
+    {
+      given_noticeid,
+    }
+  );
 
   if (_error) {
-    console.log(
-      "ERROR @api/notice/details:36: supabase getting notice data error\n",
+    console.error(
+      "ERROR @api/notice/details:40: supabase getting notice details error\n",
       _error
     );
     return new (error as any)(

@@ -3,16 +3,15 @@ import type { RequestEvent } from "./$types";
 
 export async function POST({ request }: RequestEvent): Promise<Response> {
   const user = await request.json();
-  // console.log(user);
+  
   let ret_text;
   let given_email = user.given_email;
   let { data: result, error:_error } = await supabase.rpc("can_signup_user", {
     given_email,
   });
-  //  if (error) console.error(error)
-  //  else console.log(result)
+  
   if (_error) {
-    console.log("ERROR @api/user/signup:15: supabase checking user data error\n", _error)
+    console.log("ERROR @api/user/signup:14: supabase checking user data error\n", _error)
     return new Response(JSON.stringify("internal server error while checking user input: "+_error), {
       headers: {
         "Content-Type": "application/json",

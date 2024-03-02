@@ -1,4 +1,3 @@
-import { json, error } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
 import { supabase } from "$lib/server/supabase_client.server";
 import { fileTypeFromBuffer } from "file-type";
@@ -8,7 +7,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     //throw error(401, "You must sign in to add files.");
     return new Response(JSON.stringify("you must be logged in to add files"), {

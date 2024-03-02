@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to get files.");
   }
@@ -16,7 +16,7 @@ export async function POST({
   let given_userid = user_info.given_userid;
 
   if (given_userid === undefined || given_userid === null) {
-    console.log(
+    console.error(
       "ERROR @api/files/getpersonalfiles:20: invalid user input error:\n",
       user_info
     );
@@ -30,12 +30,14 @@ export async function POST({
     }
   );
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/files/getpersonalfiles:34: supabase personal file access error\n",
       _error
     );
-    return  new (error as any)(500, "Internal Server Error, while getting files.");
-    
+    return new (error as any)(
+      500,
+      "Internal Server Error, while getting files."
+    );
   }
 
   // console.log(data)

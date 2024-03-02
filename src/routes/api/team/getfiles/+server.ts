@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -16,11 +16,10 @@ export async function POST({
 
   // console.log(session);
   const team_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_teamid = team_info.teamid;
 
   if (given_teamid === undefined || given_teamid === null) {
-    console.log(
+    console.error(
       "ERROR @api/team/getfiles:24: invalid user input error:\n",
       team_info
     );
@@ -37,9 +36,9 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/team/getfiles:43: supabase get team files error\n",
       _error
     );

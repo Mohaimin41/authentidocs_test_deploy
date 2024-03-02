@@ -6,18 +6,17 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to view org members");
   }
 
   // console.log(session);
   const org_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_orgid = org_info.orgid;
 
   if (given_orgid === undefined || given_orgid === null) {
-    console.log(
+    console.error(
       "ERROR @api/org/getaddablemembers:21: invalid user input error:\n",
       org_info
     );
@@ -34,9 +33,9 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/org/getaddablemembers:40: supabase get addable org members error\n",
       _error
     );

@@ -2,7 +2,7 @@ import { json, error } from "@sveltejs/kit"
 import type { RequestEvent } from "./$types"
 
 export async function GET({ locals }: RequestEvent) {
-  const session = await locals.getSession()
+  const session = await locals.auth()
   if (!session?.user) {
     throw error(401, "You must sign in to view movies.")
   }

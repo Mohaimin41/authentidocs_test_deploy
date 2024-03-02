@@ -4,9 +4,8 @@ import type { RequestEvent } from "./$types";
 
 export async function POST({
   request,
-  locals,
 }: RequestEvent): Promise<Response> {
-  // const session = await locals.getSession();
+  // const session = await locals.auth();
   // if (!session?.user) {
   //   return new (error as any)(
   //     401,
@@ -15,11 +14,10 @@ export async function POST({
   // }
   // console.log(session);
   const thread_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_threadid = thread_info.threadid;
   if (given_threadid === undefined || given_threadid === null) {
-    console.log(
-      "ERROR @api/thread/getdetails:22: invalid user input error:\n",
+    console.error(
+      "ERROR @api/thread/getdetails:20: invalid user input error:\n",
       thread_info
     );
     return new (error as any)(
@@ -35,10 +33,10 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
-      "ERROR @api/thread/getdetails:41: supabase getting thread details error\n",
+    console.error(
+      "ERROR @api/thread/getdetails:39: supabase getting thread details error\n",
       _error
     );
     return new (error as any)(
@@ -54,8 +52,8 @@ export async function POST({
     }
   );
   if (error_2) {
-    console.log(
-      "ERROR @api/thread/getdetails:58: supabase getting thread mod details error\n",
+    console.error(
+      "ERROR @api/thread/getdetails:56: supabase getting thread mod details error\n",
       _error
     );
     return new (error as any)(
@@ -79,13 +77,13 @@ export async function POST({
   }
 
   if (result_mod === undefined || result_mod === null) {
-    console.log(
-      "ERROR @api/thread/getdetails:88: invalid user input error:\n",
+    console.error(
+      "ERROR @api/thread/getdetails:81: supabase get thread mod detail error:\n",
       result_mod, "\n", result_custodian
     );
     return new (error as any)(
-      422,
-      "Invalid inputs, while getting thread details."
+      500,
+      "Internal server error, while getting thread details."
     );
   }
 

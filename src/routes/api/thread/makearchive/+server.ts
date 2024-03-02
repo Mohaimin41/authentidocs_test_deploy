@@ -6,13 +6,12 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to archive thread");
   }
   // console.log(session);
   const thread_info = await request.json();
-  // console.log("inside add key",key_info);
 
   let given_closing_comment = thread_info.closing_comment;
   let given_threadid = thread_info.threadid;
@@ -25,7 +24,7 @@ export async function POST({
     given_current_userid === undefined ||
     given_current_userid === null
   ) {
-    console.log(
+    console.error(
       "ERROR @api/thread/makearchive:29: invalid user input error:\n",
       thread_info
     );
@@ -41,9 +40,8 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/thread/makearchive:47: supabase make thread archived error\n",
       _error
     );
