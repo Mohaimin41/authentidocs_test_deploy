@@ -208,17 +208,16 @@ onMount((): void =>
             <p class="text-gray-700 dark:text-gray-200 mb-4">{content}</p>
         </div>
         
-        {#if file_id !== null }
-         <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
+        {#if file_id !== null && file_id !== undefined}
+          <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
         {/if}
         <div class="flex justify-end mt-2">
-            <button type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Done</button>
             <!-- Add File -->
             {#if creator_id == $page.data.session?.user?.name }
-            {#if file_id == null}
-                <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add File</button>
-                {/if}
-                {/if}
+              {#if file_id === null || file_id === undefined}
+                  <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add File</button>
+              {/if}
+            {/if}
             </div>
     </div>
 </div>

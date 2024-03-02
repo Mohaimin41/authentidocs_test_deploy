@@ -1,4 +1,5 @@
 <script lang="ts">
+  import default_pfp from "$lib/assets/user.webp";
   import { goto } from "$app/navigation";
   import FileCard from "$lib/components/dashboard/file-card.svelte";
   import OrgCard from "$lib/components/dashboard/org-card.svelte";
@@ -10,14 +11,16 @@
   import { db, type PriveKey } from "$lib/db";
   import { logged_in_store, priv_key, uid, useremail } from "$lib/stores";
   import { Entity } from '$lib/containers';
-    import List from "$lib/components/list.svelte";
-    import { Modal } from "flowbite";
+  import List from "$lib/components/list.svelte";
+  import { Modal } from "flowbite";
+  import { make_hash } from "$lib/helpers";
 
   /**
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"
    */
   let profile_edit_mode: boolean = false;
   let username: string = "";
+  let pfp_data: string = default_pfp;
   let email: string = "";
   let pubkey: string = "";
   let privkey: string = "";
@@ -91,6 +94,82 @@
   ];
   let cng_pass_modal_elem: HTMLDivElement;
   let cng_pass_modal: Modal;
+  let cng_pass_old: string;
+  let cng_pass_new: string;
+  let cng_pass_confirm: string;
+  let cng_pass_confirm_elem: HTMLInputElement;
+  let invalid_pass: boolean = false;
+
+  function upload_pfp(): void
+  {
+    let input_elem: HTMLInputElement = document.createElement("input");
+    input_elem.type = "file";
+
+    input_elem.onchange = (): void =>
+    {
+      let file: File | null | undefined = input_elem.files?.item(0);
+
+      if(file === null || file === undefined)
+      {
+        return;
+      }
+
+      let form_data: FormData = new FormData();
+
+      form_data.append("file", file);
+
+      fetch("/api/user/addpfp",
+      {
+        method: "POST",
+        body: form_data
+      });
+    };
+
+    input_elem.click();
+  }
+
+  async function cng_pass(): Promise<void>
+  {
+    if(cng_pass_new !== cng_pass_confirm)
+    {
+      cng_pass_confirm_elem.setCustomValidity("Password does not match");
+
+      return;
+    }
+
+    let password_hash: string = await make_hash(cng_pass_new);
+    let old_hash: string = await make_hash(cng_pass_old);
+
+    fetch("/api/user/editpwd",
+    {
+      method: "POST",
+      body: JSON.stringify(
+      {
+        userid: $page.data.session?.user?.name,
+        new_pwd_hash: password_hash,
+        old_pwd_hash: old_hash
+      })
+    }).then(async (response: Response): Promise<void> =>
+    {
+      if(response.status === 200)
+      {
+        let response_obj: any = await response.json();
+
+        if(response_obj === true)
+        {
+          cng_pass_modal.hide();
+        }
+        else
+        {
+          invalid_pass = true;
+        }
+      }
+      else
+      {
+        console.error(response.status, response.statusText);
+      }
+    });
+  }
 
   /**
    * toggle to profile edit mode
@@ -104,6 +183,27 @@
    */
   function save_profile(): void {
     profile_edit_mode = false;
+
+    fetch("/api/user/editprofile",
+    {
+      method: "POST",
+      body: JSON.stringify(
+      {
+        userid: $page.data.session?.user?.name,
+        username: username,
+        email: email
+      })
+    }).then(async (response: Response): Promise<void> =>
+    {
+      if(response.status === 200)
+      {
+        
+      }
+      else
+      {
+        console.error(response.status, response.statusText);
+      }
+    });
   }
 
   /**
@@ -123,13 +223,13 @@
   function switch_privkey_visibility(): void {
     privkey_visible = !privkey_visible;
   }
-  class File {
+  class FileObj {
     public id!: string;
     public name!: string;
     public type!: string;
   }
 
-  let personal_files: File[] = new Array(0);
+  let personal_files: FileObj[] = new Array(0);
   function get_personal_files(): void {
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
@@ -148,7 +248,7 @@
         }
 
         for (let i: number = 0; i < response_obj.length; ++i) {
-          personal_files[i] = new File();
+          personal_files[i] = new FileObj();
           personal_files[i].id = response_obj[i].f_fileid;
           personal_files[i].name = response_obj[i].f_filename;
           personal_files[i].type = response_obj[i].f_file_extension;
@@ -156,7 +256,7 @@
       }
     );
   }
-  let work_files: File[] = new Array(0);
+  let work_files: FileObj[] = new Array(0);
   function get_work_files(): void {
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
@@ -173,10 +273,10 @@
         if (response_obj === null) {
           return;
         }
-        console.log(response_obj);
+        // console.log(response_obj);
 
         for (let i: number = 0; i < response_obj.length; ++i) {
-          work_files[i] = new File();
+          work_files[i] = new FileObj();
           work_files[i].id = response_obj[i].f_fileid;
           work_files[i].name = response_obj[i].f_filename;
           work_files[i].type = response_obj[i].f_file_extension;
@@ -252,7 +352,7 @@
         if (response_obj === null) {
           return;
         }
-        console.log(response_obj);
+        // console.log(response_obj);
         for (let i: number = 0; i < response_obj.length; ++i) {
           threads[i] = new Thread();
           threads[i].name = response_obj[i].f_threadname;
@@ -275,7 +375,7 @@
         if (response_obj === null) {
           return;
         }
-        console.log(response_obj);
+        // console.log(response_obj);
         for (let i: number = 0; i < response_obj.length; ++i) {
           orgs[i] = new Entity();
           orgs[i].name = response_obj[i].f_org_name;
@@ -284,70 +384,6 @@
       }
     );
   }
-
-
-  onMount((): void => {
-    cng_pass_modal = new Modal(cng_pass_modal_elem);
-
-    if ($page.data.session === null) {
-      goto("/");
-
-      return;
-    } else {
-      logged_in_store.set(true);
-      uid.set($page.data.session?.user?.name as string);
-      useremail.set($page.data.session?.user?.email as string);
-    }
-
-    get_personal_files();
-    get_user_teams();
-    get_user_all_threads();
-    get_user_orgs();
-    get_work_files();
-    let request_obj: any = {
-      userid: $page.data.session?.user?.name,
-    };
-
-    common_fetch(
-      "/api/user/details",
-      request_obj,
-      async (response: Response): Promise<void> => {
-        let response_obj: any = await response.json();
-        // console.log(response_obj);
-        username = response_obj.username;
-        email = response_obj.email;
-        // console.log(typeof response_obj.publickey);
-        pubkey = [
-          ...new Uint8Array(
-            new TextEncoder().encode(JSON.stringify(response_obj.publickey))
-          ),
-        ]
-          .map((x) => x.toString(16).padStart(2, "0"))
-          .join("");
-        // console.log(pubkey);
-        if ($page.data.session) {
-          let temp_priv_key = await db.priv_key.get(
-            $page.data.session.user?.name as string
-          );
-          if (temp_priv_key) {
-            let subtle_crypto: SubtleCrypto = window.crypto.subtle;
-            let private_key = await subtle_crypto.exportKey(
-              "jwk",
-              temp_priv_key.key
-            );
-            // console.log(private_key);
-            privkey = [
-              ...new Uint8Array(
-                new TextEncoder().encode(JSON.stringify(private_key))
-              ),
-            ]
-              .map((x) => x.toString(16).padStart(2, "0"))
-              .join("");
-          }
-        }
-      }
-    );
-  });
 
   async function regenkey(): Promise<void> {
     if ($page.data.session?.user) {
@@ -392,6 +428,96 @@
             }
     }
   }
+
+  function get_pfp(): void
+  {
+    fetch("https://rajnoqicmphtmtgmfbjk.supabase.co/storage/v1/object/public/user_pfps/user_pfps/" + $page.data.session?.user?.name + ".webp?" + Math.random(),
+    {
+      method: "GET"
+    }).then(async (response: Response): Promise<void> =>
+    {
+      if(response.status === 200)
+      {
+        pfp_data = URL.createObjectURL(await response.blob());
+      }
+    });
+  }
+
+  onMount((): void => {
+    cng_pass_modal = new Modal(cng_pass_modal_elem,
+    {
+      onShow: (): void =>
+      {
+        invalid_pass = false;
+      },
+      onHide: (): void =>
+      {
+        cng_pass_old = "";
+        cng_pass_new = "";
+        cng_pass_confirm = "";
+      }
+    });
+
+    if ($page.data.session === null) {
+      goto("/");
+
+      return;
+    } else {
+      logged_in_store.set(true);
+      uid.set($page.data.session?.user?.name as string);
+      useremail.set($page.data.session?.user?.email as string);
+    }
+
+    get_personal_files();
+    get_user_teams();
+    get_user_all_threads();
+    get_user_orgs();
+    get_work_files();
+    get_pfp();
+    let request_obj: any = {
+      userid: $page.data.session?.user?.name,
+    };
+
+    common_fetch(
+      "/api/user/details",
+      request_obj,
+      async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+        // console.log(response_obj);
+        username = response_obj.username;
+        email = response_obj.email;
+        // console.log(typeof response_obj.publickey);
+        pubkey = [
+          ...new Uint8Array(
+            new TextEncoder().encode(JSON.stringify(response_obj.publickey))
+          ),
+        ]
+          .map((x) => x.toString(16).padStart(2, "0"))
+          .join("");
+        // console.log(pubkey);
+        if ($page.data.session) {
+          let temp_priv_key = await db.priv_key.get(
+            $page.data.session.user?.name as string
+          );
+          if (temp_priv_key) {
+            let subtle_crypto: SubtleCrypto = window.crypto.subtle;
+            let private_key = await subtle_crypto.exportKey(
+              "jwk",
+              temp_priv_key.key
+            );
+            // console.log(private_key);
+            privkey = [
+              ...new Uint8Array(
+                new TextEncoder().encode(JSON.stringify(private_key))
+              ),
+            ]
+              .map((x) => x.toString(16).padStart(2, "0"))
+              .join("");
+          }
+        }
+      }
+    );
+  });
 </script>
 
 <svelte:head>
@@ -409,31 +535,18 @@
       <div class="flex items-center">
         <img
           class="w-36 h-36 rounded-full"
-          src="pochita.webp"
+          src={pfp_data}
           alt="Rounded avatar"
         />
 
         {#if profile_edit_mode}
           <!-- svelte-ignore a11y-invalid-attribute -->
           <button
-            class="inline-flex items-center font-medium text-blue-700 dark:text-blue-600 hover:underline ms-2"
+            on:click={upload_pfp}
+            class="inline-flex items-center font-medium text-blue-800 dark:text-blue-100 hover:underline ms-2"
           >
-            <svg
-              class="w-6 h-6"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
-              />
-              <path
-                d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
-              />
-              <path
-                d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
-              />
+            <svg class="w-6 h-6 text-blue-800 dark:text-blue-100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.9-6.8a2 2 0 0 1 2.8 0Z"/>
             </svg>
           </button>
         {/if}
@@ -693,21 +806,24 @@
                 </button>
             </div>
             <!-- Modal body -->
-            <form class="p-4 md:p-5 space-y-4">
+            <form on:submit={cng_pass} action="javascript:" class="p-4 md:p-5 space-y-4">
               <div class="mb-5">
                 <label for="cng-pass-old" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Current Password</label>
-                <input type="password" id="cng-pass-old" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+                <input bind:value={cng_pass_old} type="password" id="cng-pass-old" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+                {#if invalid_pass}
+                  <p class="mt-2 text-sm text-red-600 dark:text-red-500">Invalid password</p>
+                {/if}
               </div>
               <div class="mb-5">
                 <label for="cng-pass-new" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">New Password</label>
-                <input type="password" id="cng-pass-old" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+                <input bind:value={cng_pass_new} type="password" id="cng-pass-new" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
               </div>
               <div class="mb-5">
                 <label for="cng-pass-confirm" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm Password</label>
-                <input type="password" id="cng-pass-old" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+                <input bind:this={cng_pass_confirm_elem} bind:value={cng_pass_confirm} type="password" id="cng-pass-confirm" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
               </div>
               <div class="flex justify-end">
-                <button type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
+                <button type="submit" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
               </div>
             </form>
         </div>

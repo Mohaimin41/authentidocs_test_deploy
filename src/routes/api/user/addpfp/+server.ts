@@ -19,7 +19,7 @@ export async function POST({
 
   // const file_info = await request.json();
   const file_formData = await request.formData();
-  
+
   // console.log(file_info);
   const file_data = file_formData.get("file") as File;
 
@@ -46,12 +46,12 @@ export async function POST({
 
   // const blob = new Blob([new Uint8Array(user_file)], { type: file_mimetype });
   //
-  let temp_name = uuidv4() + "." + fileExt;
+  let temp_name = session.user.name + "." + fileExt;
   const filePath = "user_pfps/" + temp_name;
 
   const storage_call_response = await supabase.storage
     .from("user_pfps")
-    .upload(filePath, file_data);
+    .upload(filePath, file_data, {upsert: true});
 
   if (storage_call_response.error) {
     console.error(
@@ -70,15 +70,21 @@ export async function POST({
     .getPublicUrl(filePath);
 
   let given_pfp_url = _data.publicUrl,
-    given_userid = session.user.name;
+    given_userid = session.user.name,
+    given_pwd_hash = null,
+    given_username = null,
+    given_email = null;
 
   let { data: _result1, error: _error1 } = await supabase.rpc("edit_profile", {
+    given_email,
     given_pfp_url,
+    given_pwd_hash,
     given_userid,
+    given_username
   });
   if (_error1) {
     console.log(
-      "ERROR @api/user/addpfp:103: supabase edit pfp url error\n",
+      "ERROR @api/user/addpfp:87: supabase edit pfp url error\n",
       _error1
     );
     return new (error as any)(

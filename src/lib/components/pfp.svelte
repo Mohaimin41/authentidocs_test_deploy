@@ -1,10 +1,28 @@
 <script lang="ts">
+    import default_pfp from "$lib/assets/user.webp";
     import { initDropdowns } from "flowbite";
     import { onMount } from "svelte";
     import { uid, useremail, username } from "$lib/stores";
     import { db } from "$lib/db";
     import { get } from "svelte/store";
     import { signOut } from "@auth/sveltekit/client";
+    import { page } from "$app/stores";
+
+    let pfp_data: string = default_pfp;
+
+    function get_pfp(): void
+    {
+      fetch("https://rajnoqicmphtmtgmfbjk.supabase.co/storage/v1/object/public/user_pfps/user_pfps/" + $page.data.session?.user?.name + ".webp?" + Math.random(),
+      {
+        method: "GET"
+      }).then(async (response: Response): Promise<void> =>
+      {
+        if(response.status === 200)
+        {
+          pfp_data = URL.createObjectURL(await response.blob());
+        }
+      });
+    }
 
     async function logout(): Promise<void>
     {
@@ -17,12 +35,13 @@
     onMount((): void =>
     {
         initDropdowns();
+        get_pfp();
     });
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <a href="javascript:" data-dropdown-toggle="pfp-dropdown" class="text-white font-medium rounded-lg text-sm text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-    <img class="w-10 h-10 rounded-full" src="/pochita.webp" alt="Rounded avatar">
+    <img class="w-10 h-10 rounded-full" src={pfp_data} alt="Rounded avatar">
 </a>
 
 <div id="pfp-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
