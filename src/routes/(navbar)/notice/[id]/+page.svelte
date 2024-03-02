@@ -40,7 +40,7 @@
             if (response_obj === null) {
             return;
             }
-            console.log(response_obj)
+            // console.log(response_obj);
             content = response_obj.f_content;
             subject =response_obj.f_subject;
             sender =response_obj.f_creator_name;
@@ -52,9 +52,9 @@
             notice_level_id = response_obj.f_hierarchy_level_id;
             redirect = "/" + notice_level + "/" +notice_level_id;
             if(file_id!=null)
-        {
-            get_file_details();
-        }
+            {
+                get_file_details();
+            }
         });
     }
     async function get_file_details(): Promise<void>
@@ -77,7 +77,7 @@
             file.id=response_obj.result1.fileid;
             file.name=response_obj.result1.filename;
             file.type=response_obj.result1.file_extension;
-            console.log(file);
+            // console.log(file);
         });
     }
     
@@ -191,84 +191,86 @@
             );
           }
         }
-      } else {
-        file_uploading_modal.hide();
+
         get_notice_details();
       }
+
+      file_uploading_modal.hide();
     };
 
     file_input_elem.click();
   }
 
 
-onMount((): void =>
-    {
-        initModals();
-        file_uploading_modal = new Modal(file_uploading_modal_elem);
-        id = $page.params.id;
-        get_notice_details();
+  onMount((): void =>
+  {
+      initModals();
 
-
-    });
+      file_uploading_modal = new Modal(file_uploading_modal_elem);
+      id = $page.params.id;
+      get_notice_details();
+  });
 </script>
 
 <div class="notice-root">
-  <div class="details" in:fade={{duration: 250}}>
-    <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{subject}</p>
-    <div class="grid grid-cols-4 mb-4">
-        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
-        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Sender</p>
-        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Notice Level</p>
-        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Notice Source</p>
-        <div class="flex items-center">
-            <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
-            </svg>
-            <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
-                {make_date(creation_date)}
-                {make_time(creation_date)}
-            </p>
-        </div>
-        <div class="flex items-center">
-          <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-        </svg>
-            <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{sender}</p>
-        </div>
-        
-        <div class="flex items-center">
-          <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
-        </svg>
-            <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{notice_level}</p>
-        </div>
-        <div class="flex items-center">
+  <div class="notice-root-card block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <div class="details" in:fade={{duration: 250}}>
+      <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{subject}</p>
+      <div class="grid grid-cols-4 mb-4">
+          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
+          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Sender</p>
+          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Notice Level</p>
+          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Notice Source</p>
+          <div class="flex items-center">
+              <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+              </svg>
+              <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                  {make_date(creation_date)}
+                  {make_time(creation_date)}
+              </p>
+          </div>
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+          </svg>
+              <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{sender}</p>
+          </div>
+          
+          <div class="flex items-center">
             <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
-            </svg>
-            <a href={redirect}>
-            <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{notice_level_name}</p>
-          </a>
-        </div>
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
+          </svg>
+              <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{notice_level}</p>
+          </div>
+          <div class="flex items-center">
+              <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
+              </svg>
+              <a href={redirect}>
+              <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{notice_level_name}</p>
+            </a>
+          </div>
+      </div>
+      <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Content</p>
     </div>
-    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Content</p>
-    <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{content}</p>
-    {#if file_id !== null && file_id !== undefined}
-    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Attached File</p>
-    
-          <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
+    <div class="grow overflow-y-auto">
+      <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{content}</p>
+    </div>
+    <div>
+      {#if file_id !== null && file_id !== undefined}
+        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Attached File</p>
+        <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
+      {/if}
+      <div class="flex justify-end mt-2">
+        {#if creator_id == $page.data.session?.user?.name }
+          {#if file_id === null || file_id === undefined}
+              <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add File</button>
+          {/if}
         {/if}
+      </div>
+    </div>
   </div>
-        
-        
-        <div class="flex justify-end mt-2">
-            <!-- Add File -->
-            {#if creator_id == $page.data.session?.user?.name }
-              {#if file_id === null || file_id === undefined}
-                  <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add File</button>
-              {/if}
-            {/if}
-            </div>
 </div>
 <div
   bind:this={file_uploading_modal_elem}

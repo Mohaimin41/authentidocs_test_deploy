@@ -805,10 +805,9 @@
               >
                 {org_description}
               </p>
-            </div>
-            <!-- Add File -->
-            <div class="flex justify-end mt-2">
-              <button on:click={leave_org} disabled={!can_leave_org} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Leave</button>
+              <div class="flex justify-end mt-2">
+                <button on:click={leave_org} disabled={!can_leave_org} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Leave</button>
+              </div>
             </div>
           </div>
         {:else}
