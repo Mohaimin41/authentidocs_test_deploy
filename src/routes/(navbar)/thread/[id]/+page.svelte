@@ -1310,7 +1310,7 @@
       {/if}
     </div>
     <div class="thread-extra-button flex justify-end items-end mt-2">
-      {#if tabs[0].active && is_logged_in}
+      {#if tabs[0].active && is_logged_in && is_member}
         <button
           on:click={forward}
           type="button"

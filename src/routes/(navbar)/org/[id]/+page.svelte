@@ -722,9 +722,11 @@
                         <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{org_description}</p>
                     </div>
                     <!-- Add File -->
+            {#if is_logged_in && is_member}
              <div class="flex justify-end mt-2">
                 <button on:click={leave_org} type="button" disabled={!can_leave_org} class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" >Leave</button>
               </div>
+              {/if}
                 </div>
             {:else if tabs[1].active}
                 <div class="mb-2">
