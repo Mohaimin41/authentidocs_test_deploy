@@ -76,6 +76,40 @@
     let file_uploading_modal_elem: HTMLDivElement;
     let file_upload_progress: HTMLDivElement;
     let file_uploading_modal: Modal;
+    let can_leave_org:boolean = false;
+    async function check_can_leave(): Promise<void> {
+    let response: Response = await fetch(
+    "/api/org/canleave",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            given_orgid:id,
+        })
+    });
+    let response_obj: any = await response.json();
+    console.log(response_obj)
+    can_leave_org=response_obj;   
+  }
+  async function leave_org(): Promise<void> {
+    let response: Response = await fetch(
+    "/api/org/leaveorg",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            given_orgid:id,
+        })
+    });
+    let response_obj: any = await response.json();
+    console.log(response_obj)  
+    goto('/home'); 
+  }
+
 
     let is_logged_in: boolean = false;
     function check_logged_in(): boolean {
@@ -616,6 +650,7 @@
         get_members();
         check_admin();
         check_member();
+        check_can_leave();
         }
 
     });
@@ -688,6 +723,10 @@
                         <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
                         <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{org_description}</p>
                     </div>
+                    <!-- Add File -->
+             <div class="flex justify-end mt-2">
+                <button on:click={leave_org} type="button" disabled={!can_leave_org} class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" >Leave</button>
+              </div>
                 </div>
             {:else if tabs[1].active}
                 <div class="mb-2">
