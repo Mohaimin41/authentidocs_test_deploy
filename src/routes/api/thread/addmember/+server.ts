@@ -70,6 +70,9 @@ export async function POST({
       }
     );
 
+    console.log(result);
+    console.log();
+
     // console.log("add key rps result",result)
     if (_error) {
       console.log(
