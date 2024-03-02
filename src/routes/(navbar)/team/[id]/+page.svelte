@@ -259,7 +259,7 @@
         if (response_obj === null) {
           return;
         }
-        //console.log(response_obj)
+        console.log(response_obj);
         notices = new Array(response_obj.length);
         for (let i = 0; i < notices.length; ++i) {
           notices[i] = new Entity();
@@ -333,7 +333,7 @@
         if (response_obj === null) {
           return;
         }
-        console.log(response_obj);
+        // console.log(response_obj);
         members = new Array(response_obj.length);
 
         for (let i: number = 0; i < response_obj.length; ++i) {
@@ -434,7 +434,7 @@
         })
     });
     let response_obj: any = await response.json();
-    console.log(response_obj)
+    // console.log(response_obj);
     is_member=response_obj;   
   }
   async function check_admin(): Promise<void> {
@@ -450,7 +450,7 @@
       }),
     });
     let response_obj: any = await response.json();
-    console.log(response_obj);
+    // console.log(response_obj);
     is_admin = response_obj;
   }
   function add_file(): void {
@@ -776,7 +776,7 @@
   </div>
 </div>
 {#if is_logged_in}
-<SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} />
+<SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} get_notices={get_notices} />
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} bind:addable_members={addable_members} />
 <Create
   bind:modal={create_thread_modal}

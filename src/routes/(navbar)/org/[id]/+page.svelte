@@ -1076,7 +1076,7 @@
   </div>
 </div>
 {#if is_logged_in}
-  <SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} />
+  <SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} get_notices={get_notices} />
 
   <AddMember
     bind:modal={add_member_modal}
@@ -1085,7 +1085,7 @@
     bind:addable_members
   />
 
-  <Create bind:modal={create_team_modal} {id} creation_request={create_team} />
+  <Create bind:modal={create_team_modal} id={id} creation_request={create_team} />
 {/if}
 <div
   bind:this={file_uploading_modal_elem}

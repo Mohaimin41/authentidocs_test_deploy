@@ -1434,7 +1434,7 @@
 </div>
 {#if is_logged_in}
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} bind:addable_members={addable_members} />
-<SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} />
+<SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} get_notices={get_notices} />
 <AddPassiveMember bind:modal={add_passive_member_modal} get_addable_members={get_addable_members} add_passive_member={add_passive_member} bind:addable_members={addable_members} />
 {/if}
 <div
