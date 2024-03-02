@@ -373,7 +373,7 @@
     return addable_members;
   }
 
-  function add_member(id: string, members: AddableMemberObj[]): any
+  async function add_member(id: string, members: AddableMemberObj[]): Promise<void>
   {
     let adding_members = [];
     let count = 0;
@@ -383,7 +383,7 @@
       }
     }
 
-    fetch("/api/team/addmember", {
+    await fetch("/api/team/addmember", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -392,10 +392,8 @@
         uid_list: adding_members,
         teamid: id,
       }),
-    }).then(async (response: Response): Promise<void> =>
-    {
-      get_members();
     });
+    get_members();
   }
 
   async function send_notice_request(
