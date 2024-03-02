@@ -4,14 +4,14 @@
     import { Modal } from "flowbite";
     import { onMount } from "svelte";
 
-    let id: string;
-    let modal_elem: HTMLDivElement;
-    let addable_members_filter: string;
-    let addable_members: AddableMemberObj[] = [];
-    let addable_members_filtered: AddableMemberObj[] = [];
     export let modal: Modal;
     export let get_addable_members: (id: string) => Promise<AddableMemberObj[]>;
     export let add_passive_member: (id: string, members: AddableMemberObj[]) => any;
+    export let addable_members: AddableMemberObj[];
+    let id: string;
+    let modal_elem: HTMLDivElement;
+    let addable_members_filter: string;
+    let addable_members_filtered: AddableMemberObj[] = [];
 
     async function add_member_wrapper(id: string, members: AddableMemberObj[]): Promise<void>
     {
