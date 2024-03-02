@@ -621,93 +621,101 @@
   <title>{org_name} preview</title>
 </svelte:head>
 <div class="pg-center flex justify-between">
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <div
-    class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6"
-  >
-    {#if is_logged_in}
-      <ul
-        class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400"
-      >
-        {#each tabs as tab, index}
-          <li class="mx-1">
-            {#if tab.active}
-              <a
-                href="javascript:"
-                class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active"
-                >{tab.name}</a
-              >
-            {:else}
-              <a
-                on:click={() => {
-                  show_tab(index);
-                }}
-                href="javascript:"
-                class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white"
-                >{tab.name}</a
-              >
-            {/if}
-          </li>
-        {/each}
-      </ul>
-    {/if}
-    <div class="tab-item-data">
-      {#if tabs[0].active}
-        {#if data_loaded}
-          <div class="details" in:fade={{duration: 250}}>
-            <div>
-              <p
-                class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4"
-              >
-                {org_name}
-              </p>
-              <div class="grid grid-cols-5 mb-4">
-                <p
-                  class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2"
-                >
-                  Created At
-                </p>
-                <p
-                  class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2"
-                >
-                  Files
-                </p>
-                <p
-                  class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2"
-                >
-                  Members
-                </p>
-                <p
-                  class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2"
-                >
-                  Teams
-                </p>
-                <p
-                  class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2"
-                >
-                  Threads
-                </p>
-                <div class="flex items-center">
-                  <svg
-                    class="w-6 h-6 text-red-500 dark:text-red-400 me-2"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"
-                    />
-                  </svg>
-                  <p
-                    class="text-base font-medium text-gray-700 dark:text-gray-200 me-1"
-                  >
-                    <span>{date_text}</span>
-                  </p>
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
+        {#if is_logged_in}
+        <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+            {#each tabs as tab, index}
+                <li class="mx-1">
+                    {#if tab.active}
+                        <a href="javascript:" class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active">{tab.name}</a>
+                    {:else}
+                        <a on:click={() => {show_tab(index)}} href="javascript:" class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white">{tab.name}</a>
+                    {/if}
+                </li>    
+            {/each}
+        </ul>
+        {/if}
+        <div class="tab-item-data">
+            {#if tabs[0].active}
+                <div class="details">
+                    <div>
+                        <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{org_name}</p>
+                        <div class="grid grid-cols-5 mb-4">
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Teams</p>
+                            <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Threads</p>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                                    <span>{date_text}</span>
+                                </p>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
+                            </div>
+         
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3a2.5 2.5 0 1 1 2-4.5M19.5 17h.5c.6 0 1-.4 1-1a3 3 0 0 0-3-3h-1m0-3a2.5 2.5 0 1 0-2-4.5m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3c0 .6-.4 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{team_count}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-purple-500 dark:text-purple-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
+                            </div>
+                        </div>
+                        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{org_description}</p>
+                    </div>
+                    <!-- Add File -->
+            {#if is_logged_in && is_member}
+             <div class="flex justify-end mt-2">
+                <button on:click={leave_org} type="button" disabled={!can_leave_org} class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" >Leave</button>
+              </div>
+              {/if}
+                </div>
+            {:else if tabs[1].active}
+                <div class="mb-2">
+                    <p
+                    class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
+                    >
+                    Teams
+                    </p>
+                    <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input bind:value={teams_filter} type="search" id="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter" autocomplete="off" required />
+                    </div>
+                </div>
+                <List loaded={teams_loaded} empty={teams_empty}>
+                    {#each teams_filtered as team}
+                        <li>
+                            <TeamCard uid={team.uid} name={team.name} />
+                        </li>
+                    {/each}
+                </List>
+                <div class="flex justify-end mt-2">
+                    <button on:click={() => {create_team_modal.show()}} type="button" disabled={!is_member} class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ms-2 mb-2">Create Team</button>
                 </div>
                 <div class="flex items-center">
                   <svg
