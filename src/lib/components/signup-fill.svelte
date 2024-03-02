@@ -2,6 +2,7 @@
   import { signIn } from "@auth/sveltekit/client";
   import { common_fetch } from "$lib/fetch_func";
   import { onMount } from "svelte";
+    import { make_hash } from "$lib/helpers";
 
   export let signup_card_content_div: HTMLDivElement;
   export let form: HTMLFormElement;
@@ -14,15 +15,7 @@
 
   async function signup(): Promise<void> {
     if (password === password_verify) {
-      let subtle_crypto: SubtleCrypto = window.crypto.subtle;
-      let text_encoder: TextEncoder = new TextEncoder();
-      let password_buffer: ArrayBuffer = await subtle_crypto.digest(
-        "SHA-256",
-        text_encoder.encode(password),
-      );
-      let password_hash: string = [...new Uint8Array(password_buffer)]
-        .map((x) => x.toString(16).padStart(2, "0"))
-        .join("");
+      let password_hash: string = await make_hash(password);
 
       let request_obj: any = {
         given_email: email,

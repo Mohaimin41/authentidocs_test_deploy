@@ -29,3 +29,17 @@ export function make_time(date: Date): string
 
     return hours.toString().padStart(2, "0") + ":" + date.getMinutes().toString().padStart(2, "0") + ampm;
 }
+
+export async function make_hash(password: string): Promise<string>
+{
+    let subtle_crypto: SubtleCrypto = window.crypto.subtle;
+    let text_encoder: TextEncoder = new TextEncoder();
+    let password_buffer: ArrayBuffer = await subtle_crypto.digest(
+    "SHA-256",
+    text_encoder.encode(password),
+    );
+
+      return [...new Uint8Array(password_buffer)]
+        .map((x) => x.toString(16).padStart(2, "0"))
+        .join("");
+}
