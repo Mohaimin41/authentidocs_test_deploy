@@ -9,7 +9,6 @@
     import FileCard from "$lib/components/team/file-card.svelte";
     import { fade } from "svelte/transition";
     import { make_date,make_time } from "$lib/helpers";
-  import { goto } from "$app/navigation";
 
     let id: string;
     let sender: string = "Ekjon Sender";
@@ -322,11 +321,6 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-    }
-    .notice-message
-    {
-        flex-grow: 1;
-        overflow-y: auto;
     }
     @media(max-width: 1099px)
     {
