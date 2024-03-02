@@ -6,10 +6,10 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
-  if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to get files");
-  }
+  // const session = await locals.getSession();
+  // if (!session?.user) {
+  //   return new (error as any)(401, "You must be logged in to get files");
+  // }
   // console.log(session);
   const thread_info = await request.json();
   // console.log("inside add key",key_info);

@@ -48,7 +48,6 @@
     {
         let request_obj: any = {
             fileid: file_id,
-            user_id: $page.data.session?.user?.name,
         };
 
         common_fetch(

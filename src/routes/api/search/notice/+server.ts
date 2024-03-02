@@ -6,10 +6,10 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
-  if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to get notice details");
-  }
+  // const session = await locals.getSession();
+  // if (!session?.user) {
+  //   return new (error as any)(401, "You must be logged in to get notice details");
+  // }
   const notice_info = await request.json();
   //console.log(notice_info);
   let term = notice_info.term;

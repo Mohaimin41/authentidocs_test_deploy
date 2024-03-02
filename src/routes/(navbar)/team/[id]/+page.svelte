@@ -20,8 +20,7 @@
   import Create from "$lib/components/create.svelte";
   import { priv_key } from "$lib/stores";
   import { get } from "svelte/store";
-    import { fade } from "svelte/transition";
-
+  import { fade } from "svelte/transition";
   let tabs: Tab[] = [
     {
       name: "Details",
@@ -82,6 +81,18 @@
   let file_uploading_modal_elem: HTMLDivElement;
   let file_upload_progress: HTMLDivElement;
   let file_uploading_modal: Modal;
+
+
+  let is_logged_in: boolean = false;
+  function check_logged_in(): boolean {
+    if ($page.data.session?.user?.name) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  $: is_logged_in = check_logged_in();
+  
 
   $: thread_empty = threads_filtered.length === 0;
   $: files_empty = files_filtered.length === 0;
@@ -171,9 +182,11 @@
   }
 
   function show_tab(idx: number): void {
-    reset_tabs();
 
+    reset_tabs();
     tabs[idx].active = true;
+  
+
   }
 
   function get_threads(): void {
@@ -544,12 +557,16 @@
 
     file_uploading_modal = new Modal(file_uploading_modal_elem);
 
-    get_threads();
     get_team_details();
+    if(is_logged_in)
+    {
+    get_threads();
     get_notices();
     get_members();
     get_files();
     check_admin();
+    }
+
   });
 </script>
 
@@ -559,6 +576,7 @@
 <div class="pg-center flex justify-between">
     <!-- svelte-ignore a11y-invalid-attribute -->
     <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
+      {#if is_logged_in}
         <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
             {#each tabs as tab, index}
                 <li class="mx-1">
@@ -570,6 +588,7 @@
                 </li>    
             {/each}
         </ul>
+        {/if}
         <div class="tab-item-data">
           {#if tabs[0].active}
             {#if data_loaded}
@@ -740,7 +759,7 @@
     </div>
   </div>
 </div>
-
+{#if is_logged_in}
 <SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} />
 <AddMember bind:modal={add_member_modal} {get_addable_members} {add_member} />
 <Create
@@ -748,7 +767,7 @@
   {id}
   creation_request={create_thread}
 />
-
+{/if}
 <div
   bind:this={file_uploading_modal_elem}
   data-modal-backdrop="static"
