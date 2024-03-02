@@ -104,6 +104,27 @@
    */
   function save_profile(): void {
     profile_edit_mode = false;
+
+    fetch("/api/user/editprofile",
+    {
+      method: "POST",
+      body: JSON.stringify(
+      {
+        userid: $page.data.session?.user?.name,
+        username: username,
+        email: email
+      })
+    }).then(async (response: Response): Promise<void> =>
+    {
+      if(response.status === 200)
+      {
+        
+      }
+      else
+      {
+        console.error(response.status, response.statusText);
+      }
+    });
   }
 
   /**
