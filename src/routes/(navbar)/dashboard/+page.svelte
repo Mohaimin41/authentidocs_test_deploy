@@ -13,7 +13,7 @@
   import { Entity } from '$lib/containers';
   import List from "$lib/components/list.svelte";
   import { Modal } from "flowbite";
-  import { make_hash } from "$lib/helpers";
+  import { make_hash, make_pfp_url } from "$lib/helpers";
 
   /**
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"
@@ -431,7 +431,7 @@
 
   function get_pfp(): void
   {
-    fetch("https://rajnoqicmphtmtgmfbjk.supabase.co/storage/v1/object/public/user_pfps/user_pfps/" + $page.data.session?.user?.name + ".webp?" + Math.random(),
+    fetch(make_pfp_url($page.data.session?.user?.name),
     {
       method: "GET"
     }).then(async (response: Response): Promise<void> =>

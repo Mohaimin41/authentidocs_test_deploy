@@ -1,4 +1,6 @@
 <script lang="ts">
+    import default_pfp from "$lib/assets/user.webp";
+    import { make_pfp_url } from "$lib/helpers";
     import { initModals } from "flowbite";
     import { onMount } from "svelte";
 
@@ -8,6 +10,7 @@
     export let joined_at: Date;
     export let pub_key: String;
     export let is_admin:boolean=false;
+    let pfp_data: string;
     let date_text:String;
     let pubkey: string = "0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa";
     let pubkey_truncate_status: string = "truncate";
@@ -40,15 +43,28 @@
   }
     onMount((): void =>
     {
-        initModals();
-        date_text = joined_at.toLocaleDateString();
-        pubkey = [
-          ...new Uint8Array(
-            new TextEncoder().encode(JSON.stringify(pub_key))
-          ),
-        ]
-          .map((x) => x.toString(16).padStart(2, "0"))
-          .join("");
+      pfp_data = default_pfp;
+
+      initModals();
+      date_text = joined_at.toLocaleDateString();
+      pubkey = [
+        ...new Uint8Array(
+          new TextEncoder().encode(JSON.stringify(pub_key))
+        ),
+      ]
+        .map((x) => x.toString(16).padStart(2, "0"))
+        .join("");
+
+      fetch(make_pfp_url(id),
+      {
+        method: "GET"
+      }).then(async (response: Response): Promise<void> =>
+      {
+        if(response.status === 200)
+        {
+          pfp_data = URL.createObjectURL(await response.blob());
+        }
+      });
     })
 </script>
 

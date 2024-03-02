@@ -1,4 +1,5 @@
 <script lang="ts">
+    import default_pfp from "$lib/assets/user.webp";
     import { initModals } from "flowbite";
     import { onMount } from "svelte";
 
@@ -7,8 +8,9 @@
     export let type: string;
     export let joined_at: Date;
     export let pub_key: String;
+    let pfp_data: string;
     let date_text:String;
-    let pubkey: string = "0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa0499cb82c6ebb2ae7d2bffb6071fa";
+    let pubkey: string;
     let pubkey_truncate_status: string = "truncate";
     let pubkey_p: HTMLParagraphElement;
     function switch_pubkey_truncate(): void {
@@ -22,39 +24,38 @@
   export let is_admin:boolean =false;
   async function make_moderator(): Promise<void> {
     let response: Response = await fetch(
-                    "/api/team/makeadmin",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            teamid:team_id,
-                            id:id,
-                        })
-                    }
-                );
-                let response_obj: any = await response.json();
-
-    
-  }
-    onMount((): void =>
+    "/api/team/makeadmin",
     {
-        initModals();
-        date_text = joined_at.toLocaleDateString();
-        pubkey = [
-          ...new Uint8Array(
-            new TextEncoder().encode(JSON.stringify(pub_key))
-          ),
-        ]
-          .map((x) => x.toString(16).padStart(2, "0"))
-          .join("");
-    })
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            teamid:team_id,
+            id:id,
+        })
+    });
+    let response_obj: any = await response.json();
+  }
+  onMount((): void =>
+  {
+    pfp_data = default_pfp;
+
+    initModals();
+    date_text = joined_at.toLocaleDateString();
+    pubkey = [
+      ...new Uint8Array(
+        new TextEncoder().encode(JSON.stringify(pub_key))
+      ),
+    ]
+      .map((x) => x.toString(16).padStart(2, "0"))
+      .join("");
+  });
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <button data-modal-target="member-modal-{id}" data-modal-toggle="member-modal-{id}" class="block text-start flex space-x-2 p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700" style="width: 100%;">
-    <img class="w-10 h-10 rounded-full" src="/pochita.webp" alt="Rounded avatar">
+    <img class="w-10 h-10 rounded-full" src={pfp_data} alt="Rounded avatar">
     <div class="grow">
         <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">{name}</p>
         <div class="flex justify-between items-end">
@@ -78,7 +79,7 @@
                     </button>
                 </div>
                 <div class="flex flex-col items-center">
-                    <img class="w-24 h-24 rounded-full mb-4" src="/pochita.webp" alt="Rounded avatar">
+                    <img class="w-24 h-24 rounded-full mb-4" src={pfp_data} alt="Rounded avatar">
                     <p class="text-2xl font-semibold text-gray-700">{name}</p>
                     <p class="text-xl font-medium text-gray-500">{type}</p>
                     <p class="text-lg font-medium text-gray-500">Added on: {date_text}</p>

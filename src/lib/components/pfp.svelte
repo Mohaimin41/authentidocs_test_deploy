@@ -7,12 +7,13 @@
     import { get } from "svelte/store";
     import { signOut } from "@auth/sveltekit/client";
     import { page } from "$app/stores";
+    import { make_pfp_url } from "$lib/helpers";
 
     let pfp_data: string = default_pfp;
 
     function get_pfp(): void
     {
-      fetch("https://rajnoqicmphtmtgmfbjk.supabase.co/storage/v1/object/public/user_pfps/user_pfps/" + $page.data.session?.user?.name + ".webp?" + Math.random(),
+      fetch(make_pfp_url($page.data.session?.user?.name),
       {
         method: "GET"
       }).then(async (response: Response): Promise<void> =>

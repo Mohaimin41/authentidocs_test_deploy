@@ -1,4 +1,5 @@
 <script lang="ts">
+    import default_pfp from "$lib/assets/user.webp";
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { common_fetch } from "$lib/fetch_func";
@@ -7,7 +8,7 @@
     import { logged_in_store, priv_key, uid, useremail,file_preview_mode } from "$lib/stores";
     import { jsPDF } from "jspdf";
     import { get } from "svelte/store";
-    import { make_date, make_time } from "$lib/helpers";
+    import { make_date, make_pfp_url, make_time } from "$lib/helpers";
 
     class Signature
     {
@@ -34,12 +35,14 @@
     }
 
     let id: string;
+    let pfp_data: string;
+    let cur_custody_pfp: string;
     let certificates: Signature[] = [];
     let notes: Note[] = [];
     let history: History[] = [];
     let file_name: string = "";
     let file_type: number = 0;
-    let file_status: string = "personal";
+    let file_status: string;
     let download_anchor: HTMLAnchorElement;
     let file_view_link: string;
     let file_download_link: string;
@@ -197,9 +200,7 @@
     {
         //console.log("file preview Mode: "+String($file_preview_mode));
         id = $page.params.id;
-
-        initModals();
-
+        cur_custody_pfp = default_pfp;
         file_loaded = false;
         add_note_modal = new Modal(add_note_modal_elem);
         view_notes_modal = new Modal(view_notes_modal_elem);
@@ -233,6 +234,17 @@
 
             viewer_custodian = current_custodianid === $page.data.session?.user?.name;
 
+            fetch(make_pfp_url(current_custodianid),
+            {
+                method: "GET"
+            }).then(async (response: Response): Promise<void> =>
+            {
+                if(response.status === 200)
+                {
+                    cur_custody_pfp = URL.createObjectURL(await response.blob());
+                }
+            });
+
             upload_timestamp= new Date(response_obj.file_data.created_at);
             current_state=response_obj.file_data.current_state;
 
@@ -250,6 +262,17 @@
             file_view_link =response_obj.file_link_preview;
             file_download_link = response_obj.file_link_download;
             download_anchor.download = file_download_link;
+
+            fetch(make_pfp_url(ownerid),
+            {
+                method: "GET"
+            }).then(async (response: Response): Promise<void> =>
+            {
+                if(response.status === 200)
+                {
+                    pfp_data = URL.createObjectURL(await response.blob());
+                }
+            });
 
             let name_response: Response = await fetch("/api/user/details",
             {
@@ -302,60 +325,61 @@
                 certificates.push(new_certificate);
             }
         });
+
         if($file_preview_mode == 1 )
         {
             common_fetch("/api/thread/getfilenotes",
-        {
-            fileid: id
-        }, async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
-            console.log(response_obj);
-            if(request_obj.length !=0)
             {
-            notes = new Array(response_obj.length);
+                fileid: id
+            }, async (response: Response): Promise<void> =>
+            {
+                let response_obj: any = await response.json();
+                // console.log(response_obj);
+                if(request_obj.length !=0)
+                {
+                    notes = new Array(response_obj.length);
 
-            for(let i: number = 0; i < notes.length; ++i)
+                    for(let i: number = 0; i < notes.length; ++i)
+                    {
+                        notes[i] = new Note();
+                        notes[i].author = response_obj[i].f_username;
+                        let timestamp: Date = new Date(response_obj[i].f_created_at);
+                        notes[i].date = timestamp.toLocaleDateString();
+                        notes[i].time = timestamp.toLocaleTimeString();
+                        notes[i].content = response_obj[i].f_content;
+                    }
+                }
+                
+            });
+            common_fetch("/api/thread/getfilehistory",
             {
-                notes[i] = new Note();
-                notes[i].author = response_obj[i].f_username;
-                let timestamp: Date = new Date(response_obj[i].f_created_at);
-                notes[i].date = timestamp.toLocaleDateString();
-                notes[i].time = timestamp.toLocaleTimeString();
-                notes[i].content = response_obj[i].f_content;
-            }
-            }
+                fileid: id
+            }, async (response: Response): Promise<void> =>
+            {
+                let response_obj: any = await response.json();
+                if(response_obj.length!=0)
+                {
+                    history = new Array(response_obj.length);
+                for(let i: number = 0; i < history.length; ++i)
+                {
+                    history[i] = new History();
+                    history[i].custodian = response_obj[i].f_username;
+                    let timestamp: Date = new Date(response_obj[i].f_start_at);
+                    history[i].date = timestamp.toLocaleDateString();
+                    history[i].time = timestamp.toLocaleTimeString();
+                }
+                }
             
-        });
-        common_fetch("/api/thread/getfilehistory",
-        {
-            fileid: id
-        }, async (response: Response): Promise<void> =>
-        {
-            let response_obj: any = await response.json();
-            if(response_obj.length!=0)
-            {
-                history = new Array(response_obj.length);
-            for(let i: number = 0; i < history.length; ++i)
-            {
-                history[i] = new History();
-                history[i].custodian = response_obj[i].f_username;
-                let timestamp: Date = new Date(response_obj[i].f_start_at);
-                history[i].date = timestamp.toLocaleDateString();
-                history[i].time = timestamp.toLocaleTimeString();
-            }
-            }
-           
-        });
-    }
-
+            });
         }
-        
-
-        
+    }  
 
     onMount(async (): Promise<void> =>
     {
+        pfp_data = default_pfp;
+        cur_custody_pfp = default_pfp;
+
+        initModals();
         init();
     });
     function generateCertificate() {
@@ -469,10 +493,10 @@
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current State</p>
                     </div>
                     <div class="flex items-center">
-                        <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                        <img class="w-5 h-5 rounded-full me-2" src={pfp_data} alt="Rounded avatar">
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{uploader}</p>
                     </div>
-                    {#if file_status !== "personal" || file_status !== "closed"}
+                    {#if file_status !== "personal"}
 
                     <div class="flex -space-x-2 rtl:space-x-reverse items-center">
                         <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
@@ -490,16 +514,16 @@
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{upload_time}</p>
                     </div>
                     <div class="flex items-center">
-                        {#if file_status !== "personal" || file_status !== "closed"}
+                        {#if file_status !== "personal"}
 
-                            <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                            <img class="w-5 h-5 rounded-full me-2" src={cur_custody_pfp} alt="Rounded avatar">
                             <p class="text-xs font-medium text-gray-700 dark:text-white">{current_custody}</p>
                         {:else}
                             <p class="text-xs font-medium text-gray-700 dark:text-white">N/A</p>
                         {/if}
                     </div>
                     <div class="flex items-center">
-                        {#if file_status !== "personal" || file_status !== "closed"}
+                        {#if file_status !== "personal"}
 
                             <p class="text-xs font-medium text-gray-700 dark:text-white">{current_state}</p>
                         {:else}
@@ -533,7 +557,7 @@
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Work Thread</p>
                     </div>
                     <div class="flex items-center">
-                        <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                        <img class="w-5 h-5 rounded-full me-2" src={default_pfp} alt="Rounded avatar">
                         <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex -space-x-2 rtl:space-x-reverse items-center">
@@ -548,7 +572,7 @@
                         <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex items-center">
-                        <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                        <img class="w-5 h-5 rounded-full me-2" src={default_pfp} alt="Rounded avatar">
                         <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex items-center">

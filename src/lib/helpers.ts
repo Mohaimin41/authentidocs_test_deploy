@@ -1,3 +1,5 @@
+import { pfp_src } from "./containers";
+
 const all_colors: string[] = ["red", "green", "blue", "purple"];
 const months: string[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -42,4 +44,14 @@ export async function make_hash(password: string): Promise<string>
       return [...new Uint8Array(password_buffer)]
         .map((x) => x.toString(16).padStart(2, "0"))
         .join("");
+}
+
+export function make_pfp_url(id: string | null | undefined): string
+{
+    if(id === null || id === undefined)
+    {
+        return "";
+    }
+
+    return pfp_src + id + ".webp?" + Math.random();
 }
