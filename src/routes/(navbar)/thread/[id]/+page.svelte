@@ -1,9 +1,10 @@
 <script lang="ts">
+  import default_pfp from "$lib/assets/user.webp";
   import { page } from "$app/stores";
   import AddMember from "$lib/components/add-member.svelte";
   import AddPassiveMember from "$lib/components/add-passive-member.svelte";
   import List from "$lib/components/list.svelte";
-  import { Entity, ForumMessage, ForumThread } from "$lib/containers";
+  import { Entity, ForumMessage, ForumThread, pfp_src } from "$lib/containers";
   import FileCard from "$lib/components/thread/file-card.svelte";
   import MemberCard from "$lib/components/thread/member-card.svelte";
   import ForumThreadCard from "$lib/components/thread/forum-thread-card.svelte";
@@ -97,6 +98,8 @@
   let post_text: string;
   let data_loaded: boolean = false;
   let addable_members: AddableMemberObj[] = [];
+  let moderator_pfp_data: string;
+  let custodian_pfp_data: string;
 
   let is_logged_in: boolean = false;
   function check_logged_in(): boolean {
@@ -392,7 +395,7 @@
     });
     let response_obj: any = await response.json();
 
-    console.log(response_obj);
+    // console.log(response_obj);
 
     let addable_members: AddableMemberObj[] = new Array(response_obj.length);
 
@@ -674,6 +677,8 @@
     data_loaded = false;
     members_loading = true;
     files_loaded = false;
+    moderator_pfp_data = default_pfp;
+    custodian_pfp_data = default_pfp;
 
     fetch("/api/thread/getdetails", {
       method: "POST",
@@ -690,9 +695,35 @@
       started_at = new Date(response_obj.thread_detail.created_at);
       moderator = response_obj.thread_mod_detail.f_username;
 
+      {
+        let moderator_id: number = response_obj.thread_mod_detail.f_userid;
+
+        fetch(pfp_src + moderator_id + ".webp?" + Math.random(),
+        {
+          method: "GET"
+        }).then(async (response: Response): Promise<void> =>
+        {
+          if(response.status === 200)
+          {
+            moderator_pfp_data = URL.createObjectURL(await response.blob());
+          }
+        });
+      }
+
       if (response_obj.thread_current_custodian_detail !== undefined) {
-        current_custodian =
-          response_obj.thread_current_custodian_detail.f_username;
+        let custodian_id: number = response_obj.thread_current_custodian_detail.f_userid;
+        current_custodian = response_obj.thread_current_custodian_detail.f_username;
+
+        fetch(pfp_src + custodian_id + ".webp?" + Math.random(),
+        {
+          method: "GET"
+        }).then(async (response: Response): Promise<void> =>
+        {
+          if(response.status === 200)
+          {
+            custodian_pfp_data = URL.createObjectURL(await response.blob());
+          }
+        });
       }
 
       description = response_obj.thread_detail.description;
@@ -892,7 +923,7 @@
             <div class="flex items-center mb-4">
               <img
                 class="w-8 h-8 rounded-full me-2"
-                src="/pochita.webp"
+                src={moderator_pfp_data}
                 alt="Rounded avatar"
               />
               <p class="text-2xl font-medium text-gray-700 dark:text-gray-200">
@@ -908,7 +939,7 @@
               <div class="flex items-center mb-4">
                 <img
                   class="w-8 h-8 rounded-full me-2"
-                  src="/pochita.webp"
+                  src={custodian_pfp_data}
                   alt="Rounded avatar"
                 />
                 <p

@@ -1,10 +1,12 @@
 <script lang="ts">
-    import { ForumMessage } from "$lib/containers";
+    import default_pfp from "$lib/assets/user.webp";
+    import { ForumMessage, pfp_src } from "$lib/containers";
     import ForumPost from "$lib/components/thread/forum-post.svelte";
     import { make_date, make_time } from "$lib/helpers";
 
     export let forum_id: string;
     export let message: ForumMessage;
+    let pfp_data: string;
     let children: ForumMessage[] = [];
     let reply_mode: boolean = false;
     let created_date: string;
@@ -92,7 +94,20 @@
 
     $:
     {
+        pfp_data = default_pfp;
+
         get_posts(message.id);
+
+        fetch(pfp_src + message.sender + ".webp?" + Math.random(),
+        {
+            method: "GET"
+        }).then(async (response: Response): Promise<void> =>
+        {
+            if(response.status === 200)
+            {
+                pfp_data = URL.createObjectURL(await response.blob());
+            }
+        });
     }
 
     $:
@@ -103,7 +118,7 @@
 </script>
 
 <div class="flex items-start gap-2.5">
-    <img class="w-8 h-8 rounded-full" src="/pochita.webp" alt="alt-img">
+    <img class="w-8 h-8 rounded-full" src={pfp_data} alt="alt-img">
     <div class="w-full">
         <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
             <div class="flex items-center space-x-2 rtl:space-x-reverse">
