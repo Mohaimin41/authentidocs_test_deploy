@@ -450,6 +450,8 @@
       }),
     });
 
+    get_members();
+
     let response_obj: any = await response.json();
 
     //console.log(response_obj);
