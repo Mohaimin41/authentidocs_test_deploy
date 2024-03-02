@@ -34,6 +34,15 @@
         public time: string = "";
     }
 
+    const current_state_map: Map<string, string> = new Map(
+    [
+        ["not_viewed_by_custodian", "Not Viewed by Custodian"],
+        ["viewed_by_custodian", "Viewed by Custodian"],
+        ["signed_by_custodian", "Signed by Custodian"],
+        ["signed_by_custodian_with_note", "Signed by Custodian with Note"],
+        ["closed", "Closed"],
+        ["personal", "Personal"]
+    ]);
     let id: string;
     let pfp_data: string;
     let cur_custody_pfp: string;
@@ -476,12 +485,9 @@
         {#if file_loaded}
             <div class="meta-data">
                 <p class="text-2xl font-medium text-gray-900 dark:text-white mb-2">{file_name}</p>
-                <div class="grid grid-cols-5 gap-1 me-6">
+                <div class="grid grid-cols-4 gap-1 me-6">
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Signed By</p>
                     </div>
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploaded On</p>
@@ -495,20 +501,7 @@
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src={pfp_data} alt="Rounded avatar">
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{uploader}</p>
-                    </div>
-                    {#if file_status !== "personal"}
-
-                    <div class="flex -space-x-2 rtl:space-x-reverse items-center">
-                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <!-- svelte-ignore a11y-invalid-attribute -->
-                        <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
-                    </div>
-                    {:else}
-                    <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                    {/if}
-                    
+                    </div>                    
                     <div class="flex flex-col justify-center">
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{upload_date}</p>
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{upload_time}</p>
@@ -525,7 +518,7 @@
                     <div class="flex items-center">
                         {#if file_status == "not_viewed_by_custodian" || file_status == " viewed_by_custodian"|| file_status == "signed_by_custodian"|| file_status == "signed_by_custodian_with_note"|| file_status == "signed_viewed_by_custodian"}
 
-                            <p class="text-xs font-medium text-gray-700 dark:text-white">{current_state}</p>
+                            <p class="text-xs font-medium text-gray-700 dark:text-white">{current_state_map.get(current_state)}</p>
                         {:else}
                             <p class="text-xs font-medium text-gray-700 dark:text-white">N/A</p>
                         {/if}
@@ -537,12 +530,9 @@
                 <div role="status" class="max-w-sm animate-pulse">
                     <div class="h-8 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-2"></div>
                 </div>
-                <div class="grid grid-cols-6 gap-1 animate-pulse me-6">
+                <div class="grid grid-cols-4 gap-1 animate-pulse me-6">
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Signed By</p>
                     </div>
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploaded On</p>
@@ -553,19 +543,9 @@
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current State</p>
                     </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Work Thread</p>
-                    </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src={default_pfp} alt="Rounded avatar">
                         <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
-                    </div>
-                    <div class="flex -space-x-2 rtl:space-x-reverse items-center">
-                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
-                        <!-- svelte-ignore a11y-invalid-attribute -->
-                        <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
                     </div>
                     <div class="flex flex-col justify-center">
                         <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-20"></div>
@@ -573,9 +553,6 @@
                     </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src={default_pfp} alt="Rounded avatar">
-                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
-                    </div>
-                    <div class="flex items-center">
                         <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex items-center">
