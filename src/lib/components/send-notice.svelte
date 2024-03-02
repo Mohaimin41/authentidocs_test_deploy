@@ -12,6 +12,7 @@
     function send(): void
     {
         send_notice_request(id, subject, content);
+        modal.hide();
     }
 
     onMount((): void =>

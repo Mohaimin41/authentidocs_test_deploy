@@ -7,6 +7,9 @@
     import { Modal, initModals } from "flowbite";
     import {FileObj} from "$lib/containers";
     import FileCard from "$lib/components/team/file-card.svelte";
+    import { fade } from "svelte/transition";
+    import { make_date,make_time } from "$lib/helpers";
+  import { goto } from "$app/navigation";
 
     let id: string;
     let sender: string = "Ekjon Sender";
@@ -15,6 +18,11 @@
     let creator_id:string = "";
     let file_id:string = "";
     let file:FileObj = new FileObj();
+    let creation_date:Date;
+    let notice_level:string;
+    let notice_level_id:string;
+    let notice_level_name:string;
+    let redirect:string;
     //let content: string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus scelerisque pulvinar velit, quis consequat diam ullamcorper et. Integer ut blandit nibh, quis egestas tortor. Sed vitae consequat ipsum. Phasellus imperdiet cursus rutrum. Etiam venenatis at nisi a fringilla. Aenean rhoncus hendrerit arcu, a vestibulum leo porttitor vitae. Duis nec augue eros. Proin sit amet sapien fermentum, faucibus lectus et, ultrices quam. Ut pharetra pellentesque lectus, sit amet sagittis turpis fermentum vel. Donec volutpat ullamcorper pretium. Suspendisse eleifend imperdiet malesuada. Fusce nec orci nisi. In eu dignissim dolor, at elementum elit. Aenean eros leo, mollis a neque eu, fringilla volutpat odio. Duis imperdiet erat sit amet diam aliquet porttitor. In non lorem vel purus mollis vehicula. Donec volutpat nunc eget tempus gravida. Aliquam diam tortor, tincidunt quis quam vitae, varius tincidunt odio. Pellentesque sed tellus eu mauris finibus semper in interdum nisi. Praesent eros sapien, fringilla mattis tincidunt pretium, lacinia euismod nunc. Mauris lorem nibh, facilisis nec hendrerit a, bibendum id nisi. Fusce sed massa efficitur, convallis magna ac, iaculis magna. Cras ante augue, dapibus ut dui ac, tristique faucibus neque. Aenean eget fermentum lectus. Donec facilisis tellus in ipsum porttitor suscipit at nec orci. Sed non quam sit amet risus porta lacinia eget sed lacus. Donec pharetra nunc dolor, ac accumsan risus tempus eget. Cras pharetra purus sit amet magna malesuada, vitae posuere orci pharetra. Proin faucibus augue in condimentum dapibus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras a erat erat. Duis iaculis consequat dignissim. In sollicitudin rutrum velit, vel elementum lorem aliquam sit amet. Curabitur ac nulla ipsum. Integer laoreet maximus massa a tincidunt. Nunc vitae est dui. Phasellus a laoreet magna, eu ullamcorper massa. Etiam et elit non diam porttitor mattis. Vivamus imperdiet suscipit tellus, elementum porttitor felis egestas sit amet. Donec ut eros at ipsum dapibus eleifend id eget dolor. Quisque sed sagittis magna. Nulla et metus et nisl gravida luctus et vitae ipsum. Suspendisse ac massa ut enim vulputate consequat. Fusce luctus arcu quis malesuada ultricies. Aenean vitae risus vel dolor rhoncus consectetur. Aenean imperdiet enim non tempor convallis. Quisque maximus ac tortor eget tincidunt. Phasellus gravida non lorem eu sollicitudin. Aenean convallis leo varius risus accumsan, at auctor lectus aliquet. Praesent mattis elit et leo facilisis viverra. Praesent lorem augue, maximus sed imperdiet eget, consequat vitae lorem. Vivamus eget molestie mauris. Nam quis lacus eros. Sed et sapien in lectus pharetra dapibus quis quis quam. Cras efficitur iaculis erat. Phasellus vehicula metus urna, in molestie dolor aliquam eget. Cras nisl sapien, sodales vitae erat ut, euismod posuere neque. Integer varius scelerisque libero, nec molestie libero tristique et. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus scelerisque pulvinar velit, quis consequat diam ullamcorper et. Integer ut blandit nibh, quis egestas tortor. Sed vitae consequat ipsum. Phasellus imperdiet cursus rutrum. Etiam venenatis at nisi a fringilla. Aenean rhoncus hendrerit arcu, a vestibulum leo porttitor vitae. Duis nec augue eros. Proin sit amet sapien fermentum, faucibus lectus et, ultrices quam. Ut pharetra pellentesque lectus, sit amet sagittis turpis fermentum vel. Donec volutpat ullamcorper pretium. Suspendisse eleifend imperdiet malesuada. Fusce nec orci nisi. In eu dignissim dolor, at elementum elit. Aenean eros leo, mollis a neque eu, fringilla volutpat odio. Duis imperdiet erat sit amet diam aliquet porttitor. In non lorem vel purus mollis vehicula. Donec volutpat nunc eget tempus gravida. Aliquam diam tortor, tincidunt quis quam vitae, varius tincidunt odio. Pellentesque sed tellus eu mauris finibus semper in interdum nisi. Praesent eros sapien, fringilla mattis tincidunt pretium, lacinia euismod nunc. Mauris lorem nibh, facilisis nec hendrerit a, bibendum id nisi. Fusce sed massa efficitur, convallis magna ac, iaculis magna. Cras ante augue, dapibus ut dui ac, tristique faucibus neque. Aenean eget fermentum lectus. Donec facilisis tellus in ipsum porttitor suscipit at nec orci. Sed non quam sit amet risus porta lacinia eget sed lacus. Donec pharetra nunc dolor, ac accumsan risus tempus eget. Cras pharetra purus sit amet magna malesuada, vitae posuere orci pharetra. Proin faucibus augue in condimentum dapibus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras a erat erat. Duis iaculis consequat dignissim. In sollicitudin rutrum velit, vel elementum lorem aliquam sit amet. Curabitur ac nulla ipsum. Integer laoreet maximus massa a tincidunt. Nunc vitae est dui. Phasellus a laoreet magna, eu ullamcorper massa. Etiam et elit non diam porttitor mattis. Vivamus imperdiet suscipit tellus, elementum porttitor felis egestas sit amet. Donec ut eros at ipsum dapibus eleifend id eget dolor. Quisque sed sagittis magna. Nulla et metus et nisl gravida luctus et vitae ipsum. Suspendisse ac massa ut enim vulputate consequat. Fusce luctus arcu quis malesuada ultricies. Aenean vitae risus vel dolor rhoncus consectetur. Aenean imperdiet enim non tempor convallis. Quisque maximus ac tortor eget tincidunt. Phasellus gravida non lorem eu sollicitudin. Aenean convallis leo varius risus accumsan, at auctor lectus aliquet. Praesent mattis elit et leo facilisis viverra. Praesent lorem augue, maximus sed imperdiet eget, consequat vitae lorem. Vivamus eget molestie mauris. Nam quis lacus eros. Sed et sapien in lectus pharetra dapibus quis quis quam. Cras efficitur iaculis erat. Phasellus vehicula metus urna, in molestie dolor aliquam eget. Cras nisl sapien, sodales vitae erat ut, euismod posuere neque. Integer varius scelerisque libero, nec molestie libero tristique et.";
 
     async function get_notice_details(): Promise<void>
@@ -38,6 +46,11 @@
             sender =response_obj.f_creator_name;
             creator_id = response_obj.f_creator_id;
             file_id = response_obj.f_related_file_id;
+            creation_date = new Date(response_obj.f_created_at);
+            notice_level = response_obj.f_hierarchy_level;
+            notice_level_name = response_obj.f_hierarchy_name;
+            notice_level_id = response_obj.f_hierarchy_level_id;
+            redirect = "/" + notice_level + "/" +notice_level_id;
             if(file_id!=null)
         {
             get_file_details();
@@ -180,6 +193,7 @@
         }
       } else {
         file_uploading_modal.hide();
+        get_notice_details();
       }
     };
 
@@ -199,18 +213,54 @@ onMount((): void =>
 </script>
 
 <div class="notice-root">
-    <div class="notice-root-card block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <div class="notice-card-content">
-            <p class="text-3xl font-bold text-gray-700 dark:text-gray-200">{subject}</p>
-            <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-4">Sent By: {sender}</p>
+  <div class="details" in:fade={{duration: 250}}>
+    <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{subject}</p>
+    <div class="grid grid-cols-4 mb-4">
+        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
+        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Sender</p>
+        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Notice Level</p>
+        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Notice Source</p>
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+            </svg>
+            <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                {make_date(creation_date)}
+                {make_time(creation_date)}
+            </p>
         </div>
-        <div class="notice-message">
-            <p class="text-gray-700 dark:text-gray-200 mb-4">{content}</p>
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+        </svg>
+            <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{sender}</p>
         </div>
         
-        {#if file_id !== null && file_id !== undefined}
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
+        </svg>
+            <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{notice_level}</p>
+        </div>
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
+            </svg>
+            <a href={redirect}>
+            <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{notice_level_name}</p>
+          </a>
+        </div>
+    </div>
+    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Content</p>
+    <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{content}</p>
+    {#if file_id !== null && file_id !== undefined}
+    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Attached File</p>
+    
           <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
         {/if}
+  </div>
+        
+        
         <div class="flex justify-end mt-2">
             <!-- Add File -->
             {#if creator_id == $page.data.session?.user?.name }
@@ -219,7 +269,6 @@ onMount((): void =>
               {/if}
             {/if}
             </div>
-    </div>
 </div>
 <div
   bind:this={file_uploading_modal_elem}
