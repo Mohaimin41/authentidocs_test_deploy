@@ -14,12 +14,9 @@ export async function POST({
   const file_info = await request.json();
   // console.log(key_info);
   let given_fileid = file_info.fileid;
-  let given_userid = file_info.user_id;
   if (
     given_fileid === undefined ||
-    given_fileid === null ||
-    given_userid === undefined ||
-    given_userid === null
+    given_fileid === null 
   ) {
     console.log(
       "ERROR @api/files/getfilelink:25: invalid user input error:\n",
@@ -32,7 +29,6 @@ export async function POST({
     "get_single_filemetadata_fileid",
     {
       given_fileid,
-      given_userid,
     }
   );
 
