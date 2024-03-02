@@ -72,9 +72,20 @@
     let org_creation_date:Date;
     let date_text:string;
     let is_admin:boolean = false;
+
     let file_uploading_modal_elem: HTMLDivElement;
     let file_upload_progress: HTMLDivElement;
     let file_uploading_modal: Modal;
+
+    let is_logged_in: boolean = false;
+    function check_logged_in(): boolean {
+    if ($page.data.session?.user?.name) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  $:is_logged_in = check_logged_in(); 
 
     $: teams_empty = teams_filtered.length === 0;
     $: files_empty = files_filtered.length === 0;
@@ -578,11 +589,14 @@
         file_uploading_modal = new Modal(file_uploading_modal_elem);
 
         get_org_details();
+        if(is_logged_in)
+        {
         get_teams();
         get_notices();
         get_files();
         get_members();
-        check_admin()
+        check_admin();
+        }
 
     });
 </script>
@@ -593,6 +607,7 @@
 <div class="pg-center flex justify-between">
     <!-- svelte-ignore a11y-invalid-attribute -->
     <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
+        {#if is_logged_in}
         <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
             {#each tabs as tab, index}
                 <li class="mx-1">
@@ -604,6 +619,7 @@
                 </li>    
             {/each}
         </ul>
+        {/if}
         <div class="tab-item-data">
             {#if tabs[0].active}
                 <div class="details">
@@ -762,13 +778,13 @@
         </div>
     </div>
 </div>
-
+{#if is_logged_in}
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
 
 <AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
 
 <Create bind:modal={create_team_modal} id={id} creation_request={create_team} />
-
+{/if}
 <div
   bind:this={file_uploading_modal_elem}
   data-modal-backdrop="static"

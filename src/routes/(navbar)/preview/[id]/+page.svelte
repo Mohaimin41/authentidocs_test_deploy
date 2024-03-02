@@ -218,7 +218,6 @@
         let request_obj: any =
         {
             fileid: $page.params.id,
-            user_id: $page.data.session?.user?.name
         };
 
         common_fetch("/api/files/getfilelink", request_obj,
@@ -473,7 +472,8 @@
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{uploader}</p>
                     </div>
-                    {#if $file_preview_mode == 1}
+                    {#if file_status !== "personal" || file_status !== "closed"}
+
                     <div class="flex -space-x-2 rtl:space-x-reverse items-center">
                         <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                         <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
@@ -484,12 +484,14 @@
                     {:else}
                     <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                     {/if}
+                    
                     <div class="flex flex-col justify-center">
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{upload_date}</p>
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{upload_time}</p>
                     </div>
                     <div class="flex items-center">
-                        {#if $file_preview_mode == 1}
+                        {#if file_status !== "personal" || file_status !== "closed"}
+
                             <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
                             <p class="text-xs font-medium text-gray-700 dark:text-white">{current_custody}</p>
                         {:else}
@@ -497,7 +499,8 @@
                         {/if}
                     </div>
                     <div class="flex items-center">
-                        {#if $file_preview_mode == 1}
+                        {#if file_status !== "personal" || file_status !== "closed"}
+
                             <p class="text-xs font-medium text-gray-700 dark:text-white">{current_state}</p>
                         {:else}
                             <p class="text-xs font-medium text-gray-700 dark:text-white">N/A</p>
