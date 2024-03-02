@@ -329,8 +329,8 @@
                 let new_certificate: Signature = new Signature();
                 new_certificate.by = response_obj[i].f_signing_username;
                 let on: Date = new Date(response_obj[i].f_created_at);
-                new_certificate.on_date = on.toLocaleDateString();
-                new_certificate.on_time = on.toLocaleTimeString();
+                new_certificate.on_date = make_date(on);
+                new_certificate.on_time = make_time(on);
                 new_certificate.signature = response_obj[i].f_signature;
                 new_certificate.pubkey = [...new Uint8Array(new TextEncoder().encode(JSON.stringify(response_obj[i].f_signing_key)))].map((x) => x.toString(16).padStart(2, "0")).join("");
 
@@ -616,6 +616,7 @@
                 <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signed On</p>
                 <p class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     <span>{certificate.on_date}</span>
+                    •
                     <span>{certificate.on_time}</span>
                 </p>
                 <p class="text-base font-semibold text-gray-500 dark:text-gray-400">Signature</p>
