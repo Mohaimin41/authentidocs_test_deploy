@@ -490,7 +490,7 @@
                         <p class="text-xs font-medium text-gray-700 dark:text-white">{upload_time}</p>
                     </div>
                     <div class="flex items-center">
-                        {#if file_status !== "personal" || file_status !== "closed"}
+                        {#if file_status == "not_viewed_by_custodian" || file_status == " viewed_by_custodian"|| file_status == "signed_by_custodian"|| file_status == "signed_by_custodian_with_note"|| file_status == "signed_viewed_by_custodian"}
 
                             <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
                             <p class="text-xs font-medium text-gray-700 dark:text-white">{current_custody}</p>
@@ -499,7 +499,7 @@
                         {/if}
                     </div>
                     <div class="flex items-center">
-                        {#if file_status !== "personal" || file_status !== "closed"}
+                        {#if file_status == "not_viewed_by_custodian" || file_status == " viewed_by_custodian"|| file_status == "signed_by_custodian"|| file_status == "signed_by_custodian_with_note"|| file_status == "signed_viewed_by_custodian"}
 
                             <p class="text-xs font-medium text-gray-700 dark:text-white">{current_state}</p>
                         {:else}
