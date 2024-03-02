@@ -740,7 +740,7 @@
             <List loaded={members_loaded} empty={members_empty}>
                 {#each members_filtered as member}
                     <li>
-                        <MemberCard team_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
+                        <MemberCard team_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin} get_members={get_members}/>
                     </li>
                 {/each}
             </List>

@@ -403,6 +403,8 @@
 
   function add_member(id: string, members: AddableMemberObj[]): any
   {
+    console.log("dhkse 0");
+
     let adding_members = [];
     let count = 0;
     for (let i = 0; i < members.length; i++) {
@@ -422,6 +424,8 @@
       }),
     }).then(async (response: Response): Promise<void> =>
     {
+      console.log("dhkse 1");
+
       get_members();
     });
   }
@@ -1163,6 +1167,7 @@
                 type={member.role}
                 joined_at={member.joined}
                 pub_key={member.pubkey}
+                get_members={get_members}
                 {is_admin}
               />
             </li>
