@@ -1,4 +1,6 @@
 <script lang="ts">
+  import default_pfp from "$lib/assets/user.webp";
+    import { make_pfp_url } from "$lib/helpers";
   import { initModals } from "flowbite";
   import { onMount } from "svelte";
 
@@ -6,10 +8,12 @@
   export let name: string;
   export let joined_at: Date;
   export let pub_key: String;
+  let pfp_data: string;
   let date_text:String;
   let pubkey: string = "";
   let pubkey_truncate_status: string = "truncate";
   let pubkey_p: HTMLParagraphElement;
+
   function switch_pubkey_truncate(): void {
     if (pubkey_truncate_status === "truncate") {
       pubkey_truncate_status = "";
@@ -17,8 +21,11 @@
       pubkey_truncate_status = "truncate";
     }
   }
+
   onMount((): void =>
   {
+    pfp_data = default_pfp;
+
     initModals();
     date_text = joined_at.toLocaleDateString();
     pubkey = [
@@ -28,12 +35,23 @@
     ]
       .map((x) => x.toString(16).padStart(2, "0"))
       .join("");
+
+    fetch(make_pfp_url(id),
+    {
+      method: "GET"
+    }).then(async (response: Response): Promise<void> =>
+    {
+      if(response.status === 200)
+      {
+        pfp_data = URL.createObjectURL(await response.blob());
+      }
+    });
   })
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <button data-modal-target="member-modal-{id}" data-modal-toggle="member-modal-{id}" class="block text-start flex space-x-2 p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700" style="width: 100%;">
-    <img class="w-10 h-10 rounded-full" src="/pochita.webp" alt="Rounded avatar">
+    <img class="w-10 h-10 rounded-full" src={pfp_data} alt="Rounded avatar">
     <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">{name}</p>
 </button>
 
@@ -52,7 +70,7 @@
                     </button>
                 </div>
                 <div class="flex flex-col items-center">
-                    <img class="w-24 h-24 rounded-full mb-4" src="/pochita.webp" alt="Rounded avatar">
+                    <img class="w-24 h-24 rounded-full mb-4" src={pfp_data} alt="Rounded avatar">
                     <p class="text-2xl font-semibold text-gray-700">{name}</p>
                     <p class="text-lg font-medium text-gray-500">Added on: {date_text}</p>
                 </div>
