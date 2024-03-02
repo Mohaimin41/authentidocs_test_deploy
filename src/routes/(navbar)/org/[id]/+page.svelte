@@ -73,7 +73,7 @@
     let org_creation_date:Date;
     let date_text:string;
     let is_admin:boolean = false;
-
+    let addable_members: AddableMemberObj[] = [];
     let file_uploading_modal_elem: HTMLDivElement;
     let file_upload_progress: HTMLDivElement;
     let file_uploading_modal: Modal;
@@ -798,7 +798,7 @@
                 <List loaded={members_loaded} empty={members_empty}>
                     {#each members_filtered as member}
                         <li>
-                            <MemberCard org_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin}/>
+                            <MemberCard org_id={id} id={member.id} name={member.name} type={member.role} joined_at={member.joined} pub_key={member.pubkey} is_admin={is_admin} get_members={get_members}/>
                         </li>
                     {/each}
                 </List>
@@ -838,7 +838,7 @@
 {#if is_logged_in}
 <SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} />
 
-<AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} />
+<AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} bind:addable_members={addable_members} />
 
 <Create bind:modal={create_team_modal} id={id} creation_request={create_team} />
 {/if}

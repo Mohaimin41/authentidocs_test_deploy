@@ -77,7 +77,7 @@
   let date_text: string;
   let create_thread_modal: Modal;
   let is_admin: boolean = false;
-
+  let addable_members: AddableMemberObj[] = [];
   let file_uploading_modal_elem: HTMLDivElement;
   let file_upload_progress: HTMLDivElement;
   let file_uploading_modal: Modal;
@@ -777,7 +777,7 @@
 </div>
 {#if is_logged_in}
 <SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} />
-<AddMember bind:modal={add_member_modal} {get_addable_members} {add_member} />
+<AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} bind:addable_members={addable_members} />
 <Create
   bind:modal={create_thread_modal}
   {id}

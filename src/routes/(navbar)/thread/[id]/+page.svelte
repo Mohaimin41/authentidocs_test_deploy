@@ -96,6 +96,7 @@
   let add_post_form: HTMLFormElement;
   let post_text: string;
   let data_loaded: boolean = false;
+  let addable_members: AddableMemberObj[] = [];
 
   let is_logged_in: boolean = false;
   function check_logged_in(): boolean {
@@ -391,7 +392,7 @@
     });
     let response_obj: any = await response.json();
 
-    // console.log(response_obj);
+    console.log(response_obj);
 
     let addable_members: AddableMemberObj[] = new Array(response_obj.length);
 
@@ -425,6 +426,7 @@
       }),
     });
     get_members();
+    get_forwardable_members();
   }
   async function add_passive_member(
     id: string,
@@ -1400,9 +1402,9 @@
   </div>
 </div>
 {#if is_logged_in}
-<AddMember bind:modal={add_member_modal} {get_addable_members} {add_member} />
+<AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} bind:addable_members={addable_members} />
 <SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} />
-<AddPassiveMember bind:modal={add_passive_member_modal} {get_addable_members} {add_passive_member} />
+<AddPassiveMember bind:modal={add_passive_member_modal} get_addable_members={get_addable_members} add_passive_member={add_passive_member} bind:addable_members={addable_members} />
 {/if}
 <div
   bind:this={close_thread_modal_elem}
