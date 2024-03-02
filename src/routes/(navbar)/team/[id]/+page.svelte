@@ -20,6 +20,7 @@
   import Create from "$lib/components/create.svelte";
   import { priv_key } from "$lib/stores";
   import { get } from "svelte/store";
+    import { fade } from "svelte/transition";
 
   let tabs: Tab[] = [
     {
@@ -50,6 +51,7 @@
   let notices: Entity[] = [];
   let notices_filtered: Entity[] = [];
   let id: string;
+  let data_loaded: boolean = false;
   let team_name: string;
   let team_leader: string;
   let add_member_modal: Modal;
@@ -200,6 +202,7 @@
   }
 
   function get_team_details(): void {
+    data_loaded = false;
     let request_obj: any = {
       teamid: id,
     };
@@ -224,6 +227,7 @@
         team_description = team_info.team_detail.f_description;
         team_creation_date = new Date(team_info.team_detail.f_created_at);
         date_text = team_creation_date.toLocaleDateString();
+        data_loaded = true;
       }
     );
   }
@@ -568,48 +572,69 @@
         </ul>
         <div class="tab-item-data">
           {#if tabs[0].active}
-              <div class="details">
-                  <div>
-                      <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{team_name}</p>
-                      <div class="grid grid-cols-4 mb-4">
-                          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
-                          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
-                          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
-                          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Threads</p>
-                          <div class="flex items-center">
-                              <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
-                              </svg>
-                              <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
-                                  <span>{date_text}</span>
-                              </p>
-                          </div>
-                          <div class="flex items-center">
-                              <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
-                              </svg>
-                              <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
-                              <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
-                          </div>
-                          
-                          <div class="flex items-center">
-                              <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                              </svg>
-                              <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
-                          </div>
-                          <div class="flex items-center">
-                              <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
-                              </svg>
-                              <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
-                          </div>
-                      </div>
-                      <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
-                      <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{team_description}</p>
-                  </div>
-                  
+            {#if data_loaded}
+              <div class="details" in:fade={{duration: 250}}>
+                <p class="text-4xl font-semibold text-gray-700 dark:text-gray-200 mb-4">{team_name}</p>
+                <div class="grid grid-cols-4 mb-4">
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Created At</p>
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Files</p>
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Members</p>
+                    <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Threads</p>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-red-500 dark:text-red-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1H5a1 1 0 0 0-1 1v12c0 .6.4 1 1 1Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">
+                            <span>{date_text}</span>
+                        </p>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 3v4c0 .6-.4 1-1 1H5m14-4v16c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V8c0-.4.1-.6.3-.8l4-4 .6-.2H18c.6 0 1 .4 1 1Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{file_count}</p>
+                        <!-- <p class="text-base font-medium text-red-500 dark:text-red-400 me-2">[5 Unsigned]</p> -->
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2" d="M7 17v1c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{member_count}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-green-500 dark:text-green-400 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 0 0-2 2v4m5-6h8M8 7V5c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2m0 0h3a2 2 0 0 1 2 2v4m0 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m18 0s-4 2-9 2-9-2-9-2m9-2h0"/>
+                        </svg>
+                        <p class="text-base font-medium text-gray-700 dark:text-gray-200 me-1">{thread_count}</p>
+                    </div>
+                </div>
+                <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">Description</p>
+                <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{team_description}</p>
               </div>
+            {:else}
+              <div class="flex justify-center items-center" style="height: 100%;">
+                <div role="status">
+                    <svg
+                        aria-hidden="true"
+                        class="w-20 h-20 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                        viewBox="0 0 100 101"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                            fill="currentColor"
+                        />
+                        <path
+                            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                            fill="currentFill"
+                        />
+                    </svg>
+                    <span class="sr-only">Loading...</span>
+                </div>
+              </div>
+            {/if}
           {:else if tabs[1].active}
               <div class="mb-2">
                   <p class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1">Threads</p>
@@ -655,7 +680,11 @@
                       </li>
                   {/each}
               </List>
-          {:else if tabs[3].active}
+               <!-- Add File -->
+              <div class="flex justify-end mt-2">
+              <button on:click={add_file} type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" >Add File</button>
+            </div>
+              {:else if tabs[3].active}
             <div class="mb-2">
                 <p
                 class="list-title text-2xl font-bold text-gray-700 dark:text-gray-200 pb-3 ps-1"
@@ -776,9 +805,6 @@
   }
   .details {
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
   }
   @media (max-width: 1099px) {
     .pg-center {

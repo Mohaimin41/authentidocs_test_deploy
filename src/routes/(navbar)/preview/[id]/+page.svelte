@@ -7,6 +7,7 @@
     import { logged_in_store, priv_key, uid, useremail,file_preview_mode } from "$lib/stores";
     import { jsPDF } from "jspdf";
     import { get } from "svelte/store";
+    import { make_date, make_time } from "$lib/helpers";
 
     class Signature
     {
@@ -38,7 +39,7 @@
     let history: History[] = [];
     let file_name: string = "";
     let file_type: number = 0;
-    let file_status: string = "";
+    let file_status: string = "personal";
     let download_anchor: HTMLAnchorElement;
     let file_view_link: string;
     let file_download_link: string;
@@ -66,8 +67,8 @@
     let history_modal: Modal;
 
     $: file_signed = file_status === "signed_viewed_by_custodian";
-    $: upload_date = upload_timestamp?.toLocaleDateString();
-    $: upload_time = upload_timestamp?.toLocaleTimeString();
+    $: upload_date = make_date(upload_timestamp);
+    $: upload_time = make_time(upload_timestamp);
     $: signable = viewer_custodian && !file_signed;
 
     function show_add_note_modal(): void
@@ -310,6 +311,7 @@
         }, async (response: Response): Promise<void> =>
         {
             let response_obj: any = await response.json();
+            console.log(response_obj);
             if(request_obj.length !=0)
             {
             notes = new Array(response_obj.length);
@@ -451,7 +453,7 @@
         {#if file_loaded}
             <div class="meta-data">
                 <p class="text-2xl font-medium text-gray-900 dark:text-white mb-2">{file_name}</p>
-                <div class="grid grid-cols-6 gap-1 me-6">
+                <div class="grid grid-cols-5 gap-1 me-6">
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
                     </div>
@@ -467,12 +469,9 @@
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current State</p>
                     </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Current Work Thread</p>
-                    </div>
                     <div class="flex items-center">
                         <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{uploader}</p>
+                        <p class="text-xs font-medium text-gray-700 dark:text-white">{uploader}</p>
                     </div>
                     {#if $file_preview_mode == 1}
                     <div class="flex -space-x-2 rtl:space-x-reverse items-center">
@@ -486,30 +485,22 @@
                     <img class="w-5 h-5 border-2 border-white rounded-full dark:border-gray-800" src="/pochita.webp" alt="">
                     {/if}
                     <div class="flex flex-col justify-center">
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_date}</p>
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{upload_time}</p>
+                        <p class="text-xs font-medium text-gray-700 dark:text-white">{upload_date}</p>
+                        <p class="text-xs font-medium text-gray-700 dark:text-white">{upload_time}</p>
                     </div>
-
                     <div class="flex items-center">
                         {#if $file_preview_mode == 1}
-                        <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{current_custody}</p>
+                            <img class="w-5 h-5 rounded-full me-2" src="/pochita.webp" alt="Rounded avatar">
+                            <p class="text-xs font-medium text-gray-700 dark:text-white">{current_custody}</p>
                         {:else}
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">N/A</p>
+                            <p class="text-xs font-medium text-gray-700 dark:text-white">N/A</p>
                         {/if}
                     </div>
                     <div class="flex items-center">
                         {#if $file_preview_mode == 1}
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{current_state}</p>
+                            <p class="text-xs font-medium text-gray-700 dark:text-white">{current_state}</p>
                         {:else}
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">N/A</p>
-                        {/if}
-                    </div>
-                    <div class="flex items-center">
-                        {#if $file_preview_mode == 1}
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">Thread 2 @ Team 4</p>
-                        {:else}
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">N/A</p>
+                            <p class="text-xs font-medium text-gray-700 dark:text-white">N/A</p>
                         {/if}
                     </div>
                 </div>
@@ -519,7 +510,7 @@
                 <div role="status" class="max-w-sm animate-pulse">
                     <div class="h-8 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-2"></div>
                 </div>
-                <div class="grid grid-cols-6 gap-1 me-6">
+                <div class="grid grid-cols-6 gap-1 animate-pulse me-6">
                     <div>
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Uploader</p>
                     </div>
@@ -550,7 +541,7 @@
                         <a class="flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" href="javascript:">+69</a>
                     </div>
                     <div class="flex flex-col justify-center">
-                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
+                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-20"></div>
                         <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex items-center">
@@ -561,24 +552,24 @@
                         <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                     <div class="flex items-center">
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">Thread 2 @ Team 4</p>
+                        <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
                     </div>
                 </div>
             </div>
         {/if}
         <div class="flex justify-end mt-3">
             {#if file_status !== "personal"}
-            {#if file_status !== "closed"}
-            
-            <!-- View Note -->
-            <button on:click={show_view_notes_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Notes</button>
-            <!-- Add Note -->
-            <button on:click={show_add_note_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Add Note</button>
-            <!-- Mark as Viewed -->
-            <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Mark as Viewed</button>
-            <!-- File History -->
-            <button on:click={show_history_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
-            {/if}
+                {#if file_status !== "closed"}
+                
+                    <!-- View Note -->
+                    <button on:click={show_view_notes_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Notes</button>
+                    <!-- Add Note -->
+                    <button on:click={show_add_note_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Add Note</button>
+                    <!-- Mark as Viewed -->
+                    <button on:click={sign_file} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2" disabled={!signable}>Mark as Viewed</button>
+                    <!-- File History -->
+                    <button on:click={show_history_modal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">History</button>
+                {/if}
             {/if}
             <!-- certificate button -->
             <button data-modal-target="cert-modal" data-modal-toggle="cert-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 me-2">View Certificate</button>

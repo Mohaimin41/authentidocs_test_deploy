@@ -8,37 +8,45 @@ export async function POST({
 }: RequestEvent): Promise<Response> {
   const session = await locals.getSession();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to get file notes");
+    return new (error as any)(
+      401,
+      "You must be logged in to view user work_files."
+    );
   }
   // console.log(session);
-  const file_info = await request.json();
+  const user_info = await request.json();
   // console.log("inside add key",key_info);
+  let given_userid = user_info.given_userid;
 
-  let given_fileid = file_info.fileid;
-  if (given_fileid === undefined || given_fileid === null) {
+  if (given_userid === undefined || given_userid === null) {
     console.log(
-      "ERROR @api/thread/getfilenotes:20: invalid user input error:\n",
-      file_info
+      "ERROR @api/user/getwork_files:23: invalid user input error:\n",
+      user_info
     );
-    return new (error as any)(422, "Invalid inputs, while getting file notes.");
+    return new (error as any)(
+      422,
+      "Invalid inputs, while getting user work_files."
+    );
   }
 
-  let { data: result, error: _error } = await supabase.rpc(
-    "get_threadfile_notes_list2",
-    {
-      given_fileid,
-    }
-  );
+
+
+  let { data:result, error:_error } = await supabase
+  .rpc('get_user_workfiles_userid', {
+    given_userid
+  })
+
+
 
   // console.log("add key rps result",result)
   if (_error) {
     console.log(
-      "ERROR @api/thread/getfilenotes:36: supabase get file notes error\n",
+      "ERROR @api/user/getwork_files:42: supabase get user work_files error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while getting thread file notes."
+      "Internal Server Error, while getting user work_files."
     );
   }
 

@@ -14,7 +14,7 @@ export async function POST({
     );
   }
   const file_info = await request.json();
-  // console.log(key_info);
+  //console.log(file_info);
   let given_fileid = file_info.fileid;
   let given_userid = file_info.user_id;
 
