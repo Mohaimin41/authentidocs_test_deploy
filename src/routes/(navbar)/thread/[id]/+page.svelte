@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import AddMember from "$lib/components/add-member.svelte";
+  import AddPassiveMember from "$lib/components/add-passive-member.svelte";
   import List from "$lib/components/list.svelte";
   import { Entity, ForumMessage, ForumThread } from "$lib/containers";
   import FileCard from "$lib/components/thread/file-card.svelte";
@@ -67,6 +68,7 @@
   let file_upload_progress: HTMLDivElement;
   let close_thread_modal: Modal;
   let add_member_modal: Modal;
+  let add_passive_member_modal: Modal;
   let file_uploading_modal: Modal;
   let files_loaded: boolean = false;
   let members_loading: boolean;
@@ -404,6 +406,32 @@
 
     //console.log(response_obj);
   }
+  async function add_passive_member(
+    id: string,
+    members: AddableMemberObj[]
+  ): Promise<any> {
+    let adding_members = [];
+    let count = 0;
+    for (let i = 0; i < members.length; i++) {
+      if (members[i].checked) {
+        adding_members[count++] = members[i].id;
+      }
+    }
+    let response: Response = await fetch("/api/thread/addpassivemember", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        uid_list: adding_members,
+        threadid: id,
+      }),
+    });
+
+    let response_obj: any = await response.json();
+
+    //console.log(response_obj);
+  }
 
   async function send_notice_request(
     id: string,
@@ -632,8 +660,11 @@
       let thread_current_custodian_detail: any =
         response_obj.thread_current_custodian_detail;
         data_loaded = true;
+        if(!is_logged_in)
+        {
         get_members();
         get_files();
+        }
         if(is_logged_in)
         {
 
@@ -729,7 +760,7 @@
       can_add_file = response_obj;
     });
 
-    
+    get_members();
     get_notices();
     get_forwardable_members();
     get_forum_threads();
@@ -1280,6 +1311,15 @@
           class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
           >Add Member</button
         >
+        <!-- Add Passive Members -->
+        <button
+          on:click={() => {
+            add_passive_member_modal.show();
+          }}
+          type="button"
+          class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+          >Add Passive Member</button
+        >
       {/if}
     </div>
   </div>
@@ -1287,6 +1327,7 @@
 {#if is_logged_in}
 <AddMember bind:modal={add_member_modal} {get_addable_members} {add_member} />
 <SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} />
+<AddPassiveMember bind:modal={add_passive_member_modal} {get_addable_members} {add_passive_member} />
 {/if}
 <div
   bind:this={close_thread_modal_elem}
