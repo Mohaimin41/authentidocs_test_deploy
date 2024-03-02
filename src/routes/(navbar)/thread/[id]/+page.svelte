@@ -45,6 +45,7 @@
   let description: string;
   let moderator: string;
   let current_custodian: string;
+  let curr_custodian_id: string;
   let started_at: Date;
   let date_text: string;
   let time_text: string;
@@ -56,6 +57,7 @@
   let members_filtered: MemberObj[] = [];
   let is_active: boolean;
   let can_forward: boolean;
+  let can_fast_forward: boolean;
   let can_close: boolean;
   let can_add_file: boolean;
   let closing_comment: string;
@@ -150,6 +152,25 @@
     } else {
       members_filtered = Array.from(members);
     }
+  }
+  let is_member:boolean = false;
+  async function check_member(): Promise<void> {
+    let response: Response = await fetch(
+    "/api/user/ismember",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            level:'thread',
+            level_id:id,
+            id:$page.data.session?.user?.name,
+        })
+    });
+    let response_obj: any = await response.json();
+    console.log(response_obj)
+    is_member=response_obj;   
   }
   function get_files(): void {
     let request_obj: any = {
@@ -380,10 +401,8 @@
     return addable_members;
   }
 
-  async function add_member(
-    id: string,
-    members: AddableMemberObj[]
-  ): Promise<any> {
+  function add_member(id: string, members: AddableMemberObj[]): any
+  {
     let adding_members = [];
     let count = 0;
     for (let i = 0; i < members.length; i++) {
@@ -391,7 +410,8 @@
         adding_members[count++] = members[i].id;
       }
     }
-    let response: Response = await fetch("/api/thread/addmember", {
+
+    fetch("/api/thread/addmember", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -400,11 +420,10 @@
         uid_list: adding_members,
         threadid: id,
       }),
+    }).then(async (response: Response): Promise<void> =>
+    {
+      get_members();
     });
-
-    let response_obj: any = await response.json();
-
-    //console.log(response_obj);
   }
   async function add_passive_member(
     id: string,
@@ -574,11 +593,28 @@
     }).then(async (response: Response): Promise<void> => {
       let response_obj: any = await response.json();
 
-      //console.log(response_obj);
+      console.log(response_obj);
       init();
     });
   }
+  function force_forward(): void {
+    fetch("/api/thread/forceforward", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        currcustody:curr_custodian_id,
+        threadid: id,
+      }),
+    }).then(async (response: Response): Promise<void> => {
+      let response_obj: any = await response.json();
 
+      console.log(response_obj);
+      init();
+    });
+  }
+  
   function show_close_thread_modal(): void {
     close_thread_modal.show();
   }
@@ -659,6 +695,8 @@
       is_active = response_obj.thread_detail.is_active;
       let thread_current_custodian_detail: any =
         response_obj.thread_current_custodian_detail;
+        
+        curr_custodian_id = thread_current_custodian_detail.f_userid
         data_loaded = true;
         if(!is_logged_in)
         {
@@ -715,6 +753,7 @@
       });
 
       data_loaded = true;
+      check_member();
         }
     });
     if(is_logged_in)
@@ -731,6 +770,20 @@
       let response_obj: any = await response.json();
       // console.log(response_obj);
       can_forward = response_obj;
+    });
+
+    fetch("/api/thread/canfastforward", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        given_threadid: id,
+      }),
+    }).then(async (response: Response): Promise<void> => {
+      let response_obj: any = await response.json();
+      // console.log(response_obj);
+      can_fast_forward = response_obj;
     });
 
     fetch("/api/thread/canclose", {
@@ -1166,6 +1219,7 @@
               send_notice_modal.show();
             }}
             type="button"
+            disabled={!is_member}
             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2"
             >Send Notice</button
           >
@@ -1178,6 +1232,7 @@
                 forum_thread_selected = false;
               }}
               type="button"
+              disabled={!is_member}
               class="font-medium text-blue-600 dark:text-blue-500 me-2"
             >
               <svg
@@ -1215,6 +1270,7 @@
             <button
               on:click={() => add_post_modal.show()}
               type="button"
+              disabled={!is_member}
               class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
               >Add Post</button
             >
@@ -1240,6 +1296,7 @@
                 add_forum_thread_modal.show();
               }}
               class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+              disabled={!is_member}
               >Add Thread</button
             >
           </div>
@@ -1254,16 +1311,19 @@
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
           disabled={!can_forward}>Forward</button
         >
+        {#if is_admin}
+        <button
+          type="button"
+          on:click={force_forward}
+          disabled={!can_fast_forward}
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          >Force Forward</button
+        >
+        {/if}
         <button
           type="button"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
           disabled={!can_forward}>Flex Forward</button
-        >
-        <button
-          on:click={show_close_thread_modal}
-          type="button"
-          class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-          disabled={!can_close}>Close Thread</button
         >
         <Dropdown>
           {#each forwardable_members as member}
@@ -1288,16 +1348,25 @@
             <button
               on:click={flex_forward}
               type="button"
+              disabled={!is_member}
               class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
               >Forward</button
             >
           </DropdownItem>
         </Dropdown>
+        <button
+          on:click={show_close_thread_modal}
+          type="button"
+          class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+          disabled={!can_close}>Close Thread</button
+        >
+
       {:else if tabs[1].active}
         <!-- Add File -->
         <button
           on:click={add_file}
           type="button"
+          disabled={!is_member}
           class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
           >Add File</button
         >
@@ -1308,6 +1377,7 @@
             add_member_modal.show();
           }}
           type="button"
+          disabled={!is_member}
           class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
           >Add Member</button
         >
@@ -1317,6 +1387,7 @@
             add_passive_member_modal.show();
           }}
           type="button"
+          disabled={!is_member}
           class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
           >Add Passive Member</button
         >
@@ -1350,6 +1421,7 @@
         <button
           on:click={hide_close_thread_modal}
           type="button"
+          disabled={!is_member}
           class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
         >
           <svg
@@ -1389,6 +1461,7 @@
           <div class="flex justify-end">
             <button
               type="submit"
+              disabled={!is_member}
               class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
               >Confirm</button
             >
@@ -1450,6 +1523,7 @@
             add_forum_thread_modal.hide();
           }}
           type="button"
+          disabled={!is_member}
           class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
         >
           <svg
@@ -1495,6 +1569,7 @@
         <div class="flex justify-end">
           <button
             type="submit"
+            disabled={!is_member}
             class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             >Confirm</button
           >
@@ -1524,6 +1599,7 @@
         <button
           on:click={() => add_post_modal.hide()}
           type="button"
+          disabled={!is_member}
           class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
         >
           <svg
@@ -1561,6 +1637,7 @@
         <div class="flex justify-end">
           <button
             type="submit"
+            disabled={!is_member}
             class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             >Confirm</button
           >

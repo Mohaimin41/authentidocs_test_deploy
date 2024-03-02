@@ -13,6 +13,7 @@
   import { Entity } from '$lib/containers';
   import List from '$lib/components/list.svelte';
   import OrgCard from '$lib/components/home/org-card.svelte';
+  import Create from "$lib/components/create.svelte";
 
 
   let file_input_elem: HTMLInputElement;
@@ -20,6 +21,7 @@
   let modal_obj: Modal;
   let uploading: boolean = false;
   let upload_progress_elem: HTMLDivElement;
+  let create_org_modal: Modal;
 
   /**
    * Decides which tab to show according to these values:
@@ -291,6 +293,27 @@
       notice_loaded = true;
     });
   }
+  function create_org(id:string,name:string,description:string): void
+    {
+        fetch("/api/org/createorg",
+        {
+            method: "POST",
+            headers:
+            {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(
+            {
+                orgname: name,
+                description: description
+            })
+        }).then(async (response: Response): Promise<void> =>
+        {
+            let response_obj: any = await response.json();
+            create_org_modal.hide();
+            get_organisations();
+        });
+    }
   function get_personal_files(): void {
     personal_files_loaded = false;
     let request_obj: any = {
@@ -855,6 +878,9 @@
             </li>
           {/each}
         </List>
+        <div class="flex justify-end mt-2">
+          <button on:click={() => {create_org_modal.show();}} type="button"  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-2 mb-2">Create Org</button>
+      </div>
       {:else if tab_index === 2}
         <div class="mb-2">
           <p
@@ -1048,7 +1074,7 @@
     </div>
   </div>
 </div>
-
+<Create bind:modal={create_org_modal} id={""} creation_request={create_org} />
 <style>
   .pg-center {
     position: absolute;

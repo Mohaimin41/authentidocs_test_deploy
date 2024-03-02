@@ -40,6 +40,7 @@
         ["viewed_by_custodian", "Viewed by Custodian"],
         ["signed_by_custodian", "Signed by Custodian"],
         ["signed_by_custodian_with_note", "Signed by Custodian with Note"],
+        ["signed_viewed_by_custodian", "Signed & Viewed by Custodian"],
         ["closed", "Closed"],
         ["personal", "Personal"]
     ]);
@@ -256,6 +257,8 @@
 
             upload_timestamp= new Date(response_obj.file_data.created_at);
             current_state=response_obj.file_data.current_state;
+
+            console.log(current_state);
 
             let mime_text: string = "Application/octet-stream";
 
