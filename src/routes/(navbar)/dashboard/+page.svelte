@@ -439,8 +439,6 @@
       if(response.status === 200)
       {
         pfp_data = URL.createObjectURL(await response.blob());
-
-        console.log(pfp_data);
       }
     });
   }
