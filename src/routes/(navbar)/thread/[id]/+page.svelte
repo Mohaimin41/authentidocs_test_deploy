@@ -157,24 +157,22 @@
       members_filtered = Array.from(members);
     }
   }
-  let is_member:boolean = false;
+  let is_member: boolean = false;
   async function check_member(): Promise<void> {
-    let response: Response = await fetch(
-    "/api/user/ismember",
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            level:'thread',
-            level_id:id,
-            id:$page.data.session?.user?.name,
-        })
+    let response: Response = await fetch("/api/user/ismember", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        level: "thread",
+        level_id: id,
+        id: $page.data.session?.user?.name,
+      }),
     });
     let response_obj: any = await response.json();
     // console.log(response_obj);
-    is_member=response_obj;   
+    is_member = response_obj;
   }
   function get_files(): void {
     let request_obj: any = {
@@ -203,7 +201,7 @@
         files_loaded = true;
         files_filtered = Array.from(files);
         files_filter = "";
-      }
+      },
     );
   }
   function post_message(): void {
@@ -282,7 +280,6 @@
   function show_tab(idx: number): void {
     reset_tabs();
     tabs[idx].active = true;
-
   }
 
   function get_members(): void {
@@ -408,8 +405,10 @@
     return addable_members;
   }
 
-  async function add_member(id: string, members: AddableMemberObj[]): Promise<void>
-  {
+  async function add_member(
+    id: string,
+    members: AddableMemberObj[],
+  ): Promise<void> {
     let adding_members = [];
     let count = 0;
     for (let i = 0; i < members.length; i++) {
@@ -433,7 +432,7 @@
   }
   async function add_passive_member(
     id: string,
-    members: AddableMemberObj[]
+    members: AddableMemberObj[],
   ): Promise<any> {
     let adding_members = [];
     let count = 0;
@@ -463,7 +462,7 @@
   async function send_notice_request(
     id: string,
     subject: string,
-    content: string
+    content: string,
   ): Promise<any> {
     let response: Response = await fetch("/api/notice/addnotice", {
       method: "POST",
@@ -508,7 +507,7 @@
         notices_loaded = true;
         notices_filtered = Array.from(notices);
         notices_filter = "";
-      }
+      },
     );
   }
 
@@ -544,7 +543,7 @@
             body: JSON.stringify({
               data: small_array,
             }),
-          }
+          },
         );
 
         let response_obj: any = await response.json();
@@ -574,7 +573,7 @@
               "Content-Type": "application/json",
             },
             body: JSON.stringify({}),
-          }
+          },
         ).then(async (response: Response): Promise<void> => {
           file_success_response_obj = await response.json();
 
@@ -612,7 +611,7 @@
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        currcustody:curr_custodian_id,
+        currcustody: curr_custodian_id,
         threadid: id,
       }),
     }).then(async (response: Response): Promise<void> => {
@@ -622,7 +621,7 @@
       init();
     });
   }
-  
+
   function show_close_thread_modal(): void {
     close_thread_modal.show();
   }
@@ -698,29 +697,25 @@
       {
         let moderator_id: number = response_obj.thread_mod_detail.f_userid;
 
-        fetch(pfp_src + moderator_id + ".webp?" + Math.random(),
-        {
-          method: "GET"
-        }).then(async (response: Response): Promise<void> =>
-        {
-          if(response.status === 200)
-          {
+        fetch(pfp_src + moderator_id + ".webp?" + Math.random(), {
+          method: "GET",
+        }).then(async (response: Response): Promise<void> => {
+          if (response.status === 200) {
             moderator_pfp_data = URL.createObjectURL(await response.blob());
           }
         });
       }
 
       if (response_obj.thread_current_custodian_detail !== undefined) {
-        let custodian_id: number = response_obj.thread_current_custodian_detail.f_userid;
-        current_custodian = response_obj.thread_current_custodian_detail.f_username;
+        let custodian_id: number =
+          response_obj.thread_current_custodian_detail.f_userid;
+        current_custodian =
+          response_obj.thread_current_custodian_detail.f_username;
 
-        fetch(pfp_src + custodian_id + ".webp?" + Math.random(),
-        {
-          method: "GET"
-        }).then(async (response: Response): Promise<void> =>
-        {
-          if(response.status === 200)
-          {
+        fetch(pfp_src + custodian_id + ".webp?" + Math.random(), {
+          method: "GET",
+        }).then(async (response: Response): Promise<void> => {
+          if (response.status === 200) {
             custodian_pfp_data = URL.createObjectURL(await response.blob());
           }
         });
@@ -730,132 +725,128 @@
       closing_comment = response_obj.thread_detail.closing_comment;
       is_active = response_obj.thread_detail.is_active;
       let thread_current_custodian_detail: any =
-        response_obj.thread_current_custodian_detail;
-        
-        curr_custodian_id = thread_current_custodian_detail.f_userid
-        data_loaded = true;
-        if(!is_logged_in)
-        {
+      response_obj.thread_current_custodian_detail;
+      // curr_custodian_id = thread_current_custodian_detail.f_userid;
+      data_loaded = true;
+
+      if (!is_logged_in) {
         get_members();
         get_files();
-        }
-        if(is_logged_in)
-        {
+      }
 
-      fetch("/api/thread/getfiles", {
+      if (is_logged_in) {
+        fetch("/api/thread/getfiles", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            thread_id: id,
+          }),
+        }).then(async (response: Response): Promise<void> => {
+          let response_obj: any = await response.json();
+          files = new Array(response_obj.length);
+
+          for (let i: number = 0; i < files.length; ++i) {
+            files[i] = new FileObj();
+            files[i].id = response_obj[i].f_fileid;
+            files[i].name = response_obj[i].f_filename;
+            files[i].type = response_obj[i].f_file_extension;
+
+            if (
+              thread_current_custodian_detail === undefined ||
+              thread_current_custodian_detail.f_userid !==
+                $page.data.session?.user?.name
+            ) {
+              files[i].status = 3;
+            } else {
+              files[i].status = response_obj[i].f_current_state;
+            }
+          }
+
+          // let test_count: number = 10;
+          // files = new Array(test_count);
+
+          // for(let i: number = 0; i < test_count; ++i)
+          // {
+          //     files[i] = new FileObj();
+          //     files[i].id = (i + 1).toString();
+          //     files[i].name = "File " + (i + 1);
+          //     files[i].status = "hehe";
+          //     files[i].type = "png";
+          // }
+
+          files_loaded = true;
+          files_filtered = Array.from(files);
+          files_filter = "";
+        });
+
+        check_member();
+      }
+    });
+
+    if (is_logged_in) {
+      fetch("/api/thread/canforward", {
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          thread_id: id,
+          given_threadid: id,
         }),
       }).then(async (response: Response): Promise<void> => {
         let response_obj: any = await response.json();
-        files = new Array(response_obj.length);
-
-        for (let i: number = 0; i < files.length; ++i) {
-          files[i] = new FileObj();
-          files[i].id = response_obj[i].f_fileid;
-          files[i].name = response_obj[i].f_filename;
-          files[i].type = response_obj[i].f_file_extension;
-
-          if (
-            thread_current_custodian_detail === undefined ||
-            thread_current_custodian_detail.f_userid !==
-              $page.data.session?.user?.name
-          ) {
-            files[i].status = 3;
-          } else {
-            files[i].status = response_obj[i].f_current_state;
-          }
-        }
-
-        // let test_count: number = 10;
-        // files = new Array(test_count);
-
-        // for(let i: number = 0; i < test_count; ++i)
-        // {
-        //     files[i] = new FileObj();
-        //     files[i].id = (i + 1).toString();
-        //     files[i].name = "File " + (i + 1);
-        //     files[i].status = "hehe";
-        //     files[i].type = "png";
-        // }
-
-        files_loaded = true;
-        files_filtered = Array.from(files);
-        files_filter = "";
+        // console.log(response_obj);
+        can_forward = response_obj;
       });
 
-      data_loaded = true;
-      check_member();
-        }
-    });
-    if(is_logged_in)
-    {
-        fetch("/api/thread/canforward", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        given_threadid: id,
-      }),
-    }).then(async (response: Response): Promise<void> => {
-      let response_obj: any = await response.json();
-      // console.log(response_obj);
-      can_forward = response_obj;
-    });
+      fetch("/api/thread/canfastforward", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          given_threadid: id,
+        }),
+      }).then(async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+        // console.log(response_obj);
+        can_fast_forward = response_obj;
+      });
 
-    fetch("/api/thread/canfastforward", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        given_threadid: id,
-      }),
-    }).then(async (response: Response): Promise<void> => {
-      let response_obj: any = await response.json();
-      // console.log(response_obj);
-      can_fast_forward = response_obj;
-    });
+      fetch("/api/thread/canclose", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          given_threadid: id,
+        }),
+      }).then(async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+        can_close = response_obj;
+      });
 
-    fetch("/api/thread/canclose", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        given_threadid: id,
-      }),
-    }).then(async (response: Response): Promise<void> => {
-      let response_obj: any = await response.json();
-      can_close = response_obj;
-    });
+      fetch("/api/thread/canaddfile", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          given_threadid: id,
+          given_userid: $page.data.session?.user?.name,
+        }),
+      }).then(async (response: Response): Promise<void> => {
+        let response_obj: any = await response.json();
+        can_add_file = response_obj;
+      });
 
-    fetch("/api/thread/canaddfile", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        given_threadid: id,
-        given_userid: $page.data.session?.user?.name,
-      }),
-    }).then(async (response: Response): Promise<void> => {
-      let response_obj: any = await response.json();
-      can_add_file = response_obj;
-    });
-
-    get_members();
-    get_notices();
-    get_forwardable_members();
-    get_forum_threads();
-    check_admin();
+      get_members();
+      get_notices();
+      get_forwardable_members();
+      get_forum_threads();
+      check_admin();
     }
-    
   }
 
   onMount((): void => {
@@ -880,31 +871,31 @@
   <div
     class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6"
   >
-  {#if is_logged_in}
-    <ul
-      class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400"
-    >
-      {#each tabs as tab, index}
-        <li class="mx-1">
-          {#if tab.active}
-            <a
-              href="javascript:"
-              class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active"
-              >{tab.name}</a
-            >
-          {:else}
-            <a
-              on:click={() => {
-                show_tab(index);
-              }}
-              href="javascript:"
-              class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white"
-              >{tab.name}</a
-            >
-          {/if}
-        </li>
-      {/each}
-    </ul>
+    {#if is_logged_in}
+      <ul
+        class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400 mb-2"
+      >
+        {#each tabs as tab, index}
+          <li class="mx-1">
+            {#if tab.active}
+              <a
+                href="javascript:"
+                class="inline-block px-4 py-3 text-white bg-blue-600 rounded-lg active"
+                >{tab.name}</a
+              >
+            {:else}
+              <a
+                on:click={() => {
+                  show_tab(index);
+                }}
+                href="javascript:"
+                class="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white"
+                >{tab.name}</a
+              >
+            {/if}
+          </li>
+        {/each}
+      </ul>
     {/if}
     <div class="tab-item-data">
       {#if tabs[0].active}
@@ -1062,6 +1053,26 @@
                 </p>
               </div>
             </div>
+            <p
+              class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2"
+            >
+              Description
+            </p>
+            <p
+              class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4"
+            >
+              {description}
+            </p>
+            {#if !is_active}
+              <p
+                class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2"
+              >
+                Closing Comment
+              </p>
+              <p class="text-base font-medium text-gray-700 dark:text-gray-200">
+                {closing_comment}
+              </p>
+            {/if}
           </div>
         {:else}
           <div class="flex justify-center items-center" style="height: 100%;">
@@ -1085,20 +1096,6 @@
               <span class="sr-only">Loading...</span>
             </div>
           </div>
-        {/if}
-        <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">
-          Description
-        </p>
-        <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">
-          {description}
-        </p>
-        {#if !is_active}
-          <p class="text-xl font-medium text-gray-400 dark:text-gray-500 mb-2">
-            Closing Comment
-          </p>
-          <p class="text-base font-medium text-gray-700 dark:text-gray-200">
-            {closing_comment}
-          </p>
         {/if}
       {:else if tabs[1].active}
         <div class="mb-2">
@@ -1199,7 +1196,7 @@
                 type={member.role}
                 joined_at={member.joined}
                 pub_key={member.pubkey}
-                get_members={get_members}
+                {get_members}
                 {is_admin}
               />
             </li>
@@ -1333,8 +1330,7 @@
                 add_forum_thread_modal.show();
               }}
               class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-              disabled={!is_member}
-              >Add Thread</button
+              disabled={!is_member}>Add Thread</button
             >
           </div>
         {/if}
@@ -1349,13 +1345,13 @@
           disabled={!can_forward}>Forward</button
         >
         {#if is_admin}
-        <button
-          type="button"
-          on:click={force_forward}
-          disabled={!can_fast_forward}
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          >Force Forward</button
-        >
+          <button
+            type="button"
+            on:click={force_forward}
+            disabled={!can_fast_forward}
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            >Force Forward</button
+          >
         {/if}
         <button
           type="button"
@@ -1397,7 +1393,6 @@
           class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
           disabled={!can_close}>Close Thread</button
         >
-
       {:else if tabs[1].active}
         <!-- Add File -->
         <button
@@ -1415,7 +1410,7 @@
           }}
           type="button"
           disabled={!is_member}
-          class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+          class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 me-2"
           >Add Member</button
         >
         <!-- Add Passive Members -->
@@ -1433,9 +1428,24 @@
   </div>
 </div>
 {#if is_logged_in}
-<AddMember bind:modal={add_member_modal} get_addable_members={get_addable_members} add_member={add_member} bind:addable_members={addable_members} />
-<SendNotice bind:modal={send_notice_modal} id={id} send_notice_request={send_notice_request} get_notices={get_notices} />
-<AddPassiveMember bind:modal={add_passive_member_modal} get_addable_members={get_addable_members} add_passive_member={add_passive_member} bind:addable_members={addable_members} />
+  <AddMember
+    bind:modal={add_member_modal}
+    {get_addable_members}
+    {add_member}
+    bind:addable_members
+  />
+  <SendNotice
+    bind:modal={send_notice_modal}
+    {id}
+    {send_notice_request}
+    {get_notices}
+  />
+  <AddPassiveMember
+    bind:modal={add_passive_member_modal}
+    {get_addable_members}
+    {add_passive_member}
+    bind:addable_members
+  />
 {/if}
 <div
   bind:this={close_thread_modal_elem}

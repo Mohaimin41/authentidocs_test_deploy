@@ -593,7 +593,7 @@
     <!-- svelte-ignore a11y-invalid-attribute -->
     <div class="thread-info block bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
       {#if is_logged_in}
-        <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+        <ul class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400 mb-2">
             {#each tabs as tab, index}
                 <li class="mx-1">
                     {#if tab.active}
