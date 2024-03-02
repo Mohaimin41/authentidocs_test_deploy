@@ -1,4 +1,5 @@
 <script lang="ts">
+  import default_pfp from "$lib/assets/user.webp";
   import { goto } from "$app/navigation";
   import FileCard from "$lib/components/dashboard/file-card.svelte";
   import OrgCard from "$lib/components/dashboard/org-card.svelte";
@@ -10,15 +11,16 @@
   import { db, type PriveKey } from "$lib/db";
   import { logged_in_store, priv_key, uid, useremail } from "$lib/stores";
   import { Entity } from '$lib/containers';
-    import List from "$lib/components/list.svelte";
-    import { Modal } from "flowbite";
-    import { make_hash } from "$lib/helpers";
+  import List from "$lib/components/list.svelte";
+  import { Modal } from "flowbite";
+  import { make_hash } from "$lib/helpers";
 
   /**
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"
    */
   let profile_edit_mode: boolean = false;
   let username: string = "";
+  let pfp_data: string = default_pfp;
   let email: string = "";
   let pubkey: string = "";
   let privkey: string = "";
@@ -97,6 +99,34 @@
   let cng_pass_confirm: string;
   let cng_pass_confirm_elem: HTMLInputElement;
   let invalid_pass: boolean = false;
+
+  function upload_pfp(): void
+  {
+    let input_elem: HTMLInputElement = document.createElement("input");
+    input_elem.type = "file";
+
+    input_elem.onchange = (): void =>
+    {
+      let file: File | null | undefined = input_elem.files?.item(0);
+
+      if(file === null || file === undefined)
+      {
+        return;
+      }
+
+      let form_data: FormData = new FormData();
+
+      form_data.append("file", file);
+
+      fetch("/api/user/addpfp",
+      {
+        method: "POST",
+        body: form_data
+      });
+    };
+
+    input_elem.click();
+  }
 
   async function cng_pass(): Promise<void>
   {
@@ -193,13 +223,13 @@
   function switch_privkey_visibility(): void {
     privkey_visible = !privkey_visible;
   }
-  class File {
+  class FileObj {
     public id!: string;
     public name!: string;
     public type!: string;
   }
 
-  let personal_files: File[] = new Array(0);
+  let personal_files: FileObj[] = new Array(0);
   function get_personal_files(): void {
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
@@ -218,7 +248,7 @@
         }
 
         for (let i: number = 0; i < response_obj.length; ++i) {
-          personal_files[i] = new File();
+          personal_files[i] = new FileObj();
           personal_files[i].id = response_obj[i].f_fileid;
           personal_files[i].name = response_obj[i].f_filename;
           personal_files[i].type = response_obj[i].f_file_extension;
@@ -226,7 +256,7 @@
       }
     );
   }
-  let work_files: File[] = new Array(0);
+  let work_files: FileObj[] = new Array(0);
   function get_work_files(): void {
     let request_obj: any = {
       given_userid: $page.data.session?.user?.name,
@@ -246,7 +276,7 @@
         // console.log(response_obj);
 
         for (let i: number = 0; i < response_obj.length; ++i) {
-          work_files[i] = new File();
+          work_files[i] = new FileObj();
           work_files[i].id = response_obj[i].f_fileid;
           work_files[i].name = response_obj[i].f_filename;
           work_files[i].type = response_obj[i].f_file_extension;
@@ -355,6 +385,65 @@
     );
   }
 
+  async function regenkey(): Promise<void> {
+    if ($page.data.session?.user) {
+      let subtle_crypto: SubtleCrypto = window.crypto.subtle;
+
+      let keyPair = await subtle_crypto.generateKey(
+        {
+          name: "ECDSA",
+          namedCurve: "P-384",
+        },
+        true,
+        ["sign", "verify"]
+      );
+
+      let public_key = await subtle_crypto.exportKey("jwk", keyPair.publicKey);
+
+      await db.priv_key.put({
+        id: $page.data.session.user?.name as string,
+        key: keyPair.privateKey,
+      });
+
+      let request_obj: any = {
+        user_id: $page.data.session?.user?.name,
+        key: JSON.stringify(public_key),
+      };
+      common_fetch(
+        "/api/user/addkey",
+        request_obj,
+        async (response: Response): Promise<void> => {
+          // new_key.set(false);
+          console.log("layout add key response:", response);
+          localStorage.setItem("new_key", "0");
+          localStorage.setItem("pub_key", JSON.stringify(public_key));
+        }
+      );
+
+      let temp_key: PriveKey | undefined = await db.priv_key.get($page.data.session.user?.name as string);
+
+            if(temp_key)
+            {
+                priv_key.set(temp_key.key);
+            }
+    }
+  }
+
+  function get_pfp(): void
+  {
+    fetch("https://rajnoqicmphtmtgmfbjk.supabase.co/storage/v1/object/public/user_pfps/user_pfps/" + $page.data.session?.user?.name + ".webp?" + Math.random(),
+    {
+      method: "GET"
+    }).then(async (response: Response): Promise<void> =>
+    {
+      if(response.status === 200)
+      {
+        pfp_data = URL.createObjectURL(await response.blob());
+
+        console.log(pfp_data);
+      }
+    });
+  }
 
   onMount((): void => {
     cng_pass_modal = new Modal(cng_pass_modal_elem,
@@ -386,6 +475,7 @@
     get_user_all_threads();
     get_user_orgs();
     get_work_files();
+    get_pfp();
     let request_obj: any = {
       userid: $page.data.session?.user?.name,
     };
@@ -430,50 +520,6 @@
       }
     );
   });
-
-  async function regenkey(): Promise<void> {
-    if ($page.data.session?.user) {
-      let subtle_crypto: SubtleCrypto = window.crypto.subtle;
-
-      let keyPair = await subtle_crypto.generateKey(
-        {
-          name: "ECDSA",
-          namedCurve: "P-384",
-        },
-        true,
-        ["sign", "verify"]
-      );
-
-      let public_key = await subtle_crypto.exportKey("jwk", keyPair.publicKey);
-
-      await db.priv_key.put({
-        id: $page.data.session.user?.name as string,
-        key: keyPair.privateKey,
-      });
-
-      let request_obj: any = {
-        user_id: $page.data.session?.user?.name,
-        key: JSON.stringify(public_key),
-      };
-      common_fetch(
-        "/api/user/addkey",
-        request_obj,
-        async (response: Response): Promise<void> => {
-          // new_key.set(false);
-          console.log("layout add key response:", response);
-          localStorage.setItem("new_key", "0");
-          localStorage.setItem("pub_key", JSON.stringify(public_key));
-        }
-      );
-
-      let temp_key: PriveKey | undefined = await db.priv_key.get($page.data.session.user?.name as string);
-
-            if(temp_key)
-            {
-                priv_key.set(temp_key.key);
-            }
-    }
-  }
 </script>
 
 <svelte:head>
@@ -491,31 +537,18 @@
       <div class="flex items-center">
         <img
           class="w-36 h-36 rounded-full"
-          src="pochita.webp"
+          src={pfp_data}
           alt="Rounded avatar"
         />
 
         {#if profile_edit_mode}
           <!-- svelte-ignore a11y-invalid-attribute -->
           <button
-            class="inline-flex items-center font-medium text-blue-700 dark:text-blue-600 hover:underline ms-2"
+            on:click={upload_pfp}
+            class="inline-flex items-center font-medium text-blue-800 dark:text-blue-100 hover:underline ms-2"
           >
-            <svg
-              class="w-6 h-6"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
-              />
-              <path
-                d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
-              />
-              <path
-                d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
-              />
+            <svg class="w-6 h-6 text-blue-800 dark:text-blue-100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.9-6.8a2 2 0 0 1 2.8 0Z"/>
             </svg>
           </button>
         {/if}
