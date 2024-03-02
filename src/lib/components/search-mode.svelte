@@ -6,7 +6,7 @@
 
     onMount((): void =>
     {
-        initDropdowns();
+        
     })
 </script>
 
