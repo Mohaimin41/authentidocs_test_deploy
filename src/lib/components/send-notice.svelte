@@ -5,14 +5,16 @@
     export let id: string;
     export let modal: Modal;
     export let send_notice_request: (id: string, subject: string, content: string) => any;
+    export let get_notices: () => void;
     let subject: string;
     let content: string;
     let modal_elem: HTMLDivElement;
 
-    function send(): void
+    async function send(): Promise<void>
     {
-        send_notice_request(id, subject, content);
+        await send_notice_request(id, subject, content);
         modal.hide();
+        get_notices();
     }
 
     onMount((): void =>

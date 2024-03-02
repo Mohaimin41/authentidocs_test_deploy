@@ -627,7 +627,7 @@
   >
     {#if is_logged_in}
       <ul
-        class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400"
+        class="thread-tabs flex flex-wrap justify-center items-center text-sm font-medium text-center text-gray-500 dark:text-gray-400 mb-2"
       >
         {#each tabs as tab, index}
           <li class="mx-1">
@@ -805,10 +805,9 @@
               >
                 {org_description}
               </p>
-            </div>
-            <!-- Add File -->
-            <div class="flex justify-end mt-2">
-              <button on:click={leave_org} disabled={!can_leave_org} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Leave</button>
+              <div class="flex justify-end mt-2">
+                <button on:click={leave_org} disabled={!can_leave_org} type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Leave</button>
+              </div>
             </div>
           </div>
         {:else}
@@ -1076,7 +1075,7 @@
   </div>
 </div>
 {#if is_logged_in}
-  <SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} />
+  <SendNotice bind:modal={send_notice_modal} {id} {send_notice_request} get_notices={get_notices} />
 
   <AddMember
     bind:modal={add_member_modal}
@@ -1085,7 +1084,7 @@
     bind:addable_members
   />
 
-  <Create bind:modal={create_team_modal} {id} creation_request={create_team} />
+  <Create bind:modal={create_team_modal} id={id} creation_request={create_team} />
 {/if}
 <div
   bind:this={file_uploading_modal_elem}
