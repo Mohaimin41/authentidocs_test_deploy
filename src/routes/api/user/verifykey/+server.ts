@@ -6,7 +6,6 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  
   // console.log(session);
   const key_info = await request.json();
   // console.log("inside add key",key_info);
@@ -43,6 +42,12 @@ export async function POST({
       "Content-Type": "application/json",
     },
   });
+
+  const { data: _data } = supabase.storage
+    .from("user_pfps")
+    .getPublicUrl("user_pfps/Output_11.bmp");
+  let given_pfp_url = _data;
+  console.log(given_pfp_url);
 
   return response;
 }
