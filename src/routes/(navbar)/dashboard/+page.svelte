@@ -11,6 +11,7 @@
   import { logged_in_store, priv_key, uid, useremail } from "$lib/stores";
   import { Entity } from '$lib/containers';
     import List from "$lib/components/list.svelte";
+    import { Modal } from "flowbite";
 
   /**
    * Whether profile edit mode active or not, toggled by button named "Edit Profile"
@@ -88,6 +89,8 @@
       },
     },
   ];
+  let cng_pass_modal_elem: HTMLDivElement;
+  let cng_pass_modal: Modal;
 
   /**
    * toggle to profile edit mode
@@ -284,6 +287,8 @@
 
 
   onMount((): void => {
+    cng_pass_modal = new Modal(cng_pass_modal_elem);
+
     if ($page.data.session === null) {
       goto("/");
 
@@ -469,11 +474,14 @@
       {/if}
       <!-- Edit/save profile button -->
       {#if profile_edit_mode}
-        <button
-          type="button"
-          class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-          on:click={save_profile}>Save</button
-        >
+        <div class="flex">
+          <button
+            type="button"
+            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            on:click={save_profile}>Save</button
+          >
+          <button on:click={() => cng_pass_modal.show()} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Change Password</button>
+        </div>
       {:else}
         <button
           type="button"
@@ -666,6 +674,46 @@
     </div>
   </div>
 </div>
+
+<!-- Main modal -->
+<div bind:this={cng_pass_modal_elem} data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Change Password
+                </h3>
+                <button on:click={() => cng_pass_modal.hide()} type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <form class="p-4 md:p-5 space-y-4">
+              <div class="mb-5">
+                <label for="cng-pass-old" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Current Password</label>
+                <input type="password" id="cng-pass-old" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+              </div>
+              <div class="mb-5">
+                <label for="cng-pass-new" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">New Password</label>
+                <input type="password" id="cng-pass-old" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+              </div>
+              <div class="mb-5">
+                <label for="cng-pass-confirm" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm Password</label>
+                <input type="password" id="cng-pass-old" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+              </div>
+              <div class="flex justify-end">
+                <button type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Confirm</button>
+              </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <style>
   .dash-root {
