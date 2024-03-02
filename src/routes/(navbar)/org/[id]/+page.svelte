@@ -78,13 +78,14 @@
     let file_uploading_modal: Modal;
 
     let is_logged_in: boolean = false;
-  function check_logged_in(): boolean {
+    function check_logged_in(): boolean {
     if ($page.data.session?.user?.name) {
       return true;
     } else {
       return false;
     }
   }
+  $:is_logged_in = check_logged_in(); 
 
     $: teams_empty = teams_filtered.length === 0;
     $: files_empty = files_filtered.length === 0;
