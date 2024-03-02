@@ -15,6 +15,7 @@
 
     import { priv_key } from "$lib/stores";
     import { get } from "svelte/store";
+    import { goto } from "$app/navigation";
     let tabs: Tab[] =
     [
         {
@@ -106,7 +107,7 @@
         })
     });
     let response_obj: any = await response.json();
-    console.log(response_obj)  
+    // console.log(response_obj); 
     goto('/home'); 
   }
 
@@ -263,7 +264,7 @@
         return addable_members;
     }
 
-    function add_member(id: string, members: AddableMemberObj[]): any
+    async function add_member(id: string, members: AddableMemberObj[]): Promise<void>
     {
         let adding_members = []
         let count = 0 ;
@@ -274,7 +275,7 @@
                 adding_members[count++]=members[i].id
             }
         }
-        fetch(
+        await fetch(
         "/api/org/addmember",
         {
             method: "POST",
@@ -285,10 +286,8 @@
                 uid_list:adding_members,
                 orgid:id,
             })
-        }).then(async (response: Response): Promise<void> =>
-        {
-            get_members();
         });
+        get_members();
     }
     function create_team(id:string,name:string,description:string): void
     {

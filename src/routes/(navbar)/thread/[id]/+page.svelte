@@ -390,6 +390,9 @@
       }),
     });
     let response_obj: any = await response.json();
+
+    console.log(response_obj);
+
     let addable_members: AddableMemberObj[] = new Array(response_obj.length);
 
     for (let i: number = 0; i < addable_members.length; ++i) {
@@ -401,7 +404,7 @@
     return addable_members;
   }
 
-  function add_member(id: string, members: AddableMemberObj[]): any
+  async function add_member(id: string, members: AddableMemberObj[]): Promise<void>
   {
     console.log("dhkse 0");
 
@@ -413,7 +416,7 @@
       }
     }
 
-    fetch("/api/thread/addmember", {
+    await fetch("/api/thread/addmember", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -422,12 +425,8 @@
         uid_list: adding_members,
         threadid: id,
       }),
-    }).then(async (response: Response): Promise<void> =>
-    {
-      console.log("dhkse 1");
-
-      get_members();
     });
+    get_members();
   }
   async function add_passive_member(
     id: string,

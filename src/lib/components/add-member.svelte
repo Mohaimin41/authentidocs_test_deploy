@@ -13,9 +13,9 @@
     export let get_addable_members: (id: string) => Promise<AddableMemberObj[]>;
     export let add_member: (id: string, members: AddableMemberObj[]) => any;
 
-    function add_member_wrapper(id: string, members: AddableMemberObj[]): void
+    async function add_member_wrapper(id: string, members: AddableMemberObj[]): Promise<void>
     {
-        add_member(id, members);
+        await add_member(id, members);
         get_addable_members_wrapper();
         modal.hide();
     }
