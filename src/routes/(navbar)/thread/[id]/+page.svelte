@@ -380,10 +380,8 @@
     return addable_members;
   }
 
-  async function add_member(
-    id: string,
-    members: AddableMemberObj[]
-  ): Promise<any> {
+  function add_member(id: string, members: AddableMemberObj[]): any
+  {
     let adding_members = [];
     let count = 0;
     for (let i = 0; i < members.length; i++) {
@@ -391,7 +389,8 @@
         adding_members[count++] = members[i].id;
       }
     }
-    let response: Response = await fetch("/api/thread/addmember", {
+
+    fetch("/api/thread/addmember", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -400,11 +399,10 @@
         uid_list: adding_members,
         threadid: id,
       }),
+    }).then(async (response: Response): Promise<void> =>
+    {
+      get_members();
     });
-
-    let response_obj: any = await response.json();
-
-    //console.log(response_obj);
   }
   async function add_passive_member(
     id: string,
