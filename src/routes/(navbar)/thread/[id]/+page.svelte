@@ -169,7 +169,7 @@
         })
     });
     let response_obj: any = await response.json();
-    console.log(response_obj)
+    // console.log(response_obj);
     is_member=response_obj;   
   }
   function get_files(): void {
@@ -375,7 +375,7 @@
     }).then(async (response: Response): Promise<void> => {
       let response_obj: any = await response.json();
 
-      console.log(response_obj);
+      // console.log(response_obj);
       init();
     });
   }
@@ -391,7 +391,7 @@
     });
     let response_obj: any = await response.json();
 
-    console.log(response_obj);
+    // console.log(response_obj);
 
     let addable_members: AddableMemberObj[] = new Array(response_obj.length);
 
@@ -406,8 +406,6 @@
 
   async function add_member(id: string, members: AddableMemberObj[]): Promise<void>
   {
-    console.log("dhkse 0");
-
     let adding_members = [];
     let count = 0;
     for (let i = 0; i < members.length; i++) {
@@ -598,7 +596,7 @@
     }).then(async (response: Response): Promise<void> => {
       let response_obj: any = await response.json();
 
-      console.log(response_obj);
+      // console.log(response_obj);
       init();
     });
   }
@@ -615,7 +613,7 @@
     }).then(async (response: Response): Promise<void> => {
       let response_obj: any = await response.json();
 
-      console.log(response_obj);
+      // console.log(response_obj);
       init();
     });
   }
