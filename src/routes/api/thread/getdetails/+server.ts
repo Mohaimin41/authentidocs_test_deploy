@@ -75,23 +75,18 @@ export async function POST({
       result_mod = element;
     }
   }
-
-  if (result_mod === undefined || result_mod === null) {
-    console.error(
-      "ERROR @api/thread/getdetails:81: supabase get thread mod detail error:\n",
-      result_mod, "\n", result_custodian
-    );
-    return new (error as any)(
-      500,
-      "Internal server error, while getting thread details."
-    );
-  }
-
+  
   let result_3 = {
     thread_detail: result,
     thread_mod_detail: result_mod,
     thread_current_custodian_detail: result_custodian,
   };
+
+  if (result_mod === undefined || result_mod === null) {
+    result_3.thread_current_custodian_detail = null;
+    result_3.thread_mod_detail = null;
+  }
+
 
   let response: Response = new Response(JSON.stringify(result_3), {
     headers: {
