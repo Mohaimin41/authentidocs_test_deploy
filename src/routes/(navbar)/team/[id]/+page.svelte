@@ -21,6 +21,7 @@
   import { priv_key } from "$lib/stores";
   import { get } from "svelte/store";
   import { fade } from "svelte/transition";
+    import { make_date } from "$lib/helpers";
   let tabs: Tab[] = [
     {
       name: "Details",
@@ -239,7 +240,7 @@
         file_count = team_info.team_detail.f_file_count;
         team_description = team_info.team_detail.f_description;
         team_creation_date = new Date(team_info.team_detail.f_created_at);
-        date_text = team_creation_date.toLocaleDateString();
+        date_text = make_date(team_creation_date);
         data_loaded = true;
       }
     );
@@ -566,23 +567,27 @@
     file_input_elem.click();
   }
 
-  onMount((): void => {
-    initModals();
+  $:
+  {
     id = $page.params.id;
 
-    file_uploading_modal = new Modal(file_uploading_modal_elem);
-
     get_team_details();
+
     if(is_logged_in)
     {
-    get_threads();
-    get_notices();
-    get_members();
-    get_files();
-    check_admin();
-    check_member();
+      get_threads();
+      get_notices();
+      get_members();
+      get_files();
+      check_admin();
+      check_member();
     }
+  }
 
+  onMount((): void => {
+    initModals();
+
+    file_uploading_modal = new Modal(file_uploading_modal_elem);
   });
 </script>
 

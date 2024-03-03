@@ -11,6 +11,12 @@
   export let pub_key: String;
   export let serial: Number;
   export let get_members: () => void;
+  const member_map: Map<string, string> = new Map(
+  [
+    ["admin", "Admin"],
+    ["member", "Member"],
+    ["passive_member", "Passive Member"]
+  ]);
   let pfp_data: string;
   let date_text: String;
   let pubkey: string;
@@ -83,7 +89,7 @@
     </p>
     <div class="flex justify-between items-end">
       <p class="text-base font-semibold text-blue-500 dark:text-blue-400 me-2">
-        {type}
+        {member_map.get(type)}
       </p>
     </div>
   </div>
@@ -132,7 +138,7 @@
             alt="Rounded avatar"
           />
           <p class="text-2xl font-semibold text-gray-700">{name}</p>
-          <p class="text-xl font-medium text-gray-500">{type}</p>
+          <p class="text-xl font-medium text-gray-500">{member_map.get(type)}</p>
           <p class="text-lg font-medium text-gray-500">Added on: {date_text}</p>
         </div>
         <p class="text-base font-medium text-gray-500 dark:text-gray-400 mt-6">

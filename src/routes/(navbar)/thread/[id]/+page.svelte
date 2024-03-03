@@ -100,6 +100,9 @@
   let addable_members: AddableMemberObj[] = [];
   let moderator_pfp_data: string;
   let custodian_pfp_data: string;
+  let forwardable: boolean;
+
+  $: forwardable = can_forward && member_count > 1;
 
   let is_logged_in: boolean = false;
   function check_logged_in(): boolean {
@@ -238,7 +241,7 @@
         let response_obj: any = await response.json();
         forum_messages = new Array(response_obj.length);
 
-        console.log(response_obj);
+        // console.log(response_obj);
 
         for (let i: number = 0; i < forum_messages.length; ++i) {
           forum_messages[i] = new ForumMessage();
@@ -852,16 +855,20 @@
     }
   }
 
-  onMount((): void => {
+  $:
+  {
     id = $page.params.id;
+
+    init();
+  }
+
+  onMount((): void => {
     close_thread_modal = new Modal(close_thread_modal_elem);
     file_uploading_modal = new Modal(file_uploading_modal_elem);
     add_forum_thread_modal = new Modal(add_forum_thread_modal_elem, {
       backdrop: "static",
     });
     add_post_modal = new Modal(add_post_modal_elem);
-
-    init();
   });
 </script>
 
@@ -1345,7 +1352,7 @@
           on:click={forward}
           type="button"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          disabled={!can_forward}>Forward</button
+          disabled={!forwardable}>Forward</button
         >
         {#if is_admin}
           <button
@@ -1359,7 +1366,7 @@
         <button
           type="button"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          disabled={!can_forward}>Flex Forward</button
+          disabled={!forwardable}>Flex Forward</button
         >
         <Dropdown>
           {#each forwardable_members as member}
