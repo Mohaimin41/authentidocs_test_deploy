@@ -32,6 +32,7 @@ export class AddableMemberObj
     public id: string = "";
     public name: string = "";
     public checked: boolean = false;
+    public team_name:string ="";
 }
 
 export class Tab

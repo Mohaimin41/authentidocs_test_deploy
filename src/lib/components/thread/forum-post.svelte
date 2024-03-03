@@ -58,6 +58,8 @@
             if(response.status === 200)
             {
                 let response_obj: any = await response.json();
+
+                console.log(response_obj);
                 
                 if(response_obj.children)
                 {
@@ -68,7 +70,7 @@
                         children[i] = new ForumMessage();
                         children[i].id = response_obj.children[i].postid;
                         children[i].created_at = new Date(response_obj.children[i].created_at);
-                        children[i].sender = response_obj.children[i].creator_id;
+                        children[i].sender = response_obj.children[i].username;
                         children[i].content = response_obj.children[i].post_content;
                     }
                 }

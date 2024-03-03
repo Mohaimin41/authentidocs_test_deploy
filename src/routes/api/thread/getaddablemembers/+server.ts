@@ -30,7 +30,7 @@ export async function POST({
   }
 
   let { data: result, error: _error } = await supabase.rpc(
-    "get_thread_addable_member_list",
+    "get_thread_addable_member_list2",
     {
       given_threadid,
     }

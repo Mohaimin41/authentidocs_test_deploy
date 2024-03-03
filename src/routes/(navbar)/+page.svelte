@@ -19,8 +19,6 @@
     {
         if($page.data.session)
         {
-            $logged_in_store = true;
-
             await goto("/home");
         }
 
