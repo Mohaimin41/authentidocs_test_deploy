@@ -238,10 +238,12 @@
         let response_obj: any = await response.json();
         forum_messages = new Array(response_obj.length);
 
+        console.log(response_obj);
+
         for (let i: number = 0; i < forum_messages.length; ++i) {
           forum_messages[i] = new ForumMessage();
           forum_messages[i].id = response_obj[i].f_postid;
-          forum_messages[i].sender = response_obj[i].f_creator_id;
+          forum_messages[i].sender = response_obj[i].f_creator_name;
           forum_messages[i].content = response_obj[i].f_content;
           forum_messages[i].created_at = new Date(response_obj[i].f_created_at);
         }
@@ -392,7 +394,7 @@
     });
     let response_obj: any = await response.json();
 
-     console.log(response_obj);
+    //  console.log(response_obj);
 
     let addable_members: AddableMemberObj[] = new Array(response_obj.length);
 
