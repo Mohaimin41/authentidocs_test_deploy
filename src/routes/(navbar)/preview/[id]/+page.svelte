@@ -376,8 +376,8 @@
                     history[i] = new History();
                     history[i].custodian = response_obj[i].f_username;
                     let timestamp: Date = new Date(response_obj[i].f_start_at);
-                    history[i].date = timestamp.toLocaleDateString();
-                    history[i].time = timestamp.toLocaleTimeString();
+                    history[i].date = make_date(timestamp);
+                    history[i].time = make_time(timestamp);
                 }
                 }
             
