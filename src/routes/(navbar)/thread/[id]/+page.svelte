@@ -392,7 +392,7 @@
     });
     let response_obj: any = await response.json();
 
-    // console.log(response_obj);
+     console.log(response_obj);
 
     let addable_members: AddableMemberObj[] = new Array(response_obj.length);
 
@@ -400,6 +400,7 @@
       addable_members[i] = new AddableMemberObj();
       addable_members[i].id = response_obj[i].f_userid;
       addable_members[i].name = response_obj[i].f_username;
+      addable_members[i].team_name = response_obj[i].f_teamname;
     }
 
     return addable_members;
