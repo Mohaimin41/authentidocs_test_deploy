@@ -234,7 +234,16 @@
         let team_info = response_obj;
         //console.log(team_info);
         team_name = team_info.team_detail.f_team_name;
-        team_leader = team_info.team_mod_detail.f_username;
+
+        if(response_obj.team_mod_detail)
+        {
+          team_leader = response_obj.team_mod_detail.f_username;
+        }
+        else
+        {
+          team_leader = "N/A";
+        }
+
         member_count = team_info.team_detail.f_member_count;
         thread_count = team_info.team_detail.f_thread_count;
         file_count = team_info.team_detail.f_file_count;
