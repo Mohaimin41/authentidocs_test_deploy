@@ -6,14 +6,13 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to get forum thread metadata");
+    return new (error as any)(401, "You must be logged in to get forum metadata");
   }
 
   // console.log(session);
   const forum_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_forumid = forum_info.forum_id;
 
   if (given_forumid === undefined || given_forumid === null) {
@@ -23,7 +22,7 @@ export async function POST({
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while getting thread metadata."
+      "Invalid inputs, while getting discussion forum metadata."
     );
   }
 
@@ -34,10 +33,10 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
     console.error(
-      "ERROR @api/forum/getforumthreaddata:40: supabase getting thread metadata error\n",
+      "ERROR @api/forum/getforumthreaddata:40: supabase getting forum metadata error\n",
       _error
     );
     return new (error as any)(

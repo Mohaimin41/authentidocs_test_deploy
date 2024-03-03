@@ -6,38 +6,49 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to add file");
+    return new (error as any)(
+      401,
+      "You must be logged in to make an org admin"
+    );
   }
   // console.log(session);
   const org_info = await request.json();
-  // console.log("inside add key",key_info);
-  let given_hierarchy_level='org';
-  let given_hierarchy_level_id=org_info.orgid;
-  let target_userid=org_info.id
+  let given_hierarchy_level = "org";
+  let given_hierarchy_level_id = org_info.orgid;
+  let target_userid = org_info.id;
 
+  if (
+    given_hierarchy_level_id === undefined ||
+    given_hierarchy_level_id === null ||
+    target_userid === undefined ||
+    target_userid === null
+  ) {
+    console.error(
+      "ERROR @api/org/makeadmin:29: invalid user input error:\n",
+      org_info
+    );
+    return new (error as any)(
+      422,
+      "Invalid inputs, while making admin in org."
+    );
+  }
 
- 
+  let { data: result, error: _error } = await supabase.rpc("make_admin", {
+    given_hierarchy_level,
+    given_hierarchy_level_id,
+    target_userid,
+  });
 
-
-  let { data:result, error:_error} = await supabase
-  .rpc('make_admin', {
-    given_hierarchy_level, 
-    given_hierarchy_level_id, 
-    target_userid
-  })
-
-
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/org/forward:75: supabase forward org error\n",
+    console.error(
+      "ERROR @api/org/makeadming:46: supabase making admin in org error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while forwarding org."
+      "Internal Server Error, while making admin in org."
     );
   }
 

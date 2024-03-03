@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  // const session = await locals.getSession();
+  // const session = await locals.auth();
   // if (!session?.user) {
   //   return new (error as any)(401, "You must be logged in to get team details");
   // }
@@ -15,29 +15,28 @@ export async function POST({
   let term = team_info.term;
   //console.log(given_teamid)
   if (term === undefined || term === null) {
-    console.log(
+    console.error(
       "ERROR @api/search/team:19: invalid team input error:\n",
       team_info
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while getting team details."
+      "Invalid inputs, while searching team details."
     );
   }
 
-  let { data:result, error:_error } = await supabase
-  .rpc('search_teams', {
-    term
-  })
+  let { data: result, error: _error } = await supabase.rpc("search_teams", {
+    term,
+  });
 
   if (_error) {
-    console.log(
-      "ERROR @api/team/details:36: supabase getting team data error\n",
+    console.error(
+      "ERROR @api/search/team:36: supabase searching team error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while getting team details."
+      "Internal Server Error, while searching team."
     );
   }
 

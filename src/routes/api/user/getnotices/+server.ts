@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -15,11 +15,10 @@ export async function POST({
   }
   // console.log(session);
   const user_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_userid = user_info.userid;
 
   if (given_userid === undefined || given_userid === null) {
-    console.log(
+    console.error(
       "ERROR @api/user/getnotices:23: invalid user input error:\n",
       user_info
     );
@@ -36,10 +35,9 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/user/getnotices:42: supabase get user notices error\n",
+    console.error(
+      "ERROR @api/user/getnotices:40: supabase get user notices error\n",
       _error
     );
     return new (error as any)(

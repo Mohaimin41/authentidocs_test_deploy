@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -15,7 +15,6 @@ export async function POST({
   }
   // console.log(session);
   const org_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_description = org_info.description;
   let given_userid = session.user.name;
   let given_orgname = org_info.orgname;
@@ -25,11 +24,11 @@ export async function POST({
     given_description === null ||
     given_orgname === undefined ||
     given_orgname === null ||
-    given_userid ===null ||
+    given_userid === null ||
     given_userid === undefined
   ) {
-    console.log(
-      "ERROR @api/org/createorg:32: invalid user input error:\n",
+    console.error(
+      "ERROR @api/org/createorg:31: invalid user input error:\n",
       org_info
     );
     return new (error as any)(
@@ -44,9 +43,9 @@ export async function POST({
     given_userid,
   });
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/org/createorg:50: supabase create organization error\n",
       _error
     );

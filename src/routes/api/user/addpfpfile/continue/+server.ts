@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     //   throw error(401, "You must sign in to add files.")
     return new (error as any)(401, "You must be logged in to add pfp.");
@@ -16,7 +16,7 @@ export async function POST({
   let filename: string | null = url.searchParams.get("filename");
 
   if (filename === null) {
-    console.log(
+    console.error(
       "ERROR @api/user/addpfpfile/continue:20: url parameter filename returned null"
     );
     get(filemap).clear();
@@ -30,7 +30,7 @@ export async function POST({
     request_obj.data === null ||
     request_obj.data === undefined
   ) {
-    console.log(
+    console.error(
       "ERROR @api/user/addpfpfile/continue:34: request json null||undefined or has incorrect body:\n",
       request_obj
     );

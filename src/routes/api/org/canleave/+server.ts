@@ -6,38 +6,37 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
-      "You must be logged in to view org condition"
+      "You must be logged in to view org leave condition"
     );
   }
   // console.log(session);
   const org_info = await request.json();
-  // console.log("inside add key",key_info);
+  
   let given_orgid = org_info.given_orgid;
   let given_userid = session.user.name;
   if (given_orgid === undefined || given_orgid === null) {
-    console.log(
-      "ERROR @api/org/canclose:22: invalid user input error:\n",
+    console.error(
+      "ERROR @api/org/canclose:23: invalid user input error:\n",
       org_info
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while checking org closing status."
+      "Invalid inputs, while checking org leaving condition."
     );
   }
-  let { data:result, error:_error } = await supabase
-  .rpc('can_leave_org', {
-    given_orgid, 
+  let { data: result, error: _error } = await supabase.rpc("can_leave_org", {
+    given_orgid,
     given_userid,
-  })
+  });
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
-      "ERROR @api/org/canclose:37: supabase checking can close org error\n",
+    console.error(
+      "ERROR @api/org/canclose:39: supabase checking can leave org error\n",
       _error
     );
     return new (error as any)(

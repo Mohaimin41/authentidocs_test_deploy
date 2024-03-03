@@ -6,18 +6,17 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to get file history");
   }
   // console.log(session);
   const file_info = await request.json();
-  // console.log("inside add key",key_info);
 
   let given_fileid = file_info.fileid;
 
   if (given_fileid === undefined || given_fileid === null) {
-    console.log(
+    console.error(
       "ERROR @api/thread/getfilehistory:21: invalid user input error:\n",
       file_info
     );
@@ -34,10 +33,9 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/thread/getfilehistory:40: supabase get file history error\n",
+    console.error(
+      "ERROR @api/thread/getfilehistory:38: supabase get file history error\n",
       _error
     );
     return new (error as any)(

@@ -4,7 +4,6 @@ import { supabase } from "$lib/server/supabase_client.server";
 import { error } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
 import dotenv from 'dotenv'
-import jwt, { type Secret } from 'jsonwebtoken';
 dotenv.config()
 
 /**
@@ -17,7 +16,7 @@ function delay(milliseconds: number) {
   });
 }
 
-export async function POST({ request, cookies, locals }: RequestEvent) {
+export async function POST({ request, locals }: RequestEvent) {
   const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add public key");

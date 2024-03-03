@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to view org files.");
   }
@@ -16,7 +16,7 @@ export async function POST({
   let given_orgid = org_info.orgid;
 
   if (given_orgid === undefined || given_orgid === null) {
-    console.log(
+    console.error(
       "ERROR @api/org/getfiles:20: invalid user input error:\n",
       org_info
     );
@@ -30,9 +30,9 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/org/getfiles:36: supabase get org files error\n",
       _error
     );

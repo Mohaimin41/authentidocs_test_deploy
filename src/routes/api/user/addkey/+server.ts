@@ -6,13 +6,12 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add public key");
   }
   // console.log(session);
   const key_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_publickey = key_info.key;
   let given_userid = key_info.user_id;
 
@@ -22,7 +21,7 @@ export async function POST({
     given_userid === undefined ||
     given_userid === null
   ) {
-    console.log(
+    console.error(
       "ERROR @api/user/addkey:26: invalid user input error:\n",
       key_info
     );
@@ -35,9 +34,9 @@ export async function POST({
       given_userid,
     }
   );
-  // console.log("add key rps result",result)
+
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/user/addkey:41: supabase add user publickey error\n",
       _error
     );

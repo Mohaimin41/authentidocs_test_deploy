@@ -2,13 +2,12 @@ import { error } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
 import { supabase } from "$lib/server/supabase_client.server";
 import { fileTypeFromBuffer } from "file-type";
-import { v4 as uuidv4 } from "uuid";
 
 export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -24,11 +23,8 @@ export async function POST({
   const file_data = file_formData.get("file") as File;
 
   if (file_data === undefined || file_data === null) {
-    console.log("ERROR @api/user/addpfp:24: file form data undefined\n");
-    return new (error as any)(
-      422,
-      "Invalid Input while adding user pfp"
-    );
+    console.log("ERROR @api/user/addpfp:26: file form data undefined\n");
+    return new (error as any)(422, "Invalid Input while adding user pfp");
   }
 
   // const user_file = file_info.file;
@@ -51,11 +47,11 @@ export async function POST({
 
   const storage_call_response = await supabase.storage
     .from("user_pfps")
-    .upload(filePath, file_data, {upsert: true});
+    .upload(filePath, file_data, { upsert: true });
 
   if (storage_call_response.error) {
     console.error(
-      "ERROR @api/user/addpfp:57: supabase storage upload error\n",
+      "ERROR @api/user/addpfp:54: supabase storage upload error\n",
       storage_call_response.error
     );
 
@@ -80,11 +76,11 @@ export async function POST({
     given_pfp_url,
     given_pwd_hash,
     given_userid,
-    given_username
+    given_username,
   });
   if (_error1) {
-    console.log(
-      "ERROR @api/user/addpfp:87: supabase edit pfp url error\n",
+    console.error(
+      "ERROR @api/user/addpfp:84: supabase edit pfp url error\n",
       _error1
     );
     return new (error as any)(

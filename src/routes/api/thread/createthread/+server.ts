@@ -6,18 +6,15 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to create thread");
   }
   // console.log(session);
   const thread_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_description = thread_info.description;
   let given_parent_teamid = thread_info.given_parent_teamid;
   let given_threadname = thread_info.given_threadname;
-  // let uid_list = thread_info.uid_list;
-  // let sign_serial=0;
   let given_userid = session.user.name;
 
   if (
@@ -28,8 +25,8 @@ export async function POST({
     given_threadname === undefined ||
     given_threadname === null
   ) {
-    console.log(
-      "ERROR @api/thread/createthread:32: invalid user input error:\n",
+    console.error(
+      "ERROR @api/thread/createthread:29: invalid user input error:\n",
       thread_info
     );
     return new (error as any)(422, "Invalid inputs, while creating thread.");
@@ -42,10 +39,9 @@ export async function POST({
     given_userid,
   });
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/thread/createthread:48: supabase create thread error\n",
+    console.error(
+      "ERROR @api/thread/createthread:44: supabase create thread error\n",
       _error
     );
     return new (error as any)(

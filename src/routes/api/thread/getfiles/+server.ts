@@ -6,17 +6,16 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  // const session = await locals.getSession();
+  // const session = await locals.auth();
   // if (!session?.user) {
   //   return new (error as any)(401, "You must be logged in to get files");
   // }
   // console.log(session);
   const thread_info = await request.json();
-  // console.log("inside add key",key_info);
 
   let given_threadid = thread_info.thread_id;
   if (given_threadid === undefined || given_threadid === null) {
-    console.log(
+    console.error(
       "ERROR @api/thread/getfiles:20: invalid user input error:\n",
       thread_info
     );
@@ -33,10 +32,9 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/thread/getfiles:39: supabase get thread file list error\n",
+    console.error(
+      "ERROR @api/thread/getfiles:37: supabase get thread file list error\n",
       _error
     );
     return new (error as any)(

@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -48,7 +48,7 @@ export async function POST({
   }
   if (given_userid !== src_userid) {
     console.error(
-      "ERROR @api/user/editprofile:28: forbidden access:\n",
+      "ERROR @api/user/editprofile:51: forbidden access:\n",
       user_info
     );
     return new (error as any)(
@@ -56,9 +56,6 @@ export async function POST({
       "Forbidden access, while editing user profile."
     );
   }
-
-  
-//   console.log("api/user/editprofile/: \n", given_email, given_pfp_url, given_pwd_hash, given_userid, given_username);
 
   let { data: result, error: _error } = await supabase.rpc("edit_profile", {
     given_email,
@@ -68,10 +65,9 @@ export async function POST({
     given_username,
   });
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/user/profile:42: supabase edit user profile error\n",
+    console.error(
+      "ERROR @api/user/editprofile:70: supabase edit user profile error\n",
       _error
     );
     return new (error as any)(

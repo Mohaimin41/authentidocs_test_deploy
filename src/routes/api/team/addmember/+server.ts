@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -16,7 +16,6 @@ export async function POST({
 
   // console.log(session);
   const member_info = await request.json();
-  // console.log("inside add key",key_info);
   let uid_list = member_info.uid_list;
   let given_teamid = member_info.teamid;
 
@@ -26,7 +25,7 @@ export async function POST({
     given_teamid === undefined ||
     given_teamid === null
   ) {
-    console.log(
+    console.error(
       "ERROR @api/team/addmember:30: invalid user input error:\n",
       member_info
     );
@@ -42,17 +41,20 @@ export async function POST({
     let current_userid = session.user.name;
     let given_user_post = "officer";
 
-    let { data: result, error: _error } = await supabase.rpc("add_team_member", {
-      current_userid,
-      given_teamid,
-      given_user_post,
-      given_user_role,
-      given_userid,
-    });
+    let { data: result, error: _error } = await supabase.rpc(
+      "add_team_member",
+      {
+        current_userid,
+        given_teamid,
+        given_user_post,
+        given_user_role,
+        given_userid,
+      }
+    );
 
     if (_error) {
       console.log(
-        "ERROR @api/team/addmember:55: supabase add team member error\n",
+        "ERROR @api/team/addmember:57: supabase add team member error\n",
         _error
       );
       return new (error as any)(

@@ -6,14 +6,13 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to add forum thread");
+    return new (error as any)(401, "You must be logged in to get all forum thread");
   }
 
   // console.log(session);
   const forum_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_uid: string = forum_info.hierarchy_level_id;
 
   if (given_uid === undefined || given_uid === null) {
@@ -23,7 +22,7 @@ export async function POST({
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while getting all threads of a hierarchy."
+      "Invalid inputs, while getting all threads of a threads discussion forum."
     );
   }
 
@@ -34,10 +33,10 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
     console.error(
-      "ERROR @api/forum/getallforumthread:40: supabase getting all forum thread of hierarchy error\n",
+      "ERROR @api/forum/getallforumthread:40: supabase getting all forum threads of thread error\n",
       _error
     );
     return new (error as any)(

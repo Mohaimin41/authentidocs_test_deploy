@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -15,11 +15,10 @@ export async function POST({
   }
   // console.log(session);
   const thread_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_threadid = thread_info.threadid;
 
   if (given_threadid === undefined || given_threadid === null) {
-    console.log(
+    console.error(
       "ERROR @api/thread/getnotices:23: invalid user input error:\n",
       thread_info
     );
@@ -36,10 +35,9 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/thread/getnotices:42: supabase get thread notices error\n",
+    console.error(
+      "ERROR @api/thread/getnotices:40: supabase get thread notices error\n",
       _error
     );
     return new (error as any)(

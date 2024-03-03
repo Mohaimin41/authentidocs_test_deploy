@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  // const session = await locals.getSession();
+  // const session = await locals.auth();
   // if (!session?.user) {
   //   return new (error as any)(401, "You must be logged in to get thread details");
   // }
@@ -15,13 +15,13 @@ export async function POST({
   let term = thread_info.term;
   //console.log(given_threadid)
   if (term === undefined || term === null) {
-    console.log(
+    console.error(
       "ERROR @api/search/thread:19: invalid thread input error:\n",
       thread_info
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while getting thread details."
+      "Invalid inputs, while searching thread details."
     );
   }
 
@@ -31,13 +31,13 @@ export async function POST({
   })
 
   if (_error) {
-    console.log(
-      "ERROR @api/thread/details:36: supabase getting thread data error\n",
+    console.error(
+      "ERROR @api/search/thread:36: supabase searching thread data error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while getting thread details."
+      "Internal Server Error, while searching thread details."
     );
   }
 

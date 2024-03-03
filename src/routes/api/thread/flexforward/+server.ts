@@ -6,13 +6,12 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to add file");
+    return new (error as any)(401, "You must be logged in to forward thread");
   }
   // console.log(session);
   const thread_info = await request.json();
-  // console.log("inside add key",key_info);
 
   let given_src_userid = session.user.name;
   let given_target_userid = thread_info.targetid;
@@ -24,13 +23,13 @@ export async function POST({
     given_threadid === undefined ||
     given_threadid === null
   ) {
-    console.log(
-      "ERROR @api/thread/forward:28: invalid user input error:\n",
+    console.error(
+      "ERROR @api/thread/flexforward:28: invalid user input error:\n",
       thread_info
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while adding file signature."
+      "Invalid inputs, while forwarding thread."
     );
   }
 
@@ -40,10 +39,9 @@ export async function POST({
     given_threadid,
   });
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/thread/forward:75: supabase forward thread error\n",
+    console.error(
+      "ERROR @api/thread/flexforward:44: supabase forward thread error\n",
       _error
     );
     return new (error as any)(
