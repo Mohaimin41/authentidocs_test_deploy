@@ -29,7 +29,15 @@
       ["org", "Organization"]
     ]);
     //let content: string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus scelerisque pulvinar velit, quis consequat diam ullamcorper et. Integer ut blandit nibh, quis egestas tortor. Sed vitae consequat ipsum. Phasellus imperdiet cursus rutrum. Etiam venenatis at nisi a fringilla. Aenean rhoncus hendrerit arcu, a vestibulum leo porttitor vitae. Duis nec augue eros. Proin sit amet sapien fermentum, faucibus lectus et, ultrices quam. Ut pharetra pellentesque lectus, sit amet sagittis turpis fermentum vel. Donec volutpat ullamcorper pretium. Suspendisse eleifend imperdiet malesuada. Fusce nec orci nisi. In eu dignissim dolor, at elementum elit. Aenean eros leo, mollis a neque eu, fringilla volutpat odio. Duis imperdiet erat sit amet diam aliquet porttitor. In non lorem vel purus mollis vehicula. Donec volutpat nunc eget tempus gravida. Aliquam diam tortor, tincidunt quis quam vitae, varius tincidunt odio. Pellentesque sed tellus eu mauris finibus semper in interdum nisi. Praesent eros sapien, fringilla mattis tincidunt pretium, lacinia euismod nunc. Mauris lorem nibh, facilisis nec hendrerit a, bibendum id nisi. Fusce sed massa efficitur, convallis magna ac, iaculis magna. Cras ante augue, dapibus ut dui ac, tristique faucibus neque. Aenean eget fermentum lectus. Donec facilisis tellus in ipsum porttitor suscipit at nec orci. Sed non quam sit amet risus porta lacinia eget sed lacus. Donec pharetra nunc dolor, ac accumsan risus tempus eget. Cras pharetra purus sit amet magna malesuada, vitae posuere orci pharetra. Proin faucibus augue in condimentum dapibus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras a erat erat. Duis iaculis consequat dignissim. In sollicitudin rutrum velit, vel elementum lorem aliquam sit amet. Curabitur ac nulla ipsum. Integer laoreet maximus massa a tincidunt. Nunc vitae est dui. Phasellus a laoreet magna, eu ullamcorper massa. Etiam et elit non diam porttitor mattis. Vivamus imperdiet suscipit tellus, elementum porttitor felis egestas sit amet. Donec ut eros at ipsum dapibus eleifend id eget dolor. Quisque sed sagittis magna. Nulla et metus et nisl gravida luctus et vitae ipsum. Suspendisse ac massa ut enim vulputate consequat. Fusce luctus arcu quis malesuada ultricies. Aenean vitae risus vel dolor rhoncus consectetur. Aenean imperdiet enim non tempor convallis. Quisque maximus ac tortor eget tincidunt. Phasellus gravida non lorem eu sollicitudin. Aenean convallis leo varius risus accumsan, at auctor lectus aliquet. Praesent mattis elit et leo facilisis viverra. Praesent lorem augue, maximus sed imperdiet eget, consequat vitae lorem. Vivamus eget molestie mauris. Nam quis lacus eros. Sed et sapien in lectus pharetra dapibus quis quis quam. Cras efficitur iaculis erat. Phasellus vehicula metus urna, in molestie dolor aliquam eget. Cras nisl sapien, sodales vitae erat ut, euismod posuere neque. Integer varius scelerisque libero, nec molestie libero tristique et. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus scelerisque pulvinar velit, quis consequat diam ullamcorper et. Integer ut blandit nibh, quis egestas tortor. Sed vitae consequat ipsum. Phasellus imperdiet cursus rutrum. Etiam venenatis at nisi a fringilla. Aenean rhoncus hendrerit arcu, a vestibulum leo porttitor vitae. Duis nec augue eros. Proin sit amet sapien fermentum, faucibus lectus et, ultrices quam. Ut pharetra pellentesque lectus, sit amet sagittis turpis fermentum vel. Donec volutpat ullamcorper pretium. Suspendisse eleifend imperdiet malesuada. Fusce nec orci nisi. In eu dignissim dolor, at elementum elit. Aenean eros leo, mollis a neque eu, fringilla volutpat odio. Duis imperdiet erat sit amet diam aliquet porttitor. In non lorem vel purus mollis vehicula. Donec volutpat nunc eget tempus gravida. Aliquam diam tortor, tincidunt quis quam vitae, varius tincidunt odio. Pellentesque sed tellus eu mauris finibus semper in interdum nisi. Praesent eros sapien, fringilla mattis tincidunt pretium, lacinia euismod nunc. Mauris lorem nibh, facilisis nec hendrerit a, bibendum id nisi. Fusce sed massa efficitur, convallis magna ac, iaculis magna. Cras ante augue, dapibus ut dui ac, tristique faucibus neque. Aenean eget fermentum lectus. Donec facilisis tellus in ipsum porttitor suscipit at nec orci. Sed non quam sit amet risus porta lacinia eget sed lacus. Donec pharetra nunc dolor, ac accumsan risus tempus eget. Cras pharetra purus sit amet magna malesuada, vitae posuere orci pharetra. Proin faucibus augue in condimentum dapibus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras a erat erat. Duis iaculis consequat dignissim. In sollicitudin rutrum velit, vel elementum lorem aliquam sit amet. Curabitur ac nulla ipsum. Integer laoreet maximus massa a tincidunt. Nunc vitae est dui. Phasellus a laoreet magna, eu ullamcorper massa. Etiam et elit non diam porttitor mattis. Vivamus imperdiet suscipit tellus, elementum porttitor felis egestas sit amet. Donec ut eros at ipsum dapibus eleifend id eget dolor. Quisque sed sagittis magna. Nulla et metus et nisl gravida luctus et vitae ipsum. Suspendisse ac massa ut enim vulputate consequat. Fusce luctus arcu quis malesuada ultricies. Aenean vitae risus vel dolor rhoncus consectetur. Aenean imperdiet enim non tempor convallis. Quisque maximus ac tortor eget tincidunt. Phasellus gravida non lorem eu sollicitudin. Aenean convallis leo varius risus accumsan, at auctor lectus aliquet. Praesent mattis elit et leo facilisis viverra. Praesent lorem augue, maximus sed imperdiet eget, consequat vitae lorem. Vivamus eget molestie mauris. Nam quis lacus eros. Sed et sapien in lectus pharetra dapibus quis quis quam. Cras efficitur iaculis erat. Phasellus vehicula metus urna, in molestie dolor aliquam eget. Cras nisl sapien, sodales vitae erat ut, euismod posuere neque. Integer varius scelerisque libero, nec molestie libero tristique et.";
-
+    let is_logged_in: boolean = false;
+  function check_logged_in(): boolean {
+    if ($page.data.session?.user?.name) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  $:check_logged_in();
     async function get_notice_details(): Promise<void>
     {
         data_loaded = false;
@@ -268,10 +276,18 @@
         <p class="text-base font-medium text-gray-700 dark:text-gray-200 mb-4">{content}</p>
       </div>
       <div in:fade={{duration: 250}}>
+        <p class="text-xl font-medium text-gray-500 dark:text-gray-400 mb-2">Attached File</p>
+
+        {#if is_logged_in}
         {#if file_id !== null && file_id !== undefined}
-          <p class="text-xl font-medium text-gray-500 dark:text-gray-400 mb-2">Attached File</p>
-          <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
+        <FileCard file_id={file.id} file_name={file.name} file_type={file.type} file_status={file.status}/>
+        {:else}
+        <p class="text-xl font-medium text-gray-500 dark:text-gray-400 mb-2">No Attached Files</p>
         {/if}
+        {:else}
+        <p class="text-xl font-medium text-gray-500 dark:text-gray-400 mb-2">Log in to view Attached File</p>
+        {/if}
+
         <div class="flex justify-end mt-2">
           {#if creator_id == $page.data.session?.user?.name }
             {#if file_id === null || file_id === undefined}
