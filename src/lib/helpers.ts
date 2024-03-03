@@ -29,6 +29,11 @@ export function make_time(date: Date): string
     let ampm: string = (hours >= 12) ? " PM" : " AM";
     hours %= 12;
 
+    if(hours === 0 && ampm === " PM")
+    {
+        hours = 12;
+    }
+
     return hours.toString().padStart(2, "0") + ":" + date.getMinutes().toString().padStart(2, "0") + ampm;
 }
 
