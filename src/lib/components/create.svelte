@@ -13,13 +13,19 @@
     {
         creation_request(id, name, description);
 
-        name = "";
-        description = "";
+        modal.hide();
     }
 
     onMount((): void =>
     {
-        modal = new Modal(modal_elem);
+        modal = new Modal(modal_elem,
+        {
+            onHide: (): void =>
+            {
+                name = "";
+                description = "";
+            }
+        });
     });
 </script>
 

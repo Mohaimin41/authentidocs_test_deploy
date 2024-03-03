@@ -58,21 +58,23 @@ export async function POST({
 
   let result_mod = result_2[0];
 
-  if (result_mod === undefined || result_mod === null) {
-    console.error(
-      "ERROR @api/org/getdetails:63: supabase getting org mod details error\n",
-      result_mod
-    );
-    return new (error as any)(
-      500,
-      "Internal Server Error, while getting org details."
-    );
-  }
-
   let result_3 = {
     org_detail: result,
     org_mod_detail: result_mod,
   };
+
+  if (result_mod === undefined || result_mod === null) {
+    // console.error(
+    //   "ERROR @api/org/getdetails:63: supabase getting org mod details error\n",
+    //   result_mod
+    // );
+    // return new (error as any)(
+    //   500,
+    //   "Internal Server Error, while getting org details."
+    // );
+
+    result_3.org_mod_detail = null;
+  }
 
   let response: Response = new Response(JSON.stringify(result_3), {
     headers: {

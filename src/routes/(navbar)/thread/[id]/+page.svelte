@@ -698,7 +698,15 @@
       thread_name = response_obj.thread_detail.threadname;
       team_name = response_obj.thread_detail.list_of_teams.slice(1);
       started_at = new Date(response_obj.thread_detail.created_at);
-      moderator = response_obj.thread_mod_detail.f_username;
+
+      if(response_obj.thread_mod_detail)
+      {
+        moderator = response_obj.thread_mod_detail.f_username;
+      }
+      else
+      {
+        moderator = "N/A";
+      }
 
       {
         let moderator_id: number = response_obj.thread_mod_detail.f_userid;

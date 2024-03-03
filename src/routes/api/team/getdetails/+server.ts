@@ -56,22 +56,16 @@ export async function POST({
       "Internal Server Error, while getting team details."
     );
   }
-
-  if (result_2 === undefined || result_2 === null) {
-    console.error(
-      "ERROR @api/team/getdetails:63: supabase get team mod details error:\n",
-      result_2
-    );
-    return new (error as any)(
-      500,
-      "Internal server error, while getting thread mod details."
-    );
-  }
+  
   let result_mod = result_2[0];
   let result_3 = {
     team_detail: result,
     team_mod_detail: result_mod,
   };
+  if (result_2 === undefined || result_2 === null) {
+    result_3.team_mod_detail = null;
+  }
+  
 
   let response: Response = new Response(JSON.stringify(result_3), {
     headers: {

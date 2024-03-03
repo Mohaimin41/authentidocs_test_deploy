@@ -344,7 +344,16 @@
         }
         // console.log(response_obj);
         org_name = response_obj.org_detail.f_org_name;
-        org_leader = response_obj.org_mod_detail.f_username;
+
+        if(response_obj.org_mod_detail)
+        {
+          org_leader = response_obj.org_mod_detail.f_username;
+        }
+        else
+        {
+          org_leader = "N/A";
+        }
+        
         team_count = response_obj.org_detail.f_team_count;
         member_count = response_obj.org_detail.f_member_count;
         org_description = response_obj.org_detail.f_description;
