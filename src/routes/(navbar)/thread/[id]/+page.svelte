@@ -100,6 +100,9 @@
   let addable_members: AddableMemberObj[] = [];
   let moderator_pfp_data: string;
   let custodian_pfp_data: string;
+  let forwardable: boolean;
+
+  $: forwardable = can_forward && member_count > 1;
 
   let is_logged_in: boolean = false;
   function check_logged_in(): boolean {
@@ -1349,7 +1352,7 @@
           on:click={forward}
           type="button"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          disabled={!can_forward}>Forward</button
+          disabled={!forwardable}>Forward</button
         >
         {#if is_admin}
           <button
@@ -1363,7 +1366,7 @@
         <button
           type="button"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          disabled={!can_forward}>Flex Forward</button
+          disabled={!forwardable}>Flex Forward</button
         >
         <Dropdown>
           {#each forwardable_members as member}
