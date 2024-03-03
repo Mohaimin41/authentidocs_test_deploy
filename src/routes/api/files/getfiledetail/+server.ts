@@ -6,26 +6,20 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
-  if (!session?.user) {
-    return new (error as any)(
-      401,
-      "You must be logged in to get file details."
-    );
-  }
+  // const session = await locals.auth();
+  // if (!session?.user) {
+  //   return new (error as any)(
+  //     401,
+  //     "You must be logged in to get file details."
+  //   );
+  // }
   const file_info = await request.json();
-  // console.log(key_info);
+  //console.log(file_info);
   let given_fileid = file_info.fileid;
-  let given_userid = file_info.user_id;
 
-  if (
-    given_fileid === undefined ||
-    given_fileid === null ||
-    given_userid === undefined ||
-    given_userid === null
-  ) {
-    console.log(
-      "ERROR @api/files/getfiledetail:28: invalid user input error:\n",
+  if (given_fileid === undefined || given_fileid === null) {
+    console.error(
+      "ERROR @api/files/getfiledetail:22: invalid user input error:\n",
       file_info
     );
     return new (error as any)(422, "Invalid inputs, while getting file data.");
@@ -35,13 +29,12 @@ export async function POST({
     "get_single_filemetadata_fileid",
     {
       given_fileid,
-      given_userid,
     }
   );
 
   if (_error1) {
-    console.log(
-      "ERROR @api/files/getfiledetail:47: supabase getting file data error\n",
+    console.error(
+      "ERROR @api/files/getfiledetail:37: supabase getting file data error\n",
       _error1
     );
     return new (error as any)(

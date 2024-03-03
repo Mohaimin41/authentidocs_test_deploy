@@ -9,7 +9,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add file");
   }
@@ -23,8 +23,8 @@ export async function POST({
     given_threadid === undefined ||
     filename === undefined
   ) {
-    console.log(
-      "ERROR @api/thread/addthreadchunkfile/finish:22: filename or given_threadid returned empty/undefined from url"
+    console.error(
+      "ERROR @api/thread/addthreadchunkfile/finish:27: filename or given_threadid returned empty/undefined from url"
     );
     get(filemap).clear();
     return json({ success: false });
@@ -33,8 +33,8 @@ export async function POST({
   let file_array: number[] | undefined = get(filemap).get(filename);
 
   if (file_array === undefined) {
-    console.log(
-      "ERROR @api/thread/addthreadchunkfile/finish:32: array filearray returned as undefined from filemap"
+    console.error(
+      "ERROR @api/thread/addthreadchunkfile/finish:37: array filearray returned as undefined from filemap"
     );
     get(filemap).clear();
     return json({ success: false });
@@ -75,7 +75,7 @@ export async function POST({
     .upload(filePath, blob);
   // console.log("supabaseupload" + data);
   if (storage_call_response.error) {
-    console.log(
+    console.error(
       "ERROR @api/thread/addthreadchunkfile/finish:79: supabase storage upload error\n",
       storage_call_response.error
     );
@@ -102,7 +102,7 @@ export async function POST({
 
   if (_error) {
     get(filemap).clear();
-    console.log(
+    console.error(
       "ERROR @api/thread/addthreadchunkfile/finish:106: supabase file data insert into database error\n",
       _error
     );

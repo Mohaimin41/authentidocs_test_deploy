@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add file signatures.");
   }
@@ -30,7 +30,7 @@ export async function POST({
     given_signing_userid === null ||
     given_signing_userid === undefined
   ) {
-    console.log(
+    console.error(
       "ERROR @api/files/addfilesignature:34: invalid user input error:\n",
       file_signature_info
     );
@@ -51,7 +51,7 @@ export async function POST({
   );
   // console.log("error @33: ", _error)
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/files/addfilesignature:55: supabase file signatuer insert error\n",
       _error
     );

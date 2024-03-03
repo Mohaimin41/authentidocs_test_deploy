@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -23,8 +23,8 @@ export async function POST({
     given_notificationid === undefined ||
     given_notificationid === null
   ) {
-    console.log(
-      "ERROR @api/user/notifications:27: invalid user input error:\n",
+    console.error(
+      "ERROR @api/user/readnotifications:27: invalid user input error:\n",
       noti_info
     );
     return new (error as any)(
@@ -42,7 +42,7 @@ export async function POST({
   );
 
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/user/readnotifications:46: supabase setting notification as read error\n",
       _error
     );

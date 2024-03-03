@@ -6,16 +6,15 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
-  if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to get team details");
-  }
+  // const session = await locals.auth();
+  // if (!session?.user) {
+  //   return new (error as any)(401, "You must be logged in to get team details");
+  // }
   // console.log(session);
   const team_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_teamid = team_info.teamid;
   if (given_teamid === undefined || given_teamid === null) {
-    console.log(
+    console.error(
       "ERROR @api/team/getdetails:19: invalid user input error:\n",
       team_info
     );
@@ -29,9 +28,9 @@ export async function POST({
     given_teamid,
   });
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/team/getdetails:35: supabase getting team details error\n",
       _error
     );
@@ -48,7 +47,7 @@ export async function POST({
     }
   );
   if (error_2) {
-    console.log(
+    console.error(
       "ERROR @api/team/getdetails:52: supabase getting team mod details error\n",
       _error
     );
@@ -57,22 +56,16 @@ export async function POST({
       "Internal Server Error, while getting team details."
     );
   }
-
-  if (result_2 === undefined || result_2 === null) {
-    console.log(
-      "ERROR @api/team/getdetails:63: invalid user input error:\n",
-      result_2
-    );
-    return new (error as any)(
-      422,
-      "Invalid inputs, while getting team details."
-    );
-  }
+  
   let result_mod = result_2[0];
   let result_3 = {
     team_detail: result,
     team_mod_detail: result_mod,
   };
+  if (result_2 === undefined || result_2 === null) {
+    result_3.team_mod_detail = null;
+  }
+  
 
   let response: Response = new Response(JSON.stringify(result_3), {
     headers: {

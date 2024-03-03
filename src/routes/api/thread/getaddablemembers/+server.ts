@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -16,11 +16,10 @@ export async function POST({
 
   // console.log(session);
   const thread_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_threadid = thread_info.given_threadid;
 
   if (given_threadid === undefined || given_threadid === null) {
-    console.log(
+    console.error(
       "ERROR @api/thread/getaddablemembers:24: invalid user input error:\n",
       thread_info
     );
@@ -31,16 +30,16 @@ export async function POST({
   }
 
   let { data: result, error: _error } = await supabase.rpc(
-    "get_thread_addable_member_list",
+    "get_thread_addable_member_list2",
     {
       given_threadid,
     }
   );
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
-      "ERROR @api/thread/getaddablemembers:43: supabase get addable thread members error\n",
+    console.error(
+      "ERROR @api/thread/getaddablemembers:42: supabase get addable thread members error\n",
       _error
     );
     return  new (error as any)(500, "Internal Server Error, while getting addable member to thread.");

@@ -1,15 +1,17 @@
 <script lang="ts">
+    import { gen_random_color } from "$lib/helpers";
     import { onMount } from "svelte";
+    import { file_preview_mode } from "$lib/stores";
 
     export let file_id: string;
     export let file_name: string;
     export let file_type: string;
-    const all_colors: string[] = ["red", "green", "blue", "purple"];
     let color: string;
 
     onMount(() : void =>
     {
-        color = all_colors[Math.round(Math.random() * (all_colors.length - 1))];
+        file_preview_mode.set(4);
+        color = gen_random_color();
     });
 </script>
 

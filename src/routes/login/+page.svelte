@@ -1,4 +1,6 @@
 <script lang="ts">
+    import sign0 from "$lib/assets/signin/0.webp";
+    import sign1 from "$lib/assets/signin/1.webp";
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import LogginFill from "$lib/components/loggin-fill.svelte";
@@ -66,7 +68,16 @@
 
         let image_idx = Math.round(Math.random() * (IMAGE_COUNT - 1));
         let chapa_idx = Math.round(Math.random() * (CHAPA_COLLECTION.length - 1));
-        let image_src = "signin/" + image_idx + ".webp";
+        let image_src: string;
+
+        if(image_idx === 0)
+        {
+            image_src = sign0;
+        }
+        else
+        {
+            image_src = sign1;
+        }
 
         login_left_div.style.backgroundImage = "url(" + image_src + ")";
         login_left_div.style.animationPlayState = "running";
