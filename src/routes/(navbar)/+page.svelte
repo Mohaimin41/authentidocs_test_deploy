@@ -14,7 +14,6 @@
     let canvas_root_elem: HTMLDivElement;
     let animated1: boolean = false;
     let multiple: number[] = [5.25, 0];
-    let show: boolean = false;
 
     onMount(async (): Promise<void> =>
     {
@@ -24,8 +23,6 @@
 
             await goto("/home");
         }
-
-        show = true;
 
         window.onresize = (): void =>
         {
@@ -385,66 +382,64 @@
     });
 </script>
 
-{#if show}
-    <div bind:this={canvas_root_elem} class="canvas-3d">
+<div bind:this={canvas_root_elem} class="canvas-3d">
 
-    </div>
+</div>
 
-    <div bind:this={home_root_elem}>
-        <div bind:this={home_object_elem[0]} class="home-object">
-            <div class="flex">
-                <div class="">
-                    <p bind:this={chars[0]} class="title text-semibold text-gray-700">A</p>
-                </div>
-                <div class="char-carrier">
-                    <p bind:this={chars[1]} class="title text-semibold text-gray-700">U</p>
-                </div>
-                <div class="char-carrier">
-                    <p bind:this={chars[2]} class="title text-semibold text-gray-700">T</p>
-                </div>
-                <div class="char-carrier">
-                    <p bind:this={chars[3]} class="title text-semibold text-gray-700">H</p>
-                </div>
-                <div class="char-carrier">
-                    <p bind:this={chars[4]} class="title text-semibold text-gray-700">E</p>
-                </div>
-                <div class="char-carrier">
-                    <p bind:this={chars[5]} class="title text-semibold text-gray-700">N</p>
-                </div>
-                <div class="char-carrier">
-                    <p bind:this={chars[6]} class="title text-semibold text-gray-700">T</p>
-                </div>
-                <div>
-                    <p bind:this={chars[7]} class="title text-semibold text-gray-700">I</p>
-                </div>
-                <div>
-                    <p bind:this={chars[8]} class="title text-semibold text-gray-700">D</p>
-                </div>
-                <div>
-                    <p bind:this={chars[9]} class="title text-semibold text-blue-600">O</p>
-                </div>
-                <div>
-                    <p bind:this={chars[10]} class="title text-semibold text-gray-700">C</p>
-                </div>
-                <div>
-                    <p bind:this={chars[11]} class="title text-semibold text-gray-700">S</p>
-                </div>
+<div bind:this={home_root_elem}>
+    <div bind:this={home_object_elem[0]} class="home-object">
+        <div class="flex">
+            <div class="">
+                <p bind:this={chars[0]} class="title text-semibold text-gray-700">A</p>
             </div>
-        </div>
-        
-        <div bind:this={home_object_elem[1]} class="home-object flex flex-col">
-            <p bind:this={chapa_big} class="chapa-root-1 text-gray-700" style="opacity: 0;">Your Most Trusted</p>
-            <div class="chapa-root-2 text-gray-700 flex jusitify-center">
-                <div class="overflow-hidden grow flex flex-col items-end">
-                    <div bind:this={chapas[0]} style="translate: 100% 100%;">Document <span class="text-blue-600">S</span></div>
-                </div>
-                <div class="overflow-hidden grow flex flex-col items-start">
-                    <div bind:this={chapas[1]} style="translate: -100% -100%;"><span class="text-blue-600">igning</span> App</div>
-                </div>
+            <div class="char-carrier">
+                <p bind:this={chars[1]} class="title text-semibold text-gray-700">U</p>
+            </div>
+            <div class="char-carrier">
+                <p bind:this={chars[2]} class="title text-semibold text-gray-700">T</p>
+            </div>
+            <div class="char-carrier">
+                <p bind:this={chars[3]} class="title text-semibold text-gray-700">H</p>
+            </div>
+            <div class="char-carrier">
+                <p bind:this={chars[4]} class="title text-semibold text-gray-700">E</p>
+            </div>
+            <div class="char-carrier">
+                <p bind:this={chars[5]} class="title text-semibold text-gray-700">N</p>
+            </div>
+            <div class="char-carrier">
+                <p bind:this={chars[6]} class="title text-semibold text-gray-700">T</p>
+            </div>
+            <div>
+                <p bind:this={chars[7]} class="title text-semibold text-gray-700">I</p>
+            </div>
+            <div>
+                <p bind:this={chars[8]} class="title text-semibold text-gray-700">D</p>
+            </div>
+            <div>
+                <p bind:this={chars[9]} class="title text-semibold text-blue-600">O</p>
+            </div>
+            <div>
+                <p bind:this={chars[10]} class="title text-semibold text-gray-700">C</p>
+            </div>
+            <div>
+                <p bind:this={chars[11]} class="title text-semibold text-gray-700">S</p>
             </div>
         </div>
     </div>
-{/if}
+    
+    <div bind:this={home_object_elem[1]} class="home-object flex flex-col">
+        <p bind:this={chapa_big} class="chapa-root-1 text-gray-700" style="opacity: 0;">Your Most Trusted</p>
+        <div class="chapa-root-2 text-gray-700 flex jusitify-center">
+            <div class="overflow-hidden grow flex flex-col items-end">
+                <div bind:this={chapas[0]} style="translate: 100% 100%;">Document <span class="text-blue-600">S</span></div>
+            </div>
+            <div class="overflow-hidden grow flex flex-col items-start">
+                <div bind:this={chapas[1]} style="translate: -100% -100%;"><span class="text-blue-600">igning</span> App</div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
     .home-object
