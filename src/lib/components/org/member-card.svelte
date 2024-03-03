@@ -1,6 +1,6 @@
 <script lang="ts">
   import default_pfp from "$lib/assets/user.webp";
-  import { make_pfp_url } from "$lib/helpers";
+  import { make_date, make_pfp_url } from "$lib/helpers";
   import { initModals } from "flowbite";
   import { onMount } from "svelte";
 
@@ -42,7 +42,7 @@
     pfp_data = default_pfp;
 
     initModals();
-    date_text = joined_at.toLocaleDateString();
+    date_text = make_date(joined_at);
     pubkey = [
       ...new Uint8Array(new TextEncoder().encode(JSON.stringify(pub_key))),
     ]
