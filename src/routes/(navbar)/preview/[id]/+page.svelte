@@ -218,7 +218,6 @@
 
         if ($page.data.session === null) {
             goto("/");
-
             return;
         } else {
             logged_in_store.set(true);
