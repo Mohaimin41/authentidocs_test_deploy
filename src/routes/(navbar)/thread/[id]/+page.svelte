@@ -238,7 +238,7 @@
         let response_obj: any = await response.json();
         forum_messages = new Array(response_obj.length);
 
-        console.log(response_obj);
+        // console.log(response_obj);
 
         for (let i: number = 0; i < forum_messages.length; ++i) {
           forum_messages[i] = new ForumMessage();
@@ -852,16 +852,20 @@
     }
   }
 
-  onMount((): void => {
+  $:
+  {
     id = $page.params.id;
+
+    init();
+  }
+
+  onMount((): void => {
     close_thread_modal = new Modal(close_thread_modal_elem);
     file_uploading_modal = new Modal(file_uploading_modal_elem);
     add_forum_thread_modal = new Modal(add_forum_thread_modal_elem, {
       backdrop: "static",
     });
     add_post_modal = new Modal(add_post_modal_elem);
-
-    init();
   });
 </script>
 

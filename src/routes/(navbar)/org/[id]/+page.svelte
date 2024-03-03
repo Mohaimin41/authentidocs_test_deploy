@@ -19,7 +19,7 @@
   import Notice from "$lib/components/notice.svelte";
   import Create from "$lib/components/create.svelte";
 
-  import { priv_key } from "$lib/stores";
+  import { logged_in_store, priv_key } from "$lib/stores";
   import { get } from "svelte/store";
   import { goto } from "$app/navigation";
     import { make_date } from "$lib/helpers";
@@ -597,15 +597,12 @@
     file_input_elem.click();
   }
 
-  onMount((): void => {
-    initModals();
-
+  $:
+  {
     id = $page.params.id;
 
-    file_uploading_modal = new Modal(file_uploading_modal_elem);
-
     get_org_details();
-    if (is_logged_in) {
+    if ($logged_in_store) {
       get_teams();
       get_notices();
       get_files();
@@ -614,6 +611,12 @@
       check_member();
       check_can_leave();
     }
+  }
+
+  onMount((): void => {
+    initModals();
+
+    file_uploading_modal = new Modal(file_uploading_modal_elem);
   });
 </script>
 
