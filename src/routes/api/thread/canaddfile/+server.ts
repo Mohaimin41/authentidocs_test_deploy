@@ -6,45 +6,50 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to forward thread");
+    return new (error as any)(
+      401,
+      "You must be logged in to check user thread status"
+    );
   }
   // console.log(session);
   const thread_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_threadid = thread_info.given_threadid;
   let given_userid = thread_info.given_userid;
 
-  if (given_threadid === undefined || given_threadid === null) {
-    console.log(
-      "ERROR @api/thread/canforward:20: invalid user input error:\n",
+  if (
+    given_threadid === undefined ||
+    given_threadid === null ||
+    given_userid === undefined ||
+    given_userid === null
+  ) {
+    console.error(
+      "ERROR @api/thread/canaddfile:28: invalid user input error:\n",
       thread_info
     );
     return new (error as any)(
       422,
-      "Invalid inputs, while checking forwarding status of thread."
+      "Invalid inputs, while checking user status of thread."
     );
   }
 
+  let { data: result, error: _error } = await supabase.rpc(
+    "can_add_file_thread",
+    {
+      given_threadid,
+      given_userid,
+    }
+  );
 
-  let { data:result, error:_error } = await supabase
-  .rpc('can_add_file_thread', {
-    given_threadid, 
-    given_userid
-  })
-
-
-
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/thread/canforward:39: supabase check thread forward error\n",
+    console.error(
+      "ERROR @api/thread/canaddfile:47: supabase check thread user status error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while checking thread forward error."
+      "Internal Server Error, while checking thread user status error."
     );
   }
 

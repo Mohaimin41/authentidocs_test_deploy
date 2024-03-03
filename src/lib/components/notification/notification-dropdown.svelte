@@ -2,8 +2,8 @@
     import { page } from "$app/stores";
     import { initDropdowns } from "flowbite";
     import { onMount } from "svelte";
-    import NotifcatinElement from "./notifcatin-element.svelte";
-    import { notifications } from "../../../stores";
+    import NotifcatinElement from "./notifcation-element.svelte";
+    import { notifications } from "$lib/stores";
     import { get_notifications } from "$lib/notification";
 
     let available: boolean;
@@ -57,7 +57,7 @@
     <ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700 my-2 mx-4">
         {#each $notifications as notification}
             <li class="py-3 sm:py-4">
-                <NotifcatinElement thread_id={notification.thread_id} id={notification.id} content={notification.content} seen={notification.seen} />
+                <NotifcatinElement level={notification.level} level_id={notification.level_id} id={notification.id} content={notification.content} seen={notification.seen} />
             </li>
         {/each}
     </ul>

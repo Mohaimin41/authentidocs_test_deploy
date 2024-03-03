@@ -6,15 +6,13 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  
   // console.log(session);
   const key_info = await request.json();
-  // console.log("inside add key",key_info);
   let given_pubkey = key_info.key;
 
   if (given_pubkey === undefined || given_pubkey === null) {
-    console.log(
-      "ERROR @api/user/verifykey:23: invalid user input error:\n",
+    console.error(
+      "ERROR @api/user/verifykey:15: invalid user input error:\n",
       key_info
     );
     return new (error as any)(422, "Invalid inputs, while searching a key.");
@@ -26,10 +24,10 @@ export async function POST({
       given_pubkey,
     }
   );
-  // console.log("add key rps result",result)
+
   if (_error) {
-    console.log(
-      "ERROR @api/user/verifykey:38: supabase searching user publickey organization level error\n",
+    console.error(
+      "ERROR @api/user/verifykey:30: supabase searching user publickey error\n",
       _error
     );
     return new (error as any)(

@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to get user details");
   }
@@ -15,7 +15,7 @@ export async function POST({
   let given_userid = user_info.userid;
   //console.log(given_userid)
   if (given_userid === undefined || given_userid === null) {
-    console.log(
+    console.error(
       "ERROR @api/user/details:19: invalid user input error:\n",
       user_info
     );
@@ -32,7 +32,7 @@ export async function POST({
     }
   );
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/user/details:36: supabase getting user data error\n",
       _error
     );

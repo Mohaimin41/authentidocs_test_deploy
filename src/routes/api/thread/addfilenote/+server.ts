@@ -6,13 +6,12 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add file notes.");
   }
   // console.log(session);
   const file_info = await request.json();
-  // console.log("inside add key",key_info);
 
   let given_content = file_info.content;
   let given_fileid = file_info.fileid;
@@ -32,7 +31,7 @@ export async function POST({
     given_signing_userid === undefined ||
     given_signing_userid === null
   ) {
-    console.log(
+    console.error(
       "ERROR @api/thread/addfilenote:36: invalid user input error:\n",
       file_info
     );
@@ -47,9 +46,8 @@ export async function POST({
     given_signing_userid,
   });
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/thread/addfilenote:53: supabase add file note error\n",
       _error
     );

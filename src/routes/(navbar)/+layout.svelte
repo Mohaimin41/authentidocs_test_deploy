@@ -6,13 +6,12 @@
     import { source } from "sveltekit-sse";
     import { get, type Readable, type Subscriber } from "svelte/store";
     import { get_notifications } from "$lib/notification";
+    import { logged_in_store } from "$lib/stores";
 
     let noti_json: Readable<any>;
 
     $: 
     {
-        console.log("notifcation recieved");
-
         if(!($noti_json === null || $noti_json === undefined))
         {
             get_notifications($page.data.session?.user?.name);
@@ -34,6 +33,7 @@
         }
 
         if ($page.data.session) {
+            $logged_in_store = true;
             let notification = source("/api/user/notificationevent");
             
             noti_json = notification.select('notifications').json(
