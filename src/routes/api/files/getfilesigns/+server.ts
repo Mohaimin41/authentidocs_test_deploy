@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -19,7 +19,7 @@ export async function POST({
   let given_fileid = file_info.fileid;
   // console.log("getfilesigns 19:", given_fileid);
   if (given_fileid === undefined || given_fileid === null) {
-    console.log(
+    console.error(
       "ERROR @api/files/getfilesigns:23: invalid user input error:\n",
       file_info
     );
@@ -35,7 +35,7 @@ export async function POST({
   // if (error) console.log("getfilesigns 24: ",error.toString());
   // console.log("getfilesigns 25: ", result);
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/files/getfilesigns:39: supabase get file signatuers error\n",
       _error
     );

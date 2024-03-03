@@ -6,38 +6,45 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add file");
   }
   // console.log(session);
   const team_info = await request.json();
-  // console.log("inside add key",key_info);
-  let given_hierarchy_level='team';
-  let given_hierarchy_level_id=team_info.teamid;
-  let target_userid=team_info.id
+  let given_hierarchy_level = "team";
+  let given_hierarchy_level_id = team_info.teamid;
+  let target_userid = team_info.id;
 
+  if (
+    given_hierarchy_level === (undefined || null) ||
+    given_hierarchy_level_id === (undefined || null) ||
+    target_userid === (undefined || null)
+  ) {
+    console.error(
+      "ERROR @api/team/makeadmin:25: invalid user input error:\n",
+      team_info
+    );
+    return new (error as any)(
+      422,
+      "Invalid inputs, while making team user admin."
+    );
+  }
 
- 
+  let { data: result, error: _error } = await supabase.rpc("make_admin", {
+    given_hierarchy_level,
+    given_hierarchy_level_id,
+    target_userid,
+  });
 
-
-  let { data:result, error:_error} = await supabase
-  .rpc('make_admin', {
-    given_hierarchy_level, 
-    given_hierarchy_level_id, 
-    target_userid
-  })
-
-
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/team/forward:75: supabase forward team error\n",
+    console.error(
+      "ERROR @api/team/makeadmin:42: supabase making team admin error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while forwarding team."
+      "Internal Server Error, while making team admin."
     );
   }
 

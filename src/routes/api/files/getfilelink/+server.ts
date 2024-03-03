@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to view files.");
   }
@@ -14,12 +14,9 @@ export async function POST({
   const file_info = await request.json();
   // console.log(key_info);
   let given_fileid = file_info.fileid;
-  if (
-    given_fileid === undefined ||
-    given_fileid === null 
-  ) {
-    console.log(
-      "ERROR @api/files/getfilelink:25: invalid user input error:\n",
+  if (given_fileid === undefined || given_fileid === null) {
+    console.error(
+      "ERROR @api/files/getfilelink:19: invalid user input error:\n",
       file_info
     );
     return new (error as any)(422, "Invalid inputs, while getting file data.");
@@ -33,8 +30,8 @@ export async function POST({
   );
 
   if (_error1) {
-    console.log(
-      "ERROR @api/files/getfilelink:41: supabase getting file data error\n",
+    console.error(
+      "ERROR @api/files/getfilelink:34: supabase getting file data error\n",
       _error1
     );
     return new (error as any)(
@@ -45,8 +42,8 @@ export async function POST({
 
   let result4, result5;
   if (result1.current_state === undefined || result1.current_state === null) {
-    console.log(
-      "ERROR @api/files/getfilelink:53: supabase returning incorrect result\n",
+    console.error(
+      "ERROR @api/files/getfilelink:46: supabase returning incorrect result\n",
       result1
     );
     return new (error as any)(
@@ -62,7 +59,7 @@ export async function POST({
 
     if (_error2) {
       console.log(
-        "ERROR @api/files/getfilelink:69: supabase file link access error\n",
+        "ERROR @api/files/getfilelink:62: supabase file link access error\n",
         _error2
       );
       return new (error as any)(
@@ -80,7 +77,7 @@ export async function POST({
 
     if (_error3) {
       console.log(
-        "ERROR @api/files/getfilelink:87: supabase file link access error\n",
+        "ERROR @api/files/getfilelink:80: supabase file link access error\n",
         _error3
       );
       return new (error as any)(
@@ -132,7 +129,7 @@ export async function POST({
     result5.signedUrl === undefined ||
     result5.signedUrl === null
   ) {
-    console.log(
+    console.error(
       "ERROR @api/files/getfilelink:140: supabase file link access returns incorrect result\n",
       result4,
       "\n",

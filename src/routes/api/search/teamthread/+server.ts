@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to get notice details");
   }
@@ -16,7 +16,7 @@ export async function POST({
   let given_teamid = thread_info.teamid;
   //console.log(given_noticeid)
   if (term === undefined || term === null) {
-    console.log(
+    console.error(
       "ERROR @api/search/teamthread:19: invalid threadinfo input error:\n",
       thread_info
     );
@@ -32,7 +32,7 @@ export async function POST({
     term
   })
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/notice/details:36: supabase getting notice data error\n",
       _error
     );

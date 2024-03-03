@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -16,7 +16,6 @@ export async function POST({
 
   // console.log(session);
   const member_info = await request.json();
-  // console.log("inside add key",key_info);
   let uid_list = member_info.uid_list;
   let given_threadid = member_info.threadid;
 
@@ -26,7 +25,7 @@ export async function POST({
     given_threadid === undefined ||
     given_threadid === null
   ) {
-    console.log(
+    console.error(
       "ERROR @api/thread/addmember:30: invalid user input error:\n",
       member_info
     );
@@ -43,7 +42,7 @@ export async function POST({
   );
 
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/thread/addmember:47: supabase get signing serial error\n",
       _error
     );
@@ -73,7 +72,7 @@ export async function POST({
     console.log(result);
     console.log();
 
-    // console.log("add key rps result",result)
+    
     if (_error) {
       console.log(
         "ERROR @api/thread/addmember:76: supabase add thread member error\n",

@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  // const session = await locals.auth();
   // if (!session?.user) {
   //   return new (error as any)(
   //     401,
@@ -17,12 +17,9 @@ export async function POST({
   //console.log(file_info);
   let given_fileid = file_info.fileid;
 
-  if (
-    given_fileid === undefined ||
-    given_fileid === null 
-  ) {
-    console.log(
-      "ERROR @api/files/getfiledetail:28: invalid user input error:\n",
+  if (given_fileid === undefined || given_fileid === null) {
+    console.error(
+      "ERROR @api/files/getfiledetail:22: invalid user input error:\n",
       file_info
     );
     return new (error as any)(422, "Invalid inputs, while getting file data.");
@@ -36,8 +33,8 @@ export async function POST({
   );
 
   if (_error1) {
-    console.log(
-      "ERROR @api/files/getfiledetail:47: supabase getting file data error\n",
+    console.error(
+      "ERROR @api/files/getfiledetail:37: supabase getting file data error\n",
       _error1
     );
     return new (error as any)(

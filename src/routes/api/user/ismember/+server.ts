@@ -6,37 +6,50 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
-    return new (error as any)(401, "You must be logged in to add file");
+    return new (error as any)(
+      401,
+      "You must be logged in to view user membership status"
+    );
   }
   // console.log(session);
   const user_info = await request.json();
-  // console.log("inside add key",key_info);
-  let given_hierarchy_name=user_info.level;
-  let given_hierarchy_id=user_info.level_id;
-  let given_userid=user_info.id
+  let given_hierarchy_name = user_info.level;
+  let given_hierarchy_id = user_info.level_id;
+  let given_userid = user_info.id;
+  if (
+    given_hierarchy_name === undefined ||
+    given_hierarchy_name === null ||
+    given_hierarchy_id === undefined ||
+    given_hierarchy_id === null ||
+    given_userid === undefined ||
+    given_userid === null
+  ) {
+    console.error(
+      "ERROR @api/user/ismember:27: invalid user input error:\n",
+      user_info
+    );
+    return new (error as any)(
+      422,
+      "Invalid inputs, while checking user membership status."
+    );
+  }
 
+  let { data: result, error: _error } = await supabase.rpc("is_member_of", {
+    given_hierarchy_id,
+    given_hierarchy_name,
+    given_userid,
+  });
 
- 
-
-
-  let { data:result, error:_error } = await supabase
-  .rpc('is_member_of', {
-    given_hierarchy_id, 
-    given_hierarchy_name, 
-    given_userid
-  })
-
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
-      "ERROR @api/team/forward:75: supabase forward team error\n",
+    console.error(
+      "ERROR @api/user/ismember:44: supabase checking user membership error\n",
       _error
     );
     return new (error as any)(
       500,
-      "Internal Server Error, while forwarding team."
+      "Internal Server Error, while checking user membership."
     );
   }
 

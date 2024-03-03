@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -25,7 +25,7 @@ export async function POST({
     given_userid === undefined ||
     given_userid === null
   ) {
-    console.log(
+    console.error(
       "ERROR @api/thread/getforwardablemembers:29: invalid user input error:\n",
       thread_info
     );
@@ -43,9 +43,8 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/thread/getforwardablemembers:49: supabase get forwardable thread members error\n",
       _error
     );

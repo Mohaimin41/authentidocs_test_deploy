@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -16,7 +16,6 @@ export async function POST({
 
   // console.log(session);
   const member_info = await request.json();
-  // console.log("inside add key",key_info);
   let uid_list = member_info.uid_list;
   let given_orgid = member_info.orgid;
 
@@ -26,7 +25,7 @@ export async function POST({
     given_orgid === undefined ||
     given_orgid === null
   ) {
-    console.log(
+    console.error(
       "ERROR @api/org/addmember:30: invalid user input error:\n",
       member_info
     );

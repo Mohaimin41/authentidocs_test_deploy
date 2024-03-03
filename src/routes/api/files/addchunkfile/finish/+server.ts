@@ -9,7 +9,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add files.");
   }
@@ -17,7 +17,7 @@ export async function POST({
   let filename: string | null = url.searchParams.get("filename");
 
   if (filename === null) {
-    console.log(
+    console.error(
       "ERROR @api/files/addchunkfile/finish:21: url param filename returned as undefined"
     );
     get(filemap).clear();
@@ -27,7 +27,7 @@ export async function POST({
   let file_array: number[] | undefined = get(filemap).get(filename);
 
   if (file_array === undefined) {
-    console.log(
+    console.error(
       "ERROR @api/files/addchunkfile/finish:31: array filearray returned as undefined from filemap"
     );
     get(filemap).clear();
@@ -69,7 +69,7 @@ export async function POST({
     .upload(filePath, blob);
   // console.log("supabaseupload" + data);
   if (storage_call_response.error) {
-    console.log(
+    console.error(
       "ERROR @api/files/addchunkfile/finish:73: supabase storage upload error\n",
       storage_call_response.error
     );
@@ -97,7 +97,7 @@ export async function POST({
   );
   if (_error) {
     get(filemap).clear();
-    console.log(
+    console.error(
       "ERROR @api/files/addchunkfile/finish:101: supabase file data insert into database error\n",
       _error
     );

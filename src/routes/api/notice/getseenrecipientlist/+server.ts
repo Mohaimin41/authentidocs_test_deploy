@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(
       401,
@@ -19,7 +19,7 @@ export async function POST({
   let given_noticeid = notice_info.noticeid;
 
   if (given_noticeid === undefined || given_noticeid === null) {
-    console.log(
+    console.error(
       "ERROR @api/notice/getseenrecipientlist:23: invalid user input error:\n",
       notice_info
     );
@@ -36,9 +36,9 @@ export async function POST({
     }
   );
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
-    console.log(
+    console.error(
       "ERROR @api/notice/getseenrecipientlist:42: supabase get notice seen recipient list error\n",
       _error
     );

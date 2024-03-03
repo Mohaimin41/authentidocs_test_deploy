@@ -6,7 +6,7 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     //   throw error(401, "You must sign in to add files.")
 
@@ -17,7 +17,7 @@ export async function POST({
   let filename: string | null = url.searchParams.get("filename");
 
   if (filename === null) {
-    console.log(
+    console.error(
       "ERROR @api/notice/addnoticechunkfile/continue:21: url parameter filename returned null"
     );
     get(filemap).clear();
@@ -31,7 +31,7 @@ export async function POST({
     request_obj.data === null ||
     request_obj.data === undefined
   ) {
-    console.log(
+    console.error(
       "ERROR @api/notice/addnoticechunkfile/continue:35: request json null||undefined or has incorrect body"
     );
     get(filemap).clear();

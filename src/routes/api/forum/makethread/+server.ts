@@ -6,14 +6,14 @@ export async function POST({
   request,
   locals,
 }: RequestEvent): Promise<Response> {
-  const session = await locals.getSession();
+  const session = await locals.auth();
   if (!session?.user) {
     return new (error as any)(401, "You must be logged in to add forum thread");
   }
 
   // console.log(session);
   const forum_info = await request.json();
-  // console.log("inside add key",key_info);
+  
   let given_hierarchy_level = forum_info.hierarchy_level;
   let given_hierarchy_level_id = forum_info.hierarchy_level_id;
   let given_creator_id = session.user.name;
@@ -50,7 +50,7 @@ export async function POST({
     given_hierarchy_level_id,
   });
 
-  // console.log("add key rps result",result)
+  
   if (_error) {
     console.error(
       "ERROR @api/forum/makethread:57: supabase making forum thread error\n",
