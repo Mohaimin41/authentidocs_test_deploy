@@ -740,7 +740,11 @@
       is_active = response_obj.thread_detail.is_active;
       let thread_current_custodian_detail: any =
       response_obj.thread_current_custodian_detail;
-      // curr_custodian_id = thread_current_custodian_detail.f_userid;
+      if(thread_current_custodian_detail)curr_custodian_id = thread_current_custodian_detail.f_userid;
+      else 
+      {
+        curr_custodian_id = ""
+      }
       data_loaded = true;
 
       if (!is_logged_in) {
