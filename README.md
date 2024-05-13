@@ -1,5 +1,5 @@
 <p align="center">
-  <img height = "70" width = "70" src="/04_code/assets/logo.webp" alt= "AuthentiDocs")
+  <img height = "70" width = "70" src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/logo.webp" alt= "AuthentiDocs")
 </p>
 
 <p align="center"> <h1 align="center"> AuthentiDocs - Team Collaboration Authenticated By Digital Signature </h1> </p>
