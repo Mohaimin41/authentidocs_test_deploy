@@ -88,7 +88,7 @@ After signing up, a user can:
 
 #### Setting up database
 
-Download and extract this [SQL script](assets/dump-postgres-202403131448.tar.gz?raw=true) to setup your database in Supabase or locally, using the `\i <script path>` command of Postgresql to run the SQL script.
+Download and extract this [SQL script](https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/dump-postgres-202403131448.tar.gz) to setup your database in Supabase or locally, using the `\i <script path>` command of Postgresql to run the SQL script.
 
 #### Clone the repo
 
