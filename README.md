@@ -134,19 +134,19 @@ Here is a little **[demo](https://authentidocs.vercel.app)** of the running proj
 <p align="center"> <h4 align="center"> Login, Sign Up and User Dashboard Pages </h4> </p>
 <p align ="center">
 <img
-  src="/04_code/assets/1.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/1.png?raw=true"
   alt="Login Page"
   title="Login Page"
   caption="Login Page"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/2.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/2.png?raw=true"
   alt="Signup Page"
   title="Signup Page"
   caption="Signup Page"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/0.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/0.png?raw=true"
   alt="Dashboard Page"
   title="Dashboard Page"
   caption="Dashboard Page"
@@ -156,19 +156,19 @@ Here is a little **[demo](https://authentidocs.vercel.app)** of the running proj
 <p align="center"> <h4 align="center"> Homepage: Personal Files, Organizations, Notices </h4> </p>
 <p align ="center">
 <img
-  src="/04_code/assets/3.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/3.png?raw=true"
   alt="Personal Files Page"
   title="Personal Files Page"
   caption="Personal Files Page"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/4.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/4.png?raw=true"
   alt="User Organizations Page"
   title="User Organizations Page"
   caption="User Organizations Page"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/5.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/5.png?raw=true"
   alt="User Notices Page"
   title="User Notices Page"
   caption="User Notices Page"
@@ -178,19 +178,19 @@ Here is a little **[demo](https://authentidocs.vercel.app)** of the running proj
 <p align="center"> <h4 align="center"> Homepage: User Teams Page, User Thread and Search Result Pages </h4> </p>
 <p align ="center">
 <img
-  src="/04_code/assets/6.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/6.png?raw=true"
   alt="User Teams Page"
   title="User Teams Page"
   caption="User Teams Page"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/7.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/7.png?raw=true"
   alt="User Thread Page"
   title="User Thread Page"
   caption="User Thread Page"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/8.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/8.png?raw=true"
   alt="User Search Page"
   title="User Search Page"
   caption="User Search Page"
@@ -200,19 +200,19 @@ Here is a little **[demo](https://authentidocs.vercel.app)** of the running proj
 <p align="center"> <h4 align="center">Organization Homepage: Details Tab, Member Tab and Notice Tab </h4> </p>
 <p align ="center">
 <img
-  src="/04_code/assets/9.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/9.png?raw=true"
   alt="Details"
   title="Details"
   caption="Details"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/10.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/10.png?raw=true"
   alt="Members"
   title="Members"
   caption="Members"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/11.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/11.png?raw=true"
   alt="Notices"
   title="Notices"
   caption="Notices"
@@ -222,19 +222,19 @@ Here is a little **[demo](https://authentidocs.vercel.app)** of the running proj
 <p align="center"> <h4 align="center">Organization Homepage: Adding Member, Team and Notice</h4> </p>
 <p align ="center">
 <img
-  src="/04_code/assets/13.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/13.png?raw=true"
   alt="Add Member"
   title="Add Member"
   caption="Add Member"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/14.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/14.png?raw=true"
   alt="Add Teams"
   title="Add Teams"
   caption="Add Teams"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/12.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/12.png?raw=true"
   alt="Add Notices"
   title="Add Notices"
   caption="Add Notices"
@@ -246,19 +246,19 @@ The team page and tabs are similar to the organization page, so we can skip to t
 <p align="center"> <h4 align="center">Thread Workflow: Homepage, File List, File View</h4> </p>
 <p align ="center">
 <img
-  src="/04_code/assets/15.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/15.png?raw=true"
   alt="Thread Home"
   title="Thread Home"
   caption="Thread Home"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/16.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/16.png?raw=true"
   alt="Thread File List"
   title="Thread File List"
   caption="Thread File List"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/17.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/17.png?raw=true"
   alt="Thread File View"
   title="Thread File View"
   caption="Thread File View"
@@ -268,19 +268,19 @@ The team page and tabs are similar to the organization page, so we can skip to t
 <p align="center"> <h4 align="center">Thread File View: Notes, Custody History, File Certificate</h4> </p>
 <p align ="center">
 <img
-  src="/04_code/assets/18.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/18.png?raw=true"
   alt="Notes"
   title="Notes"
   caption="Notes"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/19.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/19.png?raw=true"
   alt="Custody History"
   title="Custody History"
   caption="Custody History"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/20.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/20.png?raw=true"
   alt="Certificate"
   title="Certificate"
   caption="Certificate"
@@ -290,19 +290,19 @@ The team page and tabs are similar to the organization page, so we can skip to t
 <p align="center"> <h4 align="center">Thread View: Flexible Forwarding, Forum</h4> </p>
 <p align ="center">
 <img
-  src="/04_code/assets/21.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/21.png?raw=true"
   alt="Flexible Forward"
   title="Flexible Forward"
   caption="Flexible Forward"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/22.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/22.png?raw=true"
   alt="Forum"
   title="Forum"
   caption="Forum"
   style="display: inline-block; margin: 0 auto; width: 32%"/>
 <img
-  src="/04_code/assets/23.png?raw=true"
+  src="https://github.com/AuthentiDocs/authentidocs/blob/main/04_Code/assets/23.png?raw=true"
   alt="Forum Posts"
   title="Forum Posts"
   caption="Forum Posts"
