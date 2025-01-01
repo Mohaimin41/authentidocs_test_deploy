@@ -312,7 +312,7 @@ The team page and tabs are similar to the organization page, so we can skip to t
 
 ## Project Status
 
-Project is: _being worked on_ .
+Project is: _not being worked on_ .
 
 ## Room for Improvement
 
