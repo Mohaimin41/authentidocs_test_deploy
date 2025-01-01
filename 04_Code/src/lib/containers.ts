@@ -1,4 +1,4 @@
-export const pfp_src: string = "https://rajnoqicmphtmtgmfbjk.supabase.co/storage/v1/object/public/user_pfps/user_pfps/";
+export const pfp_src: string = "https://zrctsbqkalnxfyuffnpn.supabase.co/storage/v1/object/public/user_pfps/user_pfps/";
 
 /**
  * Common class for all types of objects with similar behaviour
